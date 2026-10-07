@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*{box-sizing:border-box}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Burjhenge Map</title>
+<meta name="description" content="When and where the sun sets or rises exactly behind Burj Khalifa. Pick a spot around Dubai and see the dates and minutes of alignment.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Burjhenge">
+<meta property="og:description" content="When and where the sun sets or rises exactly behind Burj Khalifa.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#07080d">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Burjhenge","applicationCategory":"ReferenceApplication","operatingSystem":"Any","description":"Calculates the dates, times and viewing spots in Dubai where the sun aligns with the spire of Burj Khalifa.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800&family=Martian+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one dusk screen. Scene (what you see) on top, plan (where to stand) and the year strip (when) below; two columns on wide screens. Single deliberate dusk look.
+   Hierarchy: L1 date, time, scene · L2 place, state, next · L3 precision (on demand) · L4 controls (recede). */
+:root{
+  --night:#07080d;
+  --ink:#0d1028;
+  --sun:#ffb54a;
+  --ember:#ff6b3d;
+  --dawn:#9fd0ff;
+  --text:#efe7da;
+  --mute:#8a86a6;
+  --line:rgba(239,231,218,.12);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --mono:"Martian Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --inset:clamp(14px,4vw,22px);
+  --ls:.14em;
+  color-scheme:dark;
+}
+html,body{background:var(--night);color:var(--text)}
+body{font-family:var(--mono);padding-inline:16px;padding-block:14px 28px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:900px){.wrap{grid-template-columns:1.25fr 1fr;align-items:start}}
+.right{display:grid;gap:14px;min-width:0}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;grid-column:1/-1}
+.brand{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.32em;color:var(--text);background:none;border:0;padding:8px 0;margin:-8px 0;cursor:pointer}
+.brand b{color:var(--sun);font-weight:800}
+.coords{font-size:9px;color:var(--mute);letter-spacing:var(--ls);font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:420px){.coords .ll,.spot .brg{display:none}}
+
+/* scene */
+.scene{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;aspect-ratio:4/5;max-width:100%;background:var(--ink);touch-action:pan-y;cursor:ew-resize;user-select:none;-webkit-user-select:none}
+@media (min-width:900px){.scene{aspect-ratio:auto;height:min(78vh,760px)}.date{font-size:clamp(84px,8.6vw,116px);line-height:.78;letter-spacing:-.01em}}
+@media (orientation:landscape) and (max-height:560px){.scene{aspect-ratio:auto;height:calc(100vh - 72px);height:calc(100svh - 72px)}}
+.scene:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
+.scene canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.read{position:absolute;left:var(--inset);right:var(--inset);top:var(--inset);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.when{display:grid;gap:8px;flex:1 1 auto;min-width:0}
+.date{font-family:var(--display);font-weight:800;font-size:clamp(50px,14vw,104px);line-height:.84;letter-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.time{font-family:var(--display);font-weight:500;font-size:clamp(26px,6.4vw,42px);line-height:1;color:var(--sun);display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.time svg{width:.62em;height:.62em}
+.where{display:grid;justify-items:end;gap:4px;flex:0 1 auto;max-width:40%;min-width:0;padding-top:4px}
+.spot{font-size:10px;line-height:1.5;letter-spacing:var(--ls);text-transform:uppercase;text-align:right}
+.spot .km{display:block;white-space:nowrap;color:var(--mute);font-size:9px;margin-top:2px;font-variant-numeric:tabular-nums}
+.acts{display:flex;margin-right:-12px;pointer-events:auto}
+.ico{width:40px;height:40px;border:0;background:transparent;color:var(--mute);opacity:.7;display:grid;place-items:center;cursor:pointer;text-decoration:none;border-radius:50%}
+.ico:hover,.ico:focus-visible{opacity:1;color:var(--sun)}
+.ico svg{width:14px;height:14px}
+.route{width:auto;padding:0 10px;border-radius:20px;gap:6px;display:flex;align-items:center;font:9px var(--mono);letter-spacing:var(--ls);color:var(--text);opacity:.85}
+.toast{font-size:9px;letter-spacing:var(--ls);text-transform:uppercase;color:var(--sun);min-height:12px;text-align:right}
+.linkbox{font:9px var(--mono);width:100%;max-width:200px;background:var(--night);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:4px 6px;pointer-events:auto}
+
+.foot{position:absolute;left:var(--inset);right:var(--inset);bottom:calc(var(--inset) - 12px);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;pointer-events:none}
+.state{display:grid;gap:4px;justify-items:start;flex:1 1 auto;min-width:0}
+.foot{text-shadow:0 0 10px rgba(5,5,11,.9)}
+.badge{pointer-events:auto;display:flex;gap:9px;align-items:center;font:inherit;font-size:10px;letter-spacing:var(--ls);text-transform:uppercase;color:var(--text);background:none;border:0;padding:12px 0;cursor:pointer;text-align:left}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--sun);box-shadow:0 0 10px var(--sun)}
+.badge.behind .dot{background:var(--ember);box-shadow:0 0 8px var(--ember)}
+.badge.miss .dot{background:transparent;box-shadow:none;border:1px solid var(--mute)}
+.side{display:grid;justify-items:end;align-items:end;flex:0 0 auto}
+.side>*{grid-area:1/1}
+.prec{text-align:right;padding-bottom:12px;white-space:nowrap;font-size:9px;letter-spacing:.1em;line-height:1.9;color:var(--mute);text-transform:uppercase;font-variant-numeric:tabular-nums;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s;pointer-events:none}
+.prec b{color:var(--text);font-weight:400}
+.foot:has(.state.open) .prec{opacity:1;transform:none}
+.foot:has(.state.open) .next{opacity:0;pointer-events:none}
+@media (hover:hover){.foot:has(.badge:hover) .prec{opacity:1;transform:none}.foot:has(.badge:hover) .next{opacity:0}}
+.next{transition:opacity .18s;pointer-events:auto;font:inherit;background:none;border:0;padding:12px 0;cursor:pointer;color:var(--text);text-align:right;display:grid;gap:4px;justify-items:end;flex:0 0 auto}
+.next .k{font-size:9px;letter-spacing:var(--ls);color:var(--mute)}
+.next .v{font-family:var(--display);font-weight:500;font-size:clamp(15px,4.6vw,20px);line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.next .n{font-size:9px;letter-spacing:var(--ls);text-transform:uppercase;color:var(--mute);line-height:1.5}
+.next:hover .v,.next:focus-visible .v{color:var(--sun)}
+
+/* plan + strip */
+.panel{position:relative;border-radius:14px;background:var(--ink);border:1px solid var(--line);overflow:hidden}
+.plan{aspect-ratio:1/1;max-width:100%;touch-action:manipulation;cursor:crosshair}
+.plan canvas,.strip canvas{width:100%;height:100%;display:block}
+.hint{position:absolute;right:14px;bottom:12px;font-size:9px;letter-spacing:var(--ls);text-transform:uppercase;color:var(--mute);opacity:.6;display:flex;gap:6px;align-items:center;pointer-events:none}
+.hint svg{width:11px;height:11px}
+.osm{position:absolute;left:14px;bottom:12px;font-size:8px;letter-spacing:.08em;color:var(--mute);opacity:.6;text-decoration:none}
+.osm:hover{opacity:1;color:var(--text)}
+.strip{height:112px;touch-action:pan-y;cursor:pointer}
+.strip:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
+.nav{position:absolute;right:4px;top:2px;display:flex}
+.today{position:absolute;left:4px;top:2px;height:44px;padding:0 10px;font:8px var(--mono);letter-spacing:var(--ls);color:var(--mute);background:none;border:0;cursor:pointer;border-radius:22px}
+.today:hover{color:var(--sun)}
+.nav button{font:inherit;background:transparent;color:var(--mute);border:0;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;border-radius:50%}
+.nav button:hover{color:var(--sun)}
+.nav svg{width:15px;height:15px}
+button:focus-visible,.ico:focus-visible{outline:2px solid var(--sun);outline-offset:-4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sr button:focus-visible{position:fixed;left:16px;bottom:16px;width:auto;height:auto;clip:auto;background:var(--ink);color:var(--text);border:1px solid var(--sun);padding:8px 12px;font:10px var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="brand" id="home" aria-label="Burjhenge. Back to the nearest alignment">BURJ<b>HENGE</b></button>
+    <div class="coords"><span class="ll">25.1972°N 55.2744°E · </span>828 M</div>
+  </header>
+
+  <div class="scene" id="scene" tabindex="0" role="img" aria-label="View of Burj Khalifa with the sun">
+    <canvas id="sky"></canvas>
+    <div class="read">
+      <div class="when">
+        <div class="date" id="date">16 MAR</div>
+        <div class="time"><span id="icon"></span><span id="time">17:58</span></div>
+      </div>
+      <div class="where">
+        <div class="spot" id="spot">Creek Harbour<span class="km">7.3 KM</span></div>
+        <div class="acts">
+          <a class="ico route" id="dir" href="#" target="_blank" rel="noopener" aria-label="Open directions to this spot in maps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8z"/></svg>ROUTE</a>
+          <button class="ico" id="share" aria-label="Share a link to this alignment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></button>
+        </div>
+        <div class="toast" id="toast" role="status"></div>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="state" id="state">
+        <button class="badge" id="badge" aria-expanded="false" aria-controls="prec"><span class="dot" aria-hidden="true"></span><span id="badgeText">ON THE SPIRE</span></button>
+      </div>
+      <div class="side">
+        <button class="next" id="nextAll">
+          <span class="k">NEXT</span><span class="v" id="nextV">5 FEB · 17:36</span><span class="n" id="nextN">Festival City</span>
+        </button>
+        <div class="prec" id="prec"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="panel plan" id="planBox" aria-label="Map of viewing spots around Burj Khalifa. Tap a spot to select it, or tap elsewhere to drop a pin.">
+      <canvas id="plan" aria-hidden="true"></canvas>
+      <div class="hint" id="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6-5.4-6-11a6 6 0 1 1 12 0c0 5.6-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg>tap the line to stand there</div>
+      <a class="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
+      <div class="sr" id="spotList" aria-label="Viewing spots"></div>
+    </div>
+    <div class="panel strip" id="stripBox" tabindex="0" role="slider" aria-label="Day of the year" aria-valuemin="0" aria-valuemax="364">
+      <canvas id="strip" aria-hidden="true"></canvas>
+      <button class="today" id="today" aria-label="Go to today">TODAY</button>
+      <div class="nav">
+        <button id="prev" aria-label="Previous alignment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button id="next" aria-label="Next alignment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const R=Math.PI/180, D=180/Math.PI;
+const BURJ={lat:25.19719,lon:55.27437,h:828};
+const TZ=4*3600e3; // Dubai, no DST
+// Only used while the page runs inside the Claude artifact sandbox, where the page's own address is not shareable.
+// Once deployed on a real domain, links are built from the current origin and this is never used.
+const SANDBOX_SHARE_BASE="https://claude.ai/artifact/SRc1H2z8VTyu2o1WLThVoC";
+const MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+/* ---------- astronomy (unchanged) ---------- */
+function sunpos(ms,lat,lon){
+  const n=ms/86400e3+2440587.5-2451545.0;
+  const L=(280.460+0.9856474*n)%360, g=((357.528+0.9856003*n)%360)*R;
+  const lam=(L+1.915*Math.sin(g)+0.020*Math.sin(2*g))*R, eps=(23.439-4e-7*n)*R;
+  const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam)), dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  const gmst=((18.697374558+24.06570982441908*n)%24+24)%24;
+  const H=((gmst*15+lon)%360)*R-ra, la=lat*R;
+  let alt=Math.asin(Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(H))*D;
+  const az=(Math.atan2(-Math.sin(H),Math.tan(dec)*Math.cos(la)-Math.sin(la)*Math.cos(H))*D+360)%360;
+  if(alt>-1) alt+=1.02/Math.tan((alt+10.3/(alt+5.11))*R)/60;
+  return {az,alt};
+}
+function bearing(a,b){
+  const l1=a.lat*R,l2=b.lat*R,d=(b.lon-a.lon)*R;
+  return (Math.atan2(Math.sin(d)*Math.cos(l2),Math.cos(l1)*Math.sin(l2)-Math.sin(l1)*Math.cos(l2)*Math.cos(d))*D+360)%360;
+}
+function dist(a,b){
+  const l1=a.lat*R,l2=b.lat*R,h=Math.sin((l2-l1)/2)**2+Math.cos(l1)*Math.cos(l2)*Math.sin((b.lon-a.lon)*R/2)**2;
+  return 2*6371000*Math.asin(Math.sqrt(h));
+}
+function dest(o,brg,m){
+  const d=m/6371000,b=brg*R,l1=o.lat*R,g1=o.lon*R;
+  const l2=Math.asin(Math.sin(l1)*Math.cos(d)+Math.cos(l1)*Math.sin(d)*Math.cos(b));
+  const g2=g1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(l1),Math.cos(d)-Math.sin(l1)*Math.sin(l2));
+  return {lat:l2*D,lon:g2*D};
+}
+const wrap=x=>((x+540)%360)-180;
+
+/* ---------- spots ---------- */
+const SPOTS=[
+ {id:"creek",name:"Creek Harbour",lat:25.2025,lon:55.3470,lx:8,ly:10},
+ {id:"fest",name:"Festival City",lat:25.2236,lon:55.3528,lx:8,ly:-6},
+ {id:"khor",name:"Ras Al Khor",lat:25.1880,lon:55.3300,lx:8,ly:12},
+ {id:"canal",name:"Dubai Canal",lat:25.1905,lon:55.2370,lx:-8,ly:-6,al:"right"}
+];
+
+function dubaiMidnight(ms){const d=new Date(ms+TZ);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-TZ}
+const DAY0=dubaiMidnight(Date.now()), NDAYS=365;
+
+function prep(s){
+  s.d=dist(s,BURJ); s.b=bearing(s,BURJ); s.tip=Math.atan(BURJ.h/s.d)*D;
+  s.from=(s.b+180)%360; s.pm=s.b>180;
+  s.days=[];
+  for(let i=0;i<NDAYS;i++) s.days.push(crossing(s,DAY0+i*86400e3));
+  s.days.forEach(x=>{x.kind=null; if(x.t && x.alt>-0.3 && x.alt<s.tip) x.kind="behind";});
+  for(let i=0;i<NDAYS;i++){
+    const x=s.days[i]; if(!x.t) continue;
+    const e=Math.abs(x.alt-s.tip), ep=i>0&&s.days[i-1].t?Math.abs(s.days[i-1].alt-s.tip):99, en=i<NDAYS-1&&s.days[i+1].t?Math.abs(s.days[i+1].alt-s.tip):99;
+    if(e<0.9 && e<=ep && e<=en) x.kind="spire";
+  }
+  s.spires=s.days.map((x,i)=>x.kind==="spire"?i:-1).filter(i=>i>=0);
+  s.aligns=s.days.some(x=>x.kind);
+  return s;
+}
+function crossing(s,mid){
+  const a=mid+(s.pm?11:3.5)*3600e3, z=mid+(s.pm?20:12.5)*3600e3, step=4*60e3;
+  let pt=a, pv=wrap(sunpos(pt,s.lat,s.lon).az-s.b);
+  for(let t=a+step;t<=z;t+=step){
+    const v=wrap(sunpos(t,s.lat,s.lon).az-s.b);
+    if(pv*v<=0 && Math.abs(pv-v)<20){
+      let lo=pt,hi=t,vl=pv;
+      for(let k=0;k<14;k++){const m=(lo+hi)/2,vm=wrap(sunpos(m,s.lat,s.lon).az-s.b); if(vl*vm<=0)hi=m;else{lo=m;vl=vm}}
+      const tt=(lo+hi)/2, p=sunpos(tt,s.lat,s.lon);
+      if(p.alt>-1.2) return {t:tt,alt:p.alt};
+      return {t:null};
+    }
+    pt=t;pv=v;
+  }
+  return {t:null};
+}
+function timeAtAlt(s,mid,target){
+  const a=mid+(s.pm?12:4)*3600e3,z=mid+(s.pm?20:12)*3600e3;
+  let best=a,be=99;
+  for(let t=a;t<=z;t+=3*60e3){const e=Math.abs(sunpos(t,s.lat,s.lon).alt-target); if(e<be){be=e;best=t}}
+  return best;
+}
+SPOTS.forEach(prep);
+const EVENTS=SPOTS.flatMap(s=>s.spires.map(i=>({s,i,t:s.days[i].t}))).sort((a,b)=>a.t-b.t);
+
+/* ---------- state + URL ---------- */
+const st={spot:null,day:0,dt:0,custom:null,open:false};
+function makePin(lat,lon){return prep({id:"pin",custom:true,name:"Your pin",lat,lon})}
+const fmtDay=i=>{const d=new Date(DAY0+i*86400e3+TZ);return d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,"0")+String(d.getUTCDate()).padStart(2,"0")};
+function token(){
+  const s=st.spot, key=s.custom?s.lat.toFixed(5)+"_"+s.lon.toFixed(5):s.id;
+  return key+"~"+fmtDay(st.day)+(st.dt?"~t"+st.dt:"");
+}
+function shareURL(){
+  const sandbox=!/^https?:$/.test(location.protocol)||/(^|\.)claude(usercontent)?\.(ai|com)$/i.test(location.hostname)||/claude/i.test(location.hostname);
+  return (sandbox?SANDBOX_SHARE_BASE:location.origin+location.pathname)+"#"+token();
+}
+let lastHash="";
+function writeHash(){const h=token();if(h===lastHash)return;lastHash=h;try{history.replaceState(null,"","#"+h)}catch(e){}}
+function readHash(){
+  let h="";try{h=decodeURIComponent(location.hash.slice(1))}catch(e){}
+  const m=h.match(/^([a-z]+|-?\d+\.\d+_-?\d+\.\d+)~(\d{8})(?:~t(-?\d{1,3}))?$/);
+  if(!m) return false;
+  let spot=SPOTS.find(s=>s.id===m[1]);
+  if(!spot&&m[1].includes("_")){const [la,lo]=m[1].split("_").map(Number);if(Math.abs(la-BURJ.lat)<0.5&&Math.abs(lo-BURJ.lon)<0.5&&dist({lat:la,lon:lo},BURJ)>300){spot=makePin(la,lo);st.custom=spot}}
+  if(!spot) return false;
+  let y=+m[2].slice(0,4),mo=+m[2].slice(4,6),d=+m[2].slice(6,8),shifted=false;
+  const idxOf=()=>Math.round((Date.UTC(y,mo-1,d)-TZ-DAY0)/86400e3);
+  let i=idxOf();
+  while(i<0){y++;i=idxOf();shifted=true}
+  while(i>=NDAYS){y--;i=idxOf();shifted=true}
+  if(i<0||i>=NDAYS) return false;
+  if(shifted){const near=spot.spires.find(j=>Math.abs(j-i)<=2);if(near!=null)i=near}
+  st.spot=spot;st.day=i;st.dt=shifted?0:Math.max(-90,Math.min(90,+(m[3]||0)));
+  lastHash=h;
+  return true;
+}
+if(!readHash()){const e=EVENTS[0]; st.spot=e?e.s:SPOTS[0]; st.day=e?e.i:0}
+
+/* ---------- drawing helpers ---------- */
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)");
+function fit(cv){
+  const r=cv.getBoundingClientRect(),p=Math.min(devicePixelRatio||1,2),W=Math.round(r.width*p),H=Math.round(r.height*p);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+  const c=cv.getContext("2d");c.setTransform(p,0,0,p,0,0);return {c,w:r.width,h:r.height};
+}
+const CSS={};["--ink","--sun","--ember","--dawn","--text","--mute","--line","--mono"].forEach(n=>CSS[n]=getComputedStyle(document.documentElement).getPropertyValue(n).trim());
+const css=n=>CSS[n];
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+const rgb=a=>`rgb(${a[0]},${a[1]},${a[2]})`;
+function skyCols(alt){
+  const P=[[-6,[8,9,26],[54,28,64]],[-1,[14,14,42],[122,46,79]],[2,[36,31,79],[255,110,64]],[8,[33,48,98],[255,170,92]],[20,[38,78,140],[236,204,150]]];
+  if(alt<=P[0][0]) return [P[0][1],P[0][2]];
+  for(let i=1;i<P.length;i++) if(alt<=P[i][0]){const t=(alt-P[i-1][0])/(P[i][0]-P[i-1][0]);return [mix(P[i-1][1],P[i][1],t),mix(P[i-1][2],P[i][2],t)]}
+  return [P[4][1],P[4][2]];
+}
+const PROF=[[0,46],[.12,46],[.12,40],[.27,38],[.27,32],[.42,29],[.42,24],[.55,21],[.55,16],[.66,13],[.66,9.5],[.74,8],[.74,5],[.79,4],[.82,2.6],[.9,1.6],[1,.5]];
+function rand(seed){return()=>((seed=(seed*16807)%2147483647)/2147483647)}
+const SKY=(()=>{const r=rand(7),a=[];for(let i=0;i<70;i++){const x=(r()*2-1)*2600;if(Math.abs(x)<110)continue;a.push({x,h:40+r()**2*330*(1-Math.abs(x)/3200),w:18+r()*45})}return a})();
+const STARS=(()=>{const r=rand(11),a=[];for(let i=0;i<120;i++)a.push([r(),r()*.7,r()]);return a})();
+const GLYPH={};
+function sunGlyph(set){return GLYPH[set]||(GLYPH[set]=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 18h20"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M12 ${set?"4v5m0 0l-2.5-2.5M12 9l2.5-2.5":"9V4m0 0L9.5 6.5M12 4l2.5 2.5"}"/></svg>`)}
+const hhmm=t=>{const L=new Date(t+TZ);return String(L.getUTCHours()).padStart(2,"0")+":"+String(L.getUTCMinutes()).padStart(2,"0")};
+const dmon=t=>{const L=new Date(t+TZ);return L.getUTCDate()+" "+MON[L.getUTCMonth()]};
+// touch the DOM only when something actually changed
+const setHTML=(el,v)=>{if(el._v!==v){el._v=v;el.innerHTML=v}};
+const setAttr=(el,k,v)=>{if(el.getAttribute(k)!==v)el.setAttribute(k,v)};
+
+function moment(){
+  const s=st.spot, mid=DAY0+st.day*86400e3, x=s.days[st.day];
+  const base=x.t || timeAtAlt(s,mid,Math.max(1,s.tip*.6));
+  return base+st.dt*60e3;
+}
+
+/* ---------- scene ---------- */
+function drawScene(){
+  const cv=$("sky"),{c,w,h}=fit(cv), s=st.spot, t=moment(), p=sunpos(t,s.lat,s.lon);
+  const [top,hor]=skyCols(p.alt), horizonY=h*.8, ppd=(h*.56)/s.tip, cx=w/2;
+  const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));
+  c.fillStyle=g;c.fillRect(0,0,w,h);
+  const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
+  if(night>0){c.fillStyle=`rgba(239,231,218,${.7*night})`;STARS.forEach(([x,y,r])=>{c.fillRect(x*w,y*horizonY,r>.85?1.6:1,r>.85?1.6:1)})}
+  const sx=cx+wrap(p.az-s.b)*ppd, sy=horizonY-p.alt*ppd, sr=Math.max(3,0.267*ppd);
+  const on=sx>-sr&&sx<w+sr&&sy<horizonY+sr;
+  if(on){
+    const glow=c.createRadialGradient(sx,sy,sr*.6,sx,sy,sr*7);glow.addColorStop(0,"rgba(255,190,90,.55)");glow.addColorStop(1,"rgba(255,120,60,0)");
+    c.fillStyle=glow;c.fillRect(0,0,w,h);
+    c.fillStyle="#ffe2a8";c.beginPath();c.arc(sx,sy,sr,0,7);c.fill();
+  }
+  c.fillStyle="#07070f";
+  SKY.forEach(b=>{const x=cx+Math.atan(b.x/s.d)*D*ppd, bw=Math.max(1,Math.atan(b.w/s.d)*D*ppd), bh=Math.atan(b.h/s.d)*D*ppd;c.fillRect(x-bw/2,horizonY-bh,bw,bh)});
+  c.beginPath();
+  const pts=PROF.map(([f,hw])=>[Math.atan(hw/s.d)*D*ppd,horizonY-Math.atan(f*BURJ.h/s.d)*D*ppd]);
+  c.moveTo(cx-pts[0][0],horizonY);pts.forEach(q=>c.lineTo(cx-q[0],q[1]));for(let i=pts.length-1;i>=0;i--)c.lineTo(cx+pts[i][0],pts[i][1]);c.closePath();c.fill();
+  if(on && p.alt>-1){c.save();c.clip();const rl=c.createRadialGradient(sx,sy,0,sx,sy,sr*5);rl.addColorStop(0,"rgba(255,200,120,.35)");rl.addColorStop(1,"rgba(255,200,120,0)");c.fillStyle=rl;c.fillRect(0,0,w,h);c.restore()}
+  c.fillStyle="#05050b";c.fillRect(0,horizonY,w,h-horizonY);
+  c.strokeStyle="rgba(255,181,74,.25)";c.beginPath();c.moveTo(0,horizonY+.5);c.lineTo(w,horizonY+.5);c.stroke();
+  if(!on){const left=sx<0,ay=Math.max(40,Math.min(horizonY-20,sy)),ax=left?16:w-16;c.fillStyle=css("--sun");c.beginPath();c.moveTo(ax+(left?-6:6),ay);c.lineTo(ax+(left?6:-6),ay-7);c.lineTo(ax+(left?6:-6),ay+7);c.fill();c.beginPath();c.arc(ax+(left?16:-16),ay,4,0,7);c.fill()}
+  return {p,t};
+}
+
+const KIND={spire:"on the spire",behind:"behind the tower"};
+function readouts(p,t){
+  const s=st.spot, k=s.days[st.day].kind, date=dmon(t), time=hhmm(t);
+  setHTML($("date"),date);
+  setHTML($("time"),time);
+  setHTML($("icon"),sunGlyph(s.pm));
+  setHTML($("spot"),`${s.name}<span class="km">${(s.d/1000).toFixed(1)} KM<span class="brg"> · ${Math.round(s.b)}°</span></span>`);
+  $("dir").href=`https://www.google.com/maps/dir/?api=1&destination=${s.lat.toFixed(5)},${s.lon.toFixed(5)}`;
+  $("badge").className="badge "+(k==="spire"?"":k==="behind"?"behind":"miss");
+  setHTML($("badgeText"),KIND[k]||"no alignment");
+  setAttr($("scene"),"aria-label",`${s.pm?"Sunset":"Sunrise"} from ${s.name}, ${date} at ${time}: ${KIND[k]||"no alignment with Burj Khalifa"}. Arrow up or down changes the time.`);
+  // level 3: precision + rarity, from the same model
+  const sign=v=>(v>=0?"+":"−")+Math.abs(v).toFixed(1)+"°";
+  const rows=[`SUN <b>${p.alt.toFixed(1)}°</b> SPIRE <b>${s.tip.toFixed(1)}°</b>`,`Δ <b>${sign(p.alt-s.tip)}</b>`];
+  const daz=wrap(p.az-s.b); if(Math.abs(daz)>=0.05) rows[1]+=` · AZ <b>${sign(daz)}</b>`;
+  const n=s.spires.length, after=s.spires.find(i=>i>st.day);
+  if(!s.aligns) rows.push("NEVER ALIGNS FROM HERE");
+  else{const r=[];if(n)r.push(`<b>${n}×</b>/YR`);if(after!=null)r.push(`AGAIN <b>${after-st.day}</b> D`);if(r.length)rows.push(r.join(" · "))}
+  setHTML($("prec"),rows.join("<br>"));
+  // level 2: next alignment anywhere, after the moment on screen
+  const nx=EVENTS.find(e=>e.t>t+30*60e3), nb=$("nextAll");
+  nb.hidden=!nx; st._next=nx;
+  if(nx){setHTML($("nextV"),dmon(nx.t)+" · "+hhmm(nx.t));setHTML($("nextN"),nx.s.name);setAttr(nb,"aria-label",`Next alignment: ${dmon(nx.t)} at ${hhmm(nx.t)} from ${nx.s.name}`)}
+  // the spot whose next spire alignment comes soonest from the chosen day; it is drawn brighter on the map
+  let best=null,bd=1e9;
+  SPOTS.forEach(o=>{if(!o.spires.length)return;const j=o.spires.find(j=>j>=st.day);const d=j!=null?j-st.day:o.spires[0]+NDAYS-st.day;if(d<bd){bd=d;best=o}});
+  st._best=best;
+  const sb=$("stripBox");setAttr(sb,"aria-valuenow",String(st.day));setAttr(sb,"aria-valuetext",`${dmon(DAY0+st.day*86400e3+12*3600e3)}${k?", "+KIND[k]:""}`);
+}
+
+/* ---------- ground: coastline and Sheikh Zayed Road ----------
+   From OpenStreetMap (© OpenStreetMap contributors, ODbL). East/north offsets from the tower in tens of metres,
+   simplified to about 20 m and clipped at 23 km. Drawn with the same bearing-and-distance projection as everything else. */
+const GEO={"c":[[-901,437,-910,446,-915,447,-921,436,-919,430,-907,423,-900,425,-901,437],[-1004,189,-989,190,-986,195,-992,199,-998,197,-1012,202,-1018,198,-1017,195,-1013,191,-1004,189],[-1089,302,-1089,310,-1095,310,-1104,298,-1102,294,-1099,293,-1089,302],[-917,457,-917,453,-905,448,-896,451,-902,465,-912,463,-917,457],[-1046,176,-1046,187,-1054,189,-1059,185,-1062,171,-1059,166,-1053,167,-1046,176],[-980,316,-980,321,-985,324,-992,313,-995,312,-994,308,-985,307,-980,316],[-1249,139,-1263,146,-1268,143,-1268,136,-1262,131,-1249,133,-1249,139],[-933,549,-945,561,-953,564,-958,562,-957,556,-935,539,-933,539,-933,549],[-1355,262,-1351,268,-1351,275,-1357,279,-1365,278,-1369,269,-1365,260,-1362,258,-1355,262],[-1042,522,-1045,531,-1050,535,-1057,531,-1058,526,-1054,519,-1044,519,-1042,522],[-1019,392,-1020,398,-1025,404,-1029,405,-1035,401,-1036,396,-1032,387,-1024,385,-1019,392],[-984,262,-992,267,-1000,262,-1001,256,-992,247,-980,246,-979,255,-984,262],[-930,304,-932,298,-929,295,-917,295,-910,301,-910,304,-920,305,-922,308,-930,304],[-973,368,-972,360,-968,357,-960,355,-945,346,-940,349,-940,354,-967,368,-968,380,-971,384,-978,380,-973,368],[-997,433,-992,430,-985,433,-983,440,-985,444,-989,446,-1011,443,-1011,432,-1004,429,-997,433],[-924,403,-924,397,-909,391,-911,402,-924,403],[-1295,171,-1299,176,-1307,176,-1311,182,-1317,185,-1323,183,-1323,172,-1307,161,-1300,162,-1295,171],[-1009,505,-1008,509,-1017,519,-1023,517,-1027,511,-1026,504,-1017,499,-1009,505],[-983,370,-985,378,-995,385,-1002,384,-1000,363,-991,359,-985,364,-983,370],[-959,568,-953,580,-958,584,-973,582,-982,572,-979,565,-969,560,-960,565,-959,568],[-978,284,-983,289,-996,287,-1000,283,-1001,277,-995,273,-982,275,-979,277,-978,284],[-1014,572,-1006,574,-1004,578,-1004,591,-1014,590,-1021,585,-1019,575,-1014,572],[-1096,489,-1101,484,-1103,476,-1101,458,-1098,456,-1085,465,-1084,474,-1089,485,-1096,489],[-999,394,-1004,410,-1008,411,-1014,405,-1013,393,-1003,389,-999,394],[-1131,75,-1147,67,-1145,60,-1139,56,-1132,56,-1124,63,-1127,74,-1131,75],[-1137,536,-1149,541,-1154,546,-1159,542,-1161,522,-1153,509,-1135,511,-1128,530,-1131,535,-1137,536],[-1165,455,-1160,439,-1154,437,-1146,441,-1146,445,-1156,453,-1165,457,-1165,455],[-1171,366,-1177,367,-1182,360,-1176,338,-1170,333,-1163,344,-1170,357,-1171,366],[-1320,367,-1324,358,-1329,355,-1342,359,-1342,357,-1350,351,-1348,343,-1339,339,-1324,350,-1307,341,-1302,341,-1295,352,-1291,351,-1295,358,-1301,365,-1317,369,-1320,367],[-1255,332,-1291,351,-1298,339,-1294,333,-1274,321,-1265,322,-1257,326,-1253,325,-1253,330,-1255,332],[-1372,354,-1367,360,-1363,361,-1363,366,-1369,369,-1380,362,-1372,354],[-957,377,-963,371,-948,364,-946,371,-950,386,-953,385,-953,382,-957,377],[-815,210,-819,203,-815,200,-809,201,-787,236,-780,242,-780,249,-789,253,-788,249,-815,210],[-1163,278,-1168,279,-1172,274,-1173,269,-1169,264,-1165,264,-1161,268,-1160,274,-1163,278],[-1019,571,-1024,573,-1032,568,-1033,561,-1023,552,-1015,558,-1014,563,-1019,571],[-999,528,-1007,536,-1014,534,-1016,530,-1014,524,-1010,522,-1002,523,-999,528],[-930,567,-934,574,-942,574,-942,564,-932,563,-930,567],[-995,523,-998,514,-992,511,-974,514,-965,521,-957,520,-952,513,-944,519,-947,528,-961,541,-969,537,-967,530,-973,524,-992,525,-995,523],[-1154,-950,-1166,-955,-1176,-973,-1162,-968,-1159,-964,-1163,-964,-1164,-961,-1160,-960,-1160,-957,-1156,-959,-1154,-950],[630,1426,635,1415,649,1404,661,1377,669,1375,677,1378,682,1389,678,1410,670,1423,657,1433,641,1436,627,1434,616,1426,607,1413,624,1429,630,1426],[-1115,109,-1124,113,-1137,109,-1138,105,-1135,100,-1121,97,-1115,109],[-1183,-1008,-1187,-1006,-1190,-1010,-1187,-1012,-1183,-1008],[474,617,470,610,477,606,481,612,474,617],[665,338,677,351,674,355,665,356,654,347,652,331,659,332,665,338],[-202,542,-211,532,-219,535,-211,528,-203,505,-188,484,-177,476,-161,469,-125,466,-130,467,-129,488,-119,503,-107,507,-103,526,-188,581,-183,576,-202,542],[-488,-4,-482,-7,-485,-5,-483,-2,-469,14,-462,17,-457,14,-454,16,-463,26,-461,28,-462,31,-470,36,-486,41,-500,41,-500,37,-483,38,-484,32,-491,32,-491,26,-498,21,-502,19,-503,22,-503,11,-511,11,-510,27,-514,28,-513,8,-504,-5,-485,-17,-483,-14,-491,-9,-488,-4],[-1011,-6,-1008,-1,-1010,5,-1013,6,-1021,4,-1021,-1,-1011,-6],[-1188,-872,-1191,-873,-1188,-872],[-1175,-873,-1178,-873,-1175,-873],[-1675,-1089,-1658,-1139,-1654,-1138,-1671,-1088,-1675,-1089],[-1621,-1133,-1604,-1184,-1601,-1183,-1618,-1132,-1621,-1133],[404,-105,391,-96,404,-105],[388,-83,389,-91,388,-83],[403,-39,404,-38,400,-32,403,-39],[-1500,-1345,-1500,-1345],[-1507,-1341,-1507,-1341],[-929,457,-936,456,-939,452,-935,446,-925,444,-922,451,-925,456,-929,457],[-921,460,-922,468,-933,472,-939,470,-937,465,-921,460],[-889,-613,-902,-611,-907,-603,-915,-612,-906,-615,-901,-626,-897,-628,-888,-622,-887,-617,-889,-613],[846,1294,844,1300,837,1300,824,1279,826,1274,832,1273,846,1294],[-1176,-904,-1148,-892,-1163,-890,-1164,-880,-1164,-885,-1169,-886,-1176,-884,-1194,-886,-1200,-880,-1193,-889,-1198,-901,-1235,-946,-1231,-944,-1229,-948,-1221,-943,-1218,-944,-1218,-937,-1210,-932,-1204,-937,-1197,-920,-1191,-916],[-1422,-1067,-1472,-1078,-1525,-1077,-1555,-1067,-1588,-1050,-1603,-1039,-1607,-1042,-1610,-1062,-1590,-1079,-1562,-1093,-1534,-1102,-1501,-1106,-1452,-1103,-1394,-1085,-1388,-1076,-1388,-1070,-1393,-1064,-1396,-1065,-1391,-1069,-1391,-1078,-1402,-1086,-1406,-1075,-1417,-1067,-1422,-1067],[-1265,-691,-1240,-733,-1231,-763,-1228,-808,-1233,-843,-1227,-852,-1213,-855,-1210,-860],[-1627,-999,-1638,-973,-1645,-938,-1645,-893,-1637,-853,-1617,-805,-1605,-798,-1605,-790,-1563,-736,-1555,-732,-1555,-725,-1543,-713,-1536,-706,-1525,-705,-1508,-695,-1495,-680,-1466,-671,-1451,-655,-1436,-649,-1403,-643,-1359,-644,-1320,-654,-1285,-670,-1270,-658,-1270,-652,-1300,-633,-1339,-620,-1374,-615,-1423,-618,-1464,-629,-1502,-646,-1543,-672,-1578,-703,-1611,-740,-1642,-789,-1660,-835,-1669,-873,-1672,-930,-1666,-971,-1659,-994,-1642,-1028,-1628,-1044,-1622,-1041,-1619,-1020,-1627,-999],[-1547,-775,-1540,-789,-1540,-795,-1545,-799,-1558,-798,-1565,-800,-1568,-806,-1566,-812,-1562,-814,-1516,-815,-1503,-818,-1502,-822,-1536,-825,-1572,-835,-1587,-842,-1590,-847,-1588,-852,-1577,-854,-1555,-844,-1525,-837,-1486,-834,-1483,-838,-1532,-855,-1559,-870,-1601,-902,-1606,-912,-1602,-918,-1594,-922,-1587,-919,-1561,-890,-1529,-869,-1498,-855,-1468,-847,-1466,-850,-1506,-870,-1534,-892,-1587,-956,-1597,-971,-1593,-978,-1586,-982,-1577,-979,-1562,-944,-1522,-901,-1487,-874,-1454,-859,-1453,-861,-1481,-882,-1504,-904,-1527,-938,-1541,-967,-1552,-1002,-1550,-1020,-1546,-1026,-1538,-1020,-1522,-962,-1506,-932,-1470,-889,-1444,-869,-1440,-872,-1467,-900,-1488,-935,-1499,-962,-1508,-1002,-1508,-1028,-1504,-1036,-1500,-1035,-1496,-1029,-1490,-983,-1478,-947,-1462,-916,-1432,-878,-1430,-881,-1448,-917,-1459,-953,-1466,-1019,-1463,-1030,-1451,-1032,-1448,-1028,-1448,-973,-1444,-948,-1433,-915,-1420,-888,-1431,-930,-1432,-963,-1427,-997,-1421,-1020,-1412,-1020,-1409,-1013,-1420,-958,-1416,-923,-1409,-898,-1405,-899,-1404,-906,-1398,-908,-1399,-926,-1396,-927,-1392,-938,-1388,-938,-1384,-943,-1403,-963,-1403,-971,-1399,-967,-1380,-968,-1379,-978,-1378,-974,-1369,-975,-1348,-984,-1270,-1048,-1268,-1053,-1273,-1055,-1242,-1041,-1233,-1032],[-1306,92,-1302,100,-1306,107,-1312,106,-1323,93,-1317,81,-1313,80,-1306,86,-1306,92],[-1340,212,-1337,215,-1337,220,-1344,224,-1349,223,-1352,212,-1347,209,-1340,212],[-1124,290,-1133,284,-1133,271,-1130,268,-1120,268,-1111,276,-1118,287,-1124,290],[-1234,100,-1230,103,-1230,110,-1239,113,-1245,120,-1255,121,-1263,117,-1263,112,-1259,105,-1250,105,-1243,100,-1234,100],[-1002,310,-1006,317,-1017,313,-1009,306,-1002,310],[-1366,101,-1356,111,-1364,118,-1366,129,-1376,131,-1383,137,-1393,152,-1395,161,-1393,171,-1384,192,-1394,201,-1395,216,-1388,224,-1376,224,-1374,233,-1380,239,-1392,238,-1398,240,-1406,254,-1404,266,-1397,274,-1401,284,-1400,290,-1390,298,-1385,305,-1388,308,-1405,309,-1414,308,-1419,304,-1418,287,-1428,271,-1430,254,-1422,242,-1427,207,-1425,196,-1420,188,-1419,179,-1424,156,-1423,127,-1428,112,-1419,103,-1416,104,-1413,113,-1401,110,-1398,113,-1404,124,-1396,127,-1382,112,-1383,102],[-1055,554,-1041,543,-1036,547,-1041,548,-1047,554,-1047,560,-1032,580,-1045,589,-1052,589,-1069,572,-1055,554],[-978,395,-968,396,-963,400,-962,404,-966,412,-979,409,-986,402,-987,394,-978,395],[-837,365,-830,385,-839,386,-844,392,-847,391,-857,346,-855,344,-847,348,-841,343,-839,344,-837,365],[-928,191,-937,203,-944,200,-943,183,-927,183,-928,191],[-1151,398,-1159,393,-1160,387,-1158,384,-1153,384,-1150,387,-1148,395,-1151,398],[-1331,137,-1330,149,-1339,153,-1350,142,-1350,134,-1348,130,-1339,128,-1334,130,-1331,137],[-901,256,-913,264,-916,260,-915,251,-905,240,-895,237,-893,242,-901,256],[-1220,51,-1208,48,-1199,54,-1209,57,-1221,53],[-896,480,-903,478,-903,472,-889,469,-888,475,-896,480],[-915,188,-915,199,-921,203,-926,192,-917,187],[-1298,301,-1298,308,-1305,314,-1311,313,-1317,305,-1316,301,-1307,298,-1298,301],[-1336,259,-1334,269,-1339,272,-1345,270,-1350,260,-1345,253,-1341,254,-1336,259],[-1212,156,-1214,163,-1219,166,-1234,161,-1233,154,-1225,149,-1215,152,-1212,156],[-948,213,-947,219,-951,224,-962,222,-964,210,-959,203,-951,203,-948,213],[-1071,456,-1078,460,-1082,458,-1081,451,-1073,446,-1062,445,-1058,440,-1051,439,-1048,442,-1046,448,-1050,453,-1071,456],[-1227,129,-1231,114,-1226,111,-1217,113,-1213,118,-1218,129],[-1038,309,-1039,319,-1046,321,-1045,306,-1038,304,-1035,308,-1038,309],[-1305,142,-1304,151,-1308,155,-1312,154,-1320,146,-1323,133,-1314,129,-1305,142],[-1011,477,-1003,490,-1010,497,-1018,494,-1026,483,-1020,476,-1011,477],[-1308,214,-1304,218,-1309,223,-1324,222,-1330,217,-1327,205,-1316,202,-1309,206,-1308,214],[-1032,371,-1040,366,-1030,356,-1016,360,-1010,365,-1011,370,-1017,374,-1024,375,-1032,371],[-1366,345,-1370,329,-1366,324,-1363,326,-1360,338,-1356,339,-1366,345],[-957,427,-954,439,-957,444,-968,443,-974,441,-975,432,-967,424,-960,423,-957,427],[-1338,176,-1351,180,-1355,171,-1350,165,-1334,160,-1327,164,-1327,169,-1338,176],[-1403,-37,-1381,-84,-1369,-99,-1346,-111,-1279,-134,-1252,-138,-1194,-132,-1142,-136,-1097,-124,-1142,-134,-1195,-131,-1252,-136,-1278,-132,-1345,-109,-1368,-97,-1380,-84,-1395,-47,-1403,-37],[-1023,249,-1034,252,-1038,247,-1029,230,-1015,230,-1016,242,-1023,249],[-1076,242,-1074,252,-1079,254,-1090,252,-1093,242,-1090,238,-1091,226,-1086,227,-1085,232,-1070,231,-1076,242],[-940,580,-939,587,-944,593,-952,597,-950,580,-943,577,-940,580],[-1228,244,-1238,258,-1242,260,-1245,258,-1247,245,-1239,233,-1228,240,-1228,244],[-1290,319,-1291,328,-1301,330,-1307,324,-1305,319,-1298,314,-1292,315,-1290,319],[-995,342,-1002,346,-1008,336],[-1235,192,-1253,196,-1262,194,-1260,189,-1239,178,-1230,182,-1235,192],[-880,366,-878,373,-883,377,-890,377,-895,373,-894,364,-891,362,-884,362,-880,366],[-1209,178,-1206,182,-1209,186,-1220,186,-1219,175,-1209,178],[-1279,213,-1280,217,-1287,222,-1293,218,-1295,210,-1287,205,-1282,206,-1279,213],[-714,358,-704,396,-703,428,-709,459,-732,544,-744,569,-758,588,-821,637,-759,586,-746,569,-733,543,-706,435,-705,402,-714,358],[-1064,386,-1066,393,-1076,396,-1083,404,-1087,402,-1086,394,-1077,381,-1069,380,-1064,386],[-877,441,-882,437,-884,429,-881,421,-873,418,-869,424,-875,430,-875,436,-869,440,-847,444,-835,459,-832,455,-830,438,-827,434,-783,438,-761,419,-754,417,-750,421,-753,429,-749,435,-762,447,-783,458,-809,461,-814,469,-822,465,-845,467,-868,462,-873,459,-872,456,-848,461,-845,459,-845,456,-851,450,-868,447,-877,441],[-1271,296,-1277,297,-1279,286,-1276,281,-1271,281,-1265,284,-1264,291,-1266,295,-1271,296],[-707,330,-707,305,-710,288,-717,273,-745,226,-754,173,-762,154,-789,114,-813,72,-824,61,-860,34,-815,69,-787,116,-761,154,-753,175,-744,225,-717,271,-709,289,-706,308,-707,330],[-1331,105,-1326,102,-1319,104,-1316,112,-1320,121,-1326,122,-1331,119,-1334,112,-1331,105],[-929,427,-930,436,-933,437,-942,438,-946,431,-946,423,-935,418,-931,421,-929,427],[-983,554,-982,561,-989,566,-996,564,-997,559,-991,552,-987,551,-983,554],[-1307,277,-1305,286,-1314,290,-1325,283,-1329,271,-1325,267,-1318,266,-1307,277],[-1233,78,-1234,83,-1247,91,-1255,89,-1260,80,-1257,76,-1239,69,-1233,78],[-1047,341,-1049,345,-1057,349,-1066,346,-1068,343,-1062,335,-1051,337,-1047,341],[-1276,193,-1274,197,-1278,202,-1288,201,-1299,194,-1302,185,-1298,182,-1288,190,-1280,189,-1276,193],[-1084,510,-1085,504,-1073,499,-1063,500,-1057,508,-1060,516,-1071,520,-1083,515,-1084,510],[-946,-3,-951,-11,-958,-12,-966,-20,-964,-26,-952,-28,-933,-22,-934,-13,-943,-3],[-1073,92,-1076,97,-1086,105,-1097,91,-1096,87,-1088,85,-1073,92],[-1081,435,-1083,444,-1094,446,-1099,442,-1100,428,-1093,426,-1085,427,-1081,435],[-1053,475,-1058,481,-1070,487,-1075,484,-1079,474,-1077,471,-1055,472],[-1409,483,-1398,502,-1383,562,-1374,586,-1362,602,-1342,617,-1363,603,-1375,586,-1387,555,-1404,495,-1431,460,-1442,438,-1458,380,-1487,307,-1497,233,-1515,143,-1515,124,-1508,87,-1480,15,-1457,-31,-1431,-62,-1460,-24,-1479,15,-1510,100,-1513,143,-1496,232,-1489,292,-1482,318,-1457,379,-1438,443,-1430,459,-1409,483],[-929,249,-936,251,-942,250,-944,246,-940,234,-930,227,-922,237,-929,249],[-1225,53,-1232,57,-1242,51,-1250,52,-1239,40,-1233,41,-1225,50],[-1021,428,-1023,440,-1036,438,-1043,427,-1042,421,-1036,416,-1031,416,-1025,421,-1021,428],[-825,563,-840,563,-844,557,-831,544,-830,539,-817,522,-809,518,-804,518,-804,525,-816,535,-821,547,-817,550,-807,549,-799,539,-794,540,-793,546,-811,562,-825,563],[-1331,319,-1335,326,-1342,329,-1346,327,-1341,317,-1332,315,-1331,319],[-1339,286,-1331,299,-1342,304,-1351,302,-1354,291,-1352,287,-1346,283,-1339,286],[-1077,290,-1078,301,-1084,302,-1088,299,-1086,286,-1081,284,-1077,290],[-1300,59,-1309,68,-1318,69,-1325,75,-1328,74,-1328,67,-1323,59,-1311,56,-1300,59],[-923,210,-922,215,-926,219,-935,222,-941,217,-941,212,-934,208,-924,210,-924,204,-923,210],[-974,491,-965,497,-966,507,-980,503,-988,497,-986,488,-974,491],[-1093,279,-1100,288,-1107,286,-1103,276,-1104,265,-1095,267,-1093,279],[-1266,103,-1271,110,-1281,113,-1290,113,-1296,107,-1295,101,-1284,95,-1273,96,-1266,103],[-1020,310,-1020,322,-1025,324,-1034,308,-1026,305,-1020,310],[-1295,123,-1293,134,-1295,137,-1302,139,-1309,132,-1308,119,-1297,117,-1295,123],[-1233,-1032,-1224,-1018,-1221,-989,-1227,-992,-1237,-988,-1270,-961,-1278,-949,-1276,-939,-1267,-931,-1261,-930,-1257,-923,-1259,-918,-1277,-905,-1282,-907,-1281,-917,-1292,-932,-1306,-932,-1323,-915,-1320,-899,-1316,-898,-1321,-898,-1326,-882,-1327,-876,-1323,-874,-1331,-875,-1347,-897,-1352,-895,-1353,-891,-1357,-892,-1367,-886,-1383,-890,-1387,-885,-1393,-885,-1395,-881,-1373,-870,-1340,-861,-1309,-858,-1283,-862,-1276,-856,-1276,-849,-1282,-846,-1303,-845,-1359,-851,-1405,-874,-1407,-872,-1372,-849,-1351,-838,-1329,-829,-1274,-818,-1270,-814,-1273,-804,-1288,-803,-1315,-809,-1350,-822,-1388,-843,-1416,-864,-1418,-862,-1379,-819,-1341,-794,-1301,-777,-1282,-773,-1278,-768,-1278,-762,-1287,-759,-1307,-764,-1336,-775,-1361,-789,-1381,-804,-1413,-836,-1428,-855,-1431,-854,-1410,-815,-1387,-786,-1363,-765,-1342,-752,-1317,-738,-1295,-731,-1292,-727,-1294,-724,-1304,-719,-1315,-722,-1367,-750,-1383,-763,-1416,-801,-1440,-845,-1442,-844,-1442,-837,-1434,-811,-1410,-763,-1379,-724,-1354,-705,-1349,-704,-1345,-695,-1348,-687,-1356,-686,-1363,-690,-1411,-739,-1425,-761,-1439,-787,-1453,-834,-1456,-834,-1453,-799,-1447,-771,-1429,-730,-1405,-698,-1408,-689,-1413,-686,-1422,-686,-1428,-692,-1453,-743,-1466,-789,-1468,-822,-1472,-821,-1477,-794,-1478,-768,-1471,-723,-1475,-714,-1480,-714,-1484,-718,-1491,-758,-1487,-806,-1492,-804,-1497,-792,-1509,-744,-1514,-743,-1520,-747,-1518,-766,-1521,-772,-1527,-774,-1538,-770,-1543,-771,-1547,-775],[-1064,354,-1062,362,-1068,369,-1080,367,-1083,358,-1076,349,-1072,348,-1064,354],[-810,379,-815,381,-819,378,-821,356,-830,341,-828,334,-822,334,-819,328,-815,327,-804,349,-800,366,-803,386,-793,382,-776,382,-760,395,-746,399,-745,393,-762,383,-761,380,-754,380,-738,390,-737,399,-741,406,-760,406,-767,415,-780,405,-797,404,-818,421,-827,415,-827,426,-836,431,-859,417,-859,412,-851,408,-855,397,-834,402,-821,399,-809,390,-810,379],[-967,179,-961,169,-948,167,-943,170,-942,180,-947,179,-966,181],[-943,-3,-939,7,-942,16,-956,24,-973,25,-976,22,-979,-1,-988,-15,-989,-35],[-957,289,-963,304,-971,303,-974,289,-963,283,-958,284,-957,289],[-1298,74,-1293,81,-1301,87,-1305,82,-1302,75,-1298,74],[-952,466,-953,476,-959,482,-965,486,-971,484,-973,474,-964,458,-957,457,-952,466],[-989,229,-990,221,-972,214,-967,226,-970,230,-982,236,-988,230],[-1240,270,-1244,283,-1250,288,-1257,284,-1258,278,-1252,266,-1247,264,-1240,270],[-1242,155,-1242,164,-1247,167,-1252,166,-1256,157,-1254,147,-1251,144,-1241,144,-1239,147,-1242,155],[-1074,327,-1078,331,-1079,344,-1085,346,-1088,344,-1092,327,-1085,322,-1079,322],[-1086,204,-1095,228,-1102,225,-1105,216,-1099,198,-1095,197,-1086,203],[-903,516,-901,524,-904,533,-913,541,-924,542,-916,528,-915,507,-911,505,-907,507,-903,516],[-1053,315,-1053,326,-1058,328,-1063,316,-1059,310,-1053,315],[-1084,377,-1091,387,-1099,391,-1108,387,-1105,375,-1096,368,-1088,369,-1084,377],[-1146,123,-1152,117,-1149,111,-1148,117,-1141,118,-1146,123],[-1034,202,-1042,203,-1045,200,-1045,192,-1042,191,-1033,190,-1019,199,-1027,207,-1034,202],[-1287,264,-1288,268,-1294,272,-1301,273,-1304,269,-1303,264,-1295,258,-1289,259,-1287,264],[-1056,-106,-1011,-93,-958,-59,-916,-40,-900,-28,-887,-9,-901,-27,-916,-39,-958,-58,-1011,-92,-1056,-106],[-1029,266,-1030,261,-1022,255,-1022,251,-1018,253,-1014,259,-1019,273,-1024,274,-1029,266],[-1327,94,-1329,100,-1334,103,-1350,97,-1348,89,-1338,85,-1326,88,-1324,91,-1327,94],[-934,486,-937,493,-944,501,-953,498,-951,487,-939,482,-934,486],[-1051,231,-1066,232,-1078,225,-1078,219,-1071,215,-1069,219,-1053,222],[-1274,271,-1279,281,-1290,289,-1296,286,-1297,281,-1286,269,-1278,267,-1274,271],[-1258,249,-1263,262,-1271,262,-1272,249,-1259,239,-1255,243,-1258,249],[-1273,138,-1282,141,-1287,134,-1281,125,-1274,122,-1270,130,-1273,138],[-1032,331,-1028,335,-1029,342,-1040,343,-1044,338,-1042,334,-1032,331],[-1261,174,-1262,179,-1266,181,-1282,175,-1283,167,-1271,160,-1262,163,-1261,174],[-900,377,-911,387,-918,385,-922,379,-921,375,-916,374,-900,377],[-1039,496,-1034,507,-1040,515,-1047,513,-1053,499,-1047,492,-1039,496],[-1314,338,-1320,344,-1324,343,-1329,336,-1326,323,-1316,324,-1312,332,-1314,338],[-1328,575,-1328,572,-1274,607,-1228,654,-1204,672,-1096,717,-1054,729,-1034,731,-1007,729,-888,702,-855,691,-829,677,-792,667,-828,678,-876,701,-898,707,-1007,731,-1034,733,-1054,730,-1097,718,-1205,673,-1229,655,-1276,609,-1328,575],[-955,250,-961,251,-966,246,-959,235,-954,233,-946,241,-955,250],[-731,438,-732,448,-741,456,-740,472,-746,482,-754,480,-775,489,-793,490,-811,485,-822,478,-822,473,-805,481,-771,481,-756,472,-749,463,-746,446,-738,433,-732,431,-731,438],[-1282,295,-1276,299,-1271,308,-1278,314,-1289,307,-1289,296,-1282,295],[-1341,190,-1349,204,-1358,206,-1360,197,-1353,188,-1345,185,-1341,190],[-978,270,-977,259,-973,255,-970,256,-965,263,-967,268,-971,271,-978,270],[575,524,576,520],[934,1392,931,1381,939,1352,949,1345,961,1347,968,1355,971,1362,968,1385,962,1393,952,1398,944,1398,934,1392],[1037,1503,1041,1495,1047,1494,1059,1499,1065,1507,1061,1513,1049,1515,1044,1522,1040,1523,1036,1518,1037,1503],[1110,1512,1118,1501,1126,1511,1104,1530,1098,1530,1095,1524,1096,1521,1110,1512],[137,1068,139,1070,129,1095,132,1098,149,1098,152,1091,167,1073,157,1032,158,1006,171,984,175,984,175,988,171,988,163,1002,161,1023,181,1029,186,1026,201,974,186,971,184,984,184,971,203,908,254,934],[-1111,61,-1115,60,-1118,53,-1114,47,-1108,46,-1104,48,-1097,59,-1104,63,-1111,61],[-1170,497,-1177,486,-1178,468,-1173,459,-1167,456,-1165,464,-1168,484,-1165,495,-1170,497],[-1025,647,-1022,649,-1022,655,-1028,661,-1039,661,-1059,653,-1065,648,-1069,638,-1079,607,-1076,600,-1051,605,-1047,626,-1041,638,-1032,646,-1025,647],[-1135,554,-1129,546,-1123,543,-1113,542,-1108,544,-1108,550,-1131,568,-1135,554],[-1177,402,-1183,398,-1185,389,-1184,382,-1181,380,-1174,386,-1174,399,-1172,401,-1177,402],[-1034,-7,-1040,5,-1050,7,-1049,12,-1056,23,-1066,28,-1062,13,-1048,-4,-1036,-11],[-1085,41,-1077,27,-1066,26,-1068,35,-1078,48,-1083,47,-1085,41],[-1251,318,-1257,316,-1259,301,-1255,299,-1254,294,-1240,293,-1235,297,-1235,304,-1244,316,-1251,318],[-1109,431,-1109,448,-1131,446,-1139,429,-1143,405,-1127,407,-1123,411,-1118,427,-1109,431],[-1345,335,-1351,340,-1356,339,-1359,328,-1354,321,-1348,325,-1345,335],[-1135,361,-1131,359,-1117,361,-1112,353,-1106,350,-1112,355,-1114,362,-1106,368,-1105,367,-1111,358,-1110,354,-1106,353,-1100,357,-1105,370,-1117,363,-1132,364],[-1329,361,-1325,364,-1327,372,-1330,373,-1350,363,-1349,360,-1329,361],[-1132,364,-1130,373,-1115,384,-1117,393,-1128,390,-1135,397,-1145,395,-1145,383,-1161,377,-1163,359,-1157,348,-1147,345],[-1082,411,-1070,406,-1066,408,-1062,431,-1068,433,-1075,430,-1083,416,-1082,411],[-1329,385,-1329,378,-1324,376,-1317,381,-1315,379,-1310,383,-1314,392,-1323,390,-1329,385],[-450,1723,-448,1725],[-917,322,-922,322,-926,319,-926,315,-920,310,-914,315,-917,322],[-857,92,-862,128,-853,182,-829,205,-817,211,-807,238,-805,253,-792,272,-784,274,-781,269,-779,270,-787,283,-803,285,-812,294,-818,292,-821,275,-820,271,-810,268,-812,271,-809,279,-807,282,-803,282,-816,257,-823,231,-830,221,-864,195,-868,188,-867,171,-878,141,-879,118,-870,92,-860,87,-857,89,-857,92],[-937,358,-929,351,-924,353,-922,358,-925,365,-935,364,-937,358],[-906,302,-898,300,-894,305,-895,312,-901,320,-905,320,-909,314,-906,302],[-1046,368,-1039,371,-1039,373,-1039,379,-1046,384,-1059,374,-1057,366,-1046,368],[519,58,511,61,510,58,435,58,414,45,401,24,384,12,367,6,364,9,388,17,399,26,382,20,382,18,385,18,388,19,384,20,394,23,382,16,380,21,368,21,340,14,331,3,315,-55,306,-67,295,-74,285,-77,269,-76,246,-67,217,-50,193,-44,186,-45,170,-52,154,-64,143,-79,143,-90,138,-99,127,-103,116,-101,115,-116,109,-131,97,-144,79,-156,58,-164,38,-166,17,-162,-4,-153,-16,-152,-28,-157,-46,-173,-65,-179,-150,-163,-163,-157,-188,-136,-202,-128,-247,-128,-263,-123,-287,-103,-312,-88,-330,-55,-341,-45,-372,-24,-400,-22,-427,-6,-422,-14,-426,-19,-437,-10,-433,-2,-438,1,-441,-7,-428,-19,-430,-24,-435,-25,-433,-28,-436,-39,-448,-48,-458,-47,-459,-41,-476,-69,-476,-81,-483,-108,-490,-116,-503,-121,-512,-119,-510,-113,-530,-142,-527,-143,-527,-151,-532,-171,-547,-181,-556,-180,-555,-175,-574,-204,-570,-200,-567,-201,-565,-207,-567,-224,-571,-232,-584,-239,-586,-233,-595,-236,-579,-244,-596,-270,-608,-277,-609,-274,-613,-274,-614,-264,-608,-244,-597,-228,-609,-243,-622,-233,-632,-239,-631,-254,-633,-257,-631,-275,-640,-313,-651,-309,-658,-336,-665,-349,-677,-345,-690,-384,-700,-381,-712,-421,-722,-417,-736,-449,-741,-448,-753,-471,-759,-475,-762,-475,-762,-472,-765,-474,-765,-466,-765,-474,-772,-477,-767,-477,-759,-482,-765,-495,-776,-501,-788,-495],[-1167,107,-1176,106,-1181,99,-1174,98,-1164,103,-1167,107],[-1144,295,-1167,299,-1173,294,-1170,289,-1154,278,-1148,282,-1144,295],[1049,1599,1067,1582,1075,1585,1079,1638,1073,1651,1069,1654,1050,1656,1042,1651,1045,1620,1040,1610,1041,1602,1049,1599],[-966,181,-969,185,-965,190,-964,200,-968,201,-975,197,-981,184,-977,179,-967,179],[-1063,405,-1062,391,-1049,387,-1047,397,-1049,407,-1059,410,-1063,405],[-988,230,-993,245,-999,246,-1006,242,-1007,224,-1002,222,-989,229],[-1046,278,-1044,287,-1049,289,-1055,287,-1060,279,-1054,272,-1046,278],[-1025,278,-1025,285,-1031,287,-1041,278,-1040,271,-1035,269,-1025,278],[-993,424,-1003,427,-1009,421,-1005,414,-997,412,-991,415,-993,424],[-992,545,-999,552,-1007,548,-1000,536,-992,538,-992,545],[-1020,537,-1030,545,-1037,539,-1035,533,-1029,529,-1022,530,-1020,537],[-1040,256,-1046,268,-1053,265,-1053,253,-1045,246,-1040,251,-1040,256],[-1086,203,-1075,192,-1066,190,-1062,195,-1063,200,-1061,209,-1064,212,-1079,207,-1083,211,-1086,204],[-1053,222,-1051,211,-1046,209,-1038,215,-1035,225,-1034,231,-1051,231],[-988,337,-985,331,-982,331,-979,334,-979,340,-983,353,-988,347,-988,341],[-1012,335,-1015,348,-1018,351,-1022,349,-1023,338,-1018,333,-1013,334],[-917,187,-916,184,-926,180,-928,181,-929,176,-922,168,-913,168,-905,176,-915,188],[-1129,262,-1136,258,-1137,252,-1126,242,-1118,243,-1113,250,-1114,259,-1117,262,-1129,262],[-1091,415,-1099,424,-1110,425,-1114,424,-1117,414,-1116,411,-1102,405,-1091,410,-1091,415],[-1079,322,-1074,315,-1066,314,-1064,321,-1068,329,-1074,327],[-943,405,-931,406,-932,413,-949,416,-955,413,-952,403,-943,405],[-1105,518,-1115,521,-1120,517,-1120,513,-1115,508,-1108,507,-1103,510,-1105,518],[-1063,585,-1064,590,-1070,588,-1074,583,-1074,576,-1069,575,-1063,585],[-1121,497,-1128,457,-1106,457,-1104,481,-1107,498,-1121,497],[-1102,525,-1091,540,-1075,546,-1070,540,-1063,541,-1061,546,-1079,569,-1086,571,-1092,568,-1096,556,-1107,540,-1111,530,-1102,525],[-1020,608,-1015,610,-1009,605,-1012,600,-1008,596,-994,589,-988,599,-993,607,-988,610,-986,605,-971,592,-966,604,-939,621,-936,631,-940,640,-957,644,-991,625,-1009,619,-1022,610],[645,1244,635,1248],[642,1237,620,1204,622,1201,627,1211,633,1216,648,1207,633,1178,632,1177,614,1190,619,1198,608,1203,565,1148,577,1139,614,1187,631,1174,548,1085,536,1096,554,1117,558,1141,555,1142,551,1117,514,1076],[-1028,21,-1036,25,-1043,17,-1032,8,-1026,12,-1028,21],[-1086,124,-1091,125,-1104,121,-1108,116,-1108,108,-1097,108,-1087,114,-1084,117,-1086,124],[-1042,35,-1056,52,-1064,56,-1069,54,-1069,50,-1056,40,-1047,29,-1042,31,-1042,35],[-1138,93,-1144,103,-1148,103,-1162,94,-1159,85,-1151,79,-1146,81,-1146,84,-1138,93],[-1002,30,-1009,28,-1013,22,-1014,12,-1000,17,-999,26,-1002,30],[-1112,97,-1123,89,-1123,83,-1104,72,-1097,71,-1092,79,-1104,86,-1105,97,-1112,97],[-1071,80,-1085,75,-1088,71,-1086,65,-1079,63,-1066,69,-1065,76,-1071,80],[-1074,138,-1081,131,-1073,111,-1069,113,-1066,124,-1070,139,-1074,138],[-1218,129,-1216,141,-1221,146,-1229,139,-1227,129],[-1279,57,-1286,64,-1299,59],[-1283,48,-1272,43,-1265,46,-1269,58,-1279,57],[-1299,59,-1283,48],[1175,1975,1188,1952,1184,1943,1167,1937,1162,1958,1169,1913,1166,1881,1129,1827,1077,1782,1051,1769,1036,1718,1040,1689,1074,1667,1077,1661,1082,1662,1100,1641,1105,1618,1093,1575,1094,1562,1104,1547,1152,1501,1163,1482,1161,1468,1113,1413,1096,1409,1079,1415,1047,1391,1002,1371,999,1365,999,1306,989,1294,972,1289,959,1291,945,1298,932,1308,917,1326,909,1345,905,1374,896,1389,893,1421,897,1423,897,1429,888,1447,877,1456,864,1459,831,1450,821,1454,813,1462,822,1452,814,1445,800,1460,802,1454,816,1440,818,1427,817,1406,818,1408,823,1404,816,1392,812,1351,815,1330,823,1320,855,1301,865,1290,895,1269,903,1255,904,1235,898,1221,883,1211,867,1208,850,1217,837,1233,822,1267,804,1278,796,1288,793,1300,792,1313,795,1314,789,1318,778,1318,773,1313,765,1297,759,1273],[971,1702,955,1701,934,1711,938,1706,953,1699,944,1680,936,1683,943,1680,940,1674,936,1674,940,1670,900,1608,896,1605,892,1607,896,1603,884,1584,880,1581,876,1583,883,1578,882,1575,852,1534,855,1531,854,1528,820,1487,814,1484,810,1490,808,1489,820,1468,828,1462,871,1477,897,1469,908,1460,924,1441,926,1443,944,1427,943,1430,945,1430,964,1428,988,1415,999,1398,1001,1384,998,1379,1003,1376,1049,1395,1078,1417,1044,1457,1031,1496,1029,1537,1039,1586,1025,1682,1019,1688,971,1702],[1178,1972,1176,1975],[758,1437,744,1427,751,1432,756,1424,754,1413,747,1405,738,1400,730,1399,726,1401,726,1410,722,1389,726,1394,731,1392,733,1385,732,1379,727,1373,713,1366,705,1366,705,1371,699,1351,703,1355,708,1351,707,1336,704,1333,690,1339,690,1337,696,1336,693,1328,684,1325,682,1329,680,1328,677,1319,679,1309,675,1299,666,1289,663,1281,657,1276,650,1278,654,1260,645,1244],[-1036,-11,-1023,-18,-1008,-17,-1002,-14,-1011,-8,-1025,-3,-1034,-7],[651,348,651,352,661,363,657,366,652,362,649,364,653,370,650,373,639,362,635,352,639,327,643,324,650,327,651,348],[-993,458,-987,453,-982,457,-979,461,-980,471,-987,471,-993,458],[-1506,-1385,-1507,-1386],[-1141,309,-1142,301,-1139,293,-1128,291,-1120,301,-1121,308,-1125,312,-1134,307,-1139,310],[321,974,392,1023,394,1030,401,1035,408,1035,434,1058,439,1059,428,1064,444,1081,458,1076,459,1079,488,1105],[-88,532,-83,540,-87,542,-92,534,-136,563,-141,561,-218,609,-239,633,-247,650,-252,677,-240,803,-243,804,-254,677,-252,658,-243,636,-219,608,-97,529,-100,518,-96,517],[-81,706,-59,702,-54,698,13,617,9,613,7,616,1,609,-3,614,-5,612,4,601,0,596,-9,607,-15,602,-19,605,-56,643,-58,640,-19,599,-36,579,-84,617,-107,588,-61,549,-81,528,-88,532],[-75,860,-81,907,-78,937,-95,947,-113,949,-132,942,-141,934,-147,924,-151,925,-145,921,-146,907,-140,893,-151,885,-155,833,-151,832,-147,846,-121,840,-135,775,-147,778,-149,783,-153,784,-155,775,-158,776,-156,785,-160,786,-163,773,-167,774,-164,786,-183,791,-182,805,-174,829,-177,830,-165,947,-168,948,-179,830,-198,744,-190,730,-151,721,-152,717,-137,714,-136,718,-81,706],[109,779,89,749,111,748,89,714,84,717,94,731,77,730,46,682,43,684,43,681,-14,681,-25,697,-6,703,27,703,27,706,3,708,-28,700,-40,712,-29,770,-32,795,-47,823,-75,860],[564,-67,564,-67],[511,-95,512,-99,534,-90,511,-95],[-1498,-1379,-1488,-1389],[479,-22,486,-25,485,-21,479,-22],[398,-87,402,-88,401,-85,405,-81,413,-82,414,-80,405,-71,406,-66,400,-67,414,-62,416,-57,409,-37,410,-31,404,-24,404,-37,411,-52,406,-56,397,-46,394,-48,392,-54,397,-63,393,-57,395,-61,393,-65,396,-77,404,-80,397,-82,398,-87],[389,-71,389,-86,393,-90,395,-83,391,-85,392,-72,389,-71],[-1008,335,-1005,331,-997,329,-993,335,-995,342],[-1008,336,-1008,335],[-988,341,-988,337],[-354,84,-361,86],[-1394,-1138,-1390,-1142,-1384,-1142,-1369,-1127,-1336,-1155,-1344,-1164,-1341,-1167,-1352,-1179,-1349,-1182,-1331,-1160,-1316,-1176,-1332,-1195,-1331,-1199,-1334,-1197,-1303,-1224,-1298,-1223,-1291,-1218,-1289,-1226,-1273,-1229,-1279,-1234,-1274,-1239,-1273,-1246,-1277,-1251,-1276,-1256,-1288,-1257,-1292,-1265,-1292,-1270,-1300,-1269,-1309,-1279,-1308,-1286,-1317,-1285,-1325,-1293,-1328,-1299,-1337,-1297,-1347,-1308,-1353,-1310,-1354,-1313,-1346,-1319,-1347,-1322,-1353,-1321],[536,-77,536,-77],[535,-77,535,-77],[581,89,590,82,595,86,588,91,589,93,600,94,614,114,621,153,635,179,655,196,658,193,660,195,657,198,708,245,715,272,714,290,705,312,709,315,704,323,698,321,702,325,699,333,691,347,688,347,683,340,670,342,660,328,656,328,648,320,643,320,636,325,635,337,630,349,635,358,636,367,645,380,643,383,633,375,623,385,630,394,625,398,618,389,615,390,577,421,553,446,552,455,546,453,541,457,538,463,540,474,528,495,527,509,521,523,521,533,509,551,510,555,470,587,468,595,462,600,451,602,444,613,432,618,386,657,359,690,349,707,350,710,347,710,346,716,343,717,344,720,336,724,336,728,327,732,325,735,319,739,319,741,307,744,307,747,297,748,295,751,292,749,291,752,286,751,286,754,278,753,277,756,271,754,235,755,192,746,177,747,166,753,160,768,164,785,171,797,185,809,198,815,202,824,196,854,198,861,196,863],[107,1010,95,1008,20,970,-53,912,-53,909,-50,909,-37,922],[379,1196,387,1184,386,1170,376,1156,365,1151,320,1156,304,1172,295,1175,257,1173,227,1163,208,1150,194,1136,187,1107,181,1100,173,1096,166,1103,159,1119,162,1143,186,1172,205,1186,215,1189],[371,-75,367,-54,391,-49,367,-51,363,-30],[-361,86,-375,85,-374,83,-365,83,-365,70,-372,60,-372,55,-380,48,-387,44,-391,50,-388,43,-382,37,-396,33,-406,37,-411,42,-405,47,-411,44,-415,52,-419,77,-418,97,-426,100,-440,112,-442,108,-456,95,-476,84,-471,75,-455,56,-428,11,-430,17,-422,21,-409,8,-408,2,-412,-3,-417,-1,-401,-11,-365,-19,-335,-38,-323,-52,-309,-79,-284,-92,-259,-115,-243,-119,-211,-118,-194,-121,-179,-127,-145,-151,-113,-160,-107,-160,-90,-140,-89,-131,-87,-131,-86,-143,-101,-161,-78,-157,-50,-140,-34,-137,-42,-121,-59,-115,-59,-111,-52,-110,-38,-112,4,-142,20,-151,45,-154,70,-148,85,-137,98,-119,103,-106,107,-77,114,-69,121,-65,121,-69,113,-74,112,-80,126,-79,132,-71,124,-69,124,-65,136,-68,157,-46,183,-33,200,-32,217,-39,237,-41,256,-37,269,-32,286,-18,303,5,318,19,340,30,365,32,371,36,383,48,401,79,433,93,432,96,469,92,569,93,581,89],[-1353,-1321,-1362,-1330,-1362,-1339,-1364,-1339,-1365,-1336,-1367,-1337,-1366,-1340,-1361,-1340,-1362,-1343,-1373,-1343,-1381,-1347,-1387,-1355,-1391,-1374,-1400,-1383,-1416,-1385,-1432,-1403,-1434,-1412,-1438,-1417,-1450,-1415,-1456,-1408,-1484,-1400,-1506,-1385],[-96,517,-89,515,-87,509,-86,517,-81,514,-77,497,-82,480,-88,482,-84,479,-85,471,-93,466,-96,467,-93,465,-96,454,-103,443,-109,440,-110,438,-107,436,-113,428,-118,432,-113,440,-113,445,-115,445,-125,421,-125,417,-121,415,-124,411,-134,412,-150,426,-175,437,-181,443,-182,453],[-411,155,-413,151,-436,151,-436,139,-423,135,-418,126,-407,118,-394,116,-382,118,-362,130,-346,150,-350,150,-352,154,-353,169,-348,181,-342,177,-368,201,-378,223,-393,269,-395,272,-399,268,-407,273,-407,279,-403,278,-403,280,-411,285,-413,279,-429,278,-436,284,-436,288,-430,289,-444,288,-439,285,-445,277,-478,262,-483,264,-483,266,-490,254,-487,258,-484,255,-482,245,-489,235,-493,235,-488,219,-484,215,-485,220,-479,221,-474,217,-475,212,-473,212,-459,219,-463,218,-465,222,-464,232,-458,245,-449,252,-429,256,-412,247,-400,230,-402,227,-399,220,-403,217,-399,209,-403,207,-393,176,-396,172,-388,174,-385,169,-387,160,-391,155,-396,153,-399,160,-404,158,-399,142,-391,142],[-1147,345,-1140,345,-1139,359,-1135,361],[-37,922,-23,933,-16,933,-4,939,-4,949],[-4,949,21,969,89,1004],[89,1004,131,962,147,974],[147,974,159,959,167,941,168,939,163,934,167,925,164,928,167,925,163,927,164,923,159,929,164,922,160,919,155,925,159,920,154,916,147,924,154,915,151,911,153,908,11,796,6,790,1,760,12,747,127,840,141,824,109,779],[514,1076,512,1075],[512,1075,464,1030,457,1029,453,1031,416,1000,351,953,286,912,206,870,215,845,216,829,208,810,186,790,179,776,186,764,200,758,212,760,231,771,244,775,290,775,327,763,358,740,413,683,430,685,437,680,437,674,411,673,414,668,431,668,432,671,447,672,454,667,455,661,429,660,428,658,431,655,447,655,464,660,471,654,472,648,445,647,445,645,449,642,465,642,481,647,483,635,461,633,484,614,487,615],[488,1105,489,1106],[489,1106,505,1122,499,1127,460,1146,414,1157],[-1221,53,-1225,53],[-1270,71,-1268,62,-1259,63,-1256,67,-1257,70,-1270,71],[-1273,72,-1272,79,-1277,84,-1283,83,-1285,79,-1282,73,-1278,70,-1273,72],[-1225,50,-1220,51],[-1111,321,-1119,306,-1113,301,-1108,302,-1099,316,-1101,321,-1106,324],[-1106,324,-1109,326,-1111,339,-1123,349,-1131,335],[-1128,332,-1111,321],[-391,142,-391,136,-396,131,-406,131,-411,136,-412,148,-409,155,-411,155],[-1139,310,-1135,315,-1135,327,-1130,333],[-1237,-687,-1250,-671,-1256,-667,-1272,-680,-1271,-685,-1265,-691],[-1210,-860,-1218,-867,-1230,-864,-1227,-868,-1219,-870,-1209,-862,-1203,-832,-1202,-798,-1204,-773,-1211,-741,-1221,-714,-1237,-687],[-788,-495,-778,-481,-774,-465,-801,-452,-794,-456,-796,-461,-810,-473,-815,-473,-820,-472,-830,-453,-827,-464,-839,-500,-850,-503,-831,-502,-827,-511,-817,-518,-807,-516],[-807,-516,-808,-530,-828,-571,-831,-572,-845,-560,-830,-573,-839,-585,-867,-561,-862,-553,-857,-555,-848,-552,-857,-551,-845,-550,-844,-547,-863,-548,-868,-553,-874,-563,-873,-578,-882,-583,-873,-580,-870,-583,-865,-604,-873,-616,-886,-626,-885,-632,-891,-651,-921,-698,-944,-727,-959,-715,-951,-724,-964,-728,-960,-727,-958,-730,-962,-740,-1008,-794,-1036,-817,-1031,-822,-1032,-824,-1062,-848,-1055,-854,-1077,-879,-1104,-899,-1109,-900,-1111,-889,-1112,-903,-1108,-905,-1120,-916,-1105,-911,-1100,-914,-1102,-919,-1116,-938,-1124,-940,-1136,-938,-1137,-943,-1125,-951,-1137,-966,-1156,-973,-1156,-982,-1162,-994,-1173,-1002,-1179,-998,-1176,-994,-1180,-998,-1183,-996,-1172,-1008,-1180,-1020,-1183,-1021,-1189,-1017,-1194,-1009,-1183,-987,-1186,-985,-1195,-1007,-1195,-1013,-1188,-1020,-1191,-1024,-1207,-1041,-1219,-1033,-1230,-1045,-1226,-1059,-1232,-1076,-1288,-1147,-1303,-1156,-1334,-1129],[-1334,-1129,-1337,-1131,-1338,-1127],[530,586,535,582,540,581,542,576,555,567,566,544,570,544,571,539,568,536,571,533,573,531,579,533,578,535,579,534,579,536,580,534,586,536,585,531,588,527,583,514,578,511,579,505,597,471,614,446,636,431,641,423,641,418,650,415,663,402,692,384,707,391,710,387,699,379,701,373,705,377,723,363,730,353,733,354,742,339,742,318,746,308,745,295,755,279,751,272,762,280,772,277,772,269,775,263,771,258,762,256,755,263,752,262,759,255,760,250,749,239,746,228,748,221,763,206,769,193,774,153,773,129,762,129,754,133,748,130,742,141,728,149,711,150,707,147,708,153,706,153,700,143,688,131,678,106,669,94,670,92,673,98,679,102,687,101,693,95,693,86,685,79,671,85,675,80,668,75,666,66,670,57,678,58,678,55,672,53,675,48,682,51,683,49,679,46,682,43,686,47,689,44,687,41,690,39,692,42,694,41,693,37,696,36,698,40,701,39,701,35,705,35,706,39,707,35,714,35,713,29,717,25,700,16],[-1130,333,-1128,332],[-989,-35,-991,-38,-988,-43,-982,-44],[-982,-44,-972,-40,-975,-27,-969,-8,-959,1,-948,1,-946,-3],[-182,453,-181,461,-187,468,-218,493,-242,507,-238,503],[-238,503,-236,501],[-245,442,-234,455,-237,458,-226,471,-224,469,-221,472,-199,454,-202,451,-199,448,-211,434,-213,436,-224,421,-219,418,-211,424,-205,411,-198,408,-178,413,-167,409,-157,401,-153,401,-154,385,-159,373,-167,366,-170,365,-175,374,-180,376,-192,370,-193,365,-190,362,-192,356,-186,352,-188,347,-182,351,-178,348,-177,343,-185,329,-195,322,-202,322,-202,329,-209,330,-224,343,-235,367,-243,365,-258,378,-254,372,-263,361,-276,350,-282,354,-273,343,-274,334,-270,324,-257,307,-262,296,-255,302,-251,303,-248,307,-241,304,-238,297,-233,300,-231,298,-227,288,-230,287,-216,291,-205,287,-214,274,-218,273,-227,250,-240,233,-272,202,-274,204,-267,198,-272,192,-288,179,-295,175,-298,177,-299,171,-287,161,-292,149,-304,142,-316,148,-305,163,-302,178,-304,179,-307,163,-317,148,-329,147,-318,146,-316,143,-320,138,-316,134,-317,128,-341,103,-354,84],[-267,464,-273,467,-261,457,-240,428,-237,430,-245,442],[-224,282,-233,268,-224,282],[-1141,-52,-1142,-54,-1141,-52],[588,14,588,7,590,8,588,14],[449,1510,409,1513,397,1519,372,1538,367,1549,371,1554,372,1563,380,1568,384,1563,387,1566,385,1572,377,1581,377,1586],[456,1503,465,1497,455,1508,449,1510],[503,1488,502,1482,495,1476,484,1473,475,1474,460,1485,456,1492,456,1503],[555,1442,565,1435,573,1425,574,1429,567,1437,548,1450,539,1461,524,1471,508,1488,499,1491,497,1488,503,1488],[375,1590,362,1599,360,1604],[377,1586,378,1588,375,1590],[361,1608,347,1619,344,1627,345,1633],[360,1604,361,1608],[309,1668,271,1680,249,1691,236,1703,234,1708,238,1712],[345,1633,347,1634,309,1668],[241,1719,223,1728,220,1735,222,1742],[238,1712,244,1719,241,1719],[388,1304,395,1307,403,1302,415,1306,420,1304],[420,1304,447,1352,459,1393,462,1429,468,1437,476,1434,486,1424,493,1402,484,1355,473,1320,465,1304,442,1268,412,1255,369,1220],[132,1365,140,1364,143,1366,140,1374,148,1384],[148,1384,170,1412,186,1437,191,1456,188,1474],[130,1363,132,1365],[222,1742,227,1738,228,1740,201,1762,189,1761,183,1752,195,1689,199,1656,202,1655,201,1668],[201,1668,207,1670,216,1669,233,1658,240,1644,244,1624,240,1611,217,1579,207,1570,192,1570],[192,1570,194,1579,191,1579,181,1518,183,1484,188,1460,186,1442,167,1411,134,1371],[188,1474,196,1475,192,1467,202,1471,211,1468,266,1408,285,1393,301,1372,315,1364,332,1360,373,1323,388,1318,388,1304],[591,1257,589,1250,593,1241,619,1223,627,1235],[627,1235,632,1244],[369,1220,366,1223,369,1214,368,1199,369,1204],[639,1256,641,1268,638,1282,640,1286,638,1285],[638,1285,635,1289,637,1298,643,1305,647,1305],[554,-75,543,-83,543,-85,539,-86,537,-84,537,-87,534,-85,537,-89,558,-80,559,-78,556,-79,556,-75,558,-72,565,-75,569,-73,563,-72,565,-70,569,-71,564,-67],[564,-67,561,-61],[561,-61,558,-56],[558,-56,550,-57,543,-62,543,-59,537,-58,537,-55,536,-58,532,-58,532,-54,528,-59,525,-57,526,-59,522,-60,522,-62,514,-63,510,-67],[510,-67,505,-64,491,-71,477,-82,468,-85,463,-92,459,-94,458,-98],[510,-67,507,-73,509,-97,507,-74,510,-67],[700,16,637,-27,633,-26],[633,-26,633,-26],[633,-26,634,-28,630,-32,579,-67,566,-75,560,-73,559,-79,556,-82,537,-90,531,-81,530,-84,535,-90,513,-99,509,-89,510,-100,472,-116,467,-111,445,-124,440,-132,429,-124,439,-133,434,-164,411,-158,394,-134,378,-105,371,-75],[458,-98,456,-96,449,-102],[449,-102,452,-113,450,-120,467,-110,473,-115,510,-100,509,-89,514,-91,515,-86,518,-86,515,-81,524,-80,521,-84,524,-87,531,-81,534,-82,534,-76,531,-77,533,-78,531,-81,525,-79,532,-75,534,-70,538,-69,534,-73,537,-79,540,-77,538,-80,540,-78,544,-82,554,-75],[519,57,521,56,519,58],[361,-23,359,3,361,9,366,5,377,8,393,15,404,25,415,-1,417,1,406,28,408,30,412,24,412,20,421,11,435,7,440,13,519,57],[363,-30,365,-29,364,-30,367,-34,376,-31,382,-37,389,-39,383,-33,391,-39,390,-28,385,-21,377,-26,365,-28,361,-23],[-448,1725,-438,1733,-416,1743,-411,1748,-415,1774,-426,1802,-425,1821,-419,1830,-405,1845,-371,1864,-344,1888,-302,1889,-293,1894,-300,1900,-322,1904,-342,1902,-405,1864,-419,1853,-453,1815,-476,1795,-504,1752,-517,1746,-527,1749],[-545,1700,-531,1701,-499,1711,-491,1710,-483,1719,-470,1725,-450,1723],[-527,1749,-525,1757],[-548,1686,-545,1700],[-525,1757,-541,1720,-551,1689,-548,1686],[-1178,-905,-1179,-911,-1176,-904],[-1191,-916,-1185,-917,-1180,-914,-1190,-914],[-1190,-914,-1184,-906,-1178,-905],[487,615,496,608,504,613,512,612,520,603,531,599,535,594,531,594,520,599,510,610,503,610,501,604,508,604,522,587,530,586],[573,1378,566,1378,557,1385,548,1400,548,1421,555,1442],[196,863,177,927,160,962,137,991,107,1010],[-112,439,-112,437,-112,439],[655,1324,652,1328,652,1336,658,1343,664,1343],[647,1305,655,1324],[659,1370,651,1378,643,1401,633,1408],[664,1343,672,1360,668,1367,659,1370],[633,1408,624,1408,616,1403,612,1396,617,1372,617,1358,604,1323,595,1278,583,1261,584,1260,590,1268],[590,1268,596,1268,600,1263,598,1257,591,1257],[632,1244,642,1237],[-1320,-1038,-1367,-1093],[-1307,-1062,-1311,-1043,-1320,-1038],[418,-15,406,-9,411,-13,406,-19,418,-15],[-1369,-1096,-1393,-1121,-1400,-1114,-1400,-1108],[-1367,-1093,-1375,-1091,-1369,-1096],[-1400,-1108,-1391,-1100,-1402,-1107,-1404,-1113,-1397,-1133],[-1343,-1122,-1348,-1117,-1348,-1108,-1307,-1062],[-1341,-1125,-1344,-1124,-1343,-1122],[-1338,-1127,-1336,-1125,-1340,-1122,-1341,-1125],[-1488,-1162,-1495,-1167,-1497,-1174,-1487,-1197,-1488,-1192,-1482,-1191,-1478,-1182],[-1392,-1197,-1387,-1204],[-1414,-1180,-1416,-1192,-1402,-1200,-1392,-1197],[-1387,-1204,-1387,-1220,-1394,-1245,-1408,-1274,-1428,-1303,-1473,-1345,-1478,-1352,-1489,-1357,-1496,-1354],[-1415,-1174,-1463,-1197,-1460,-1202,-1414,-1180],[-1397,-1161,-1412,-1163,-1415,-1174],[-1496,-1354,-1494,-1347,-1497,-1348,-1502,-1368,-1502,-1376,-1498,-1379],[-1488,-1389,-1483,-1393,-1452,-1402,-1445,-1395,-1436,-1397,-1420,-1380,-1421,-1366,-1418,-1358,-1407,-1351,-1394,-1347,-1387,-1341,-1382,-1331,-1382,-1319,-1367,-1316,-1368,-1302,-1360,-1304,-1354,-1298,-1346,-1295,-1342,-1291,-1341,-1281,-1332,-1282,-1327,-1278,-1325,-1266,-1319,-1272,-1314,-1273,-1297,-1257,-1302,-1243,-1299,-1235,-1370,-1174],[-1508,-1348,-1504,-1311,-1508,-1306,-1506,-1292,-1528,-1258,-1533,-1256,-1540,-1258,-1545,-1255,-1571,-1290,-1573,-1290,-1568,-1294,-1566,-1304,-1518,-1347,-1525,-1373,-1516,-1391,-1534,-1415,-1538,-1418,-1541,-1416,-1598,-1487,-1613,-1475,-1612,-1479,-1615,-1477,-1601,-1489,-1606,-1490,-1650,-1550,-1657,-1555,-1659,-1554,-1655,-1558,-1656,-1560,-1663,-1558,-1659,-1563,-1662,-1566,-1667,-1563,-1666,-1566,-1673,-1574],[-1507,-1386,-1510,-1373,-1508,-1348],[134,1371,128,1373,127,1379,129,1381,139,1379,140,1381,129,1397,94,1398,99,1396,108,1385,118,1380,130,1363],[-265,462,-267,464],[-236,501,-244,487,-265,462],[254,934,252,939,266,950,272,954,276,947,286,953,291,949,294,954,289,951,289,954,293,957,297,955,299,958,295,958,321,974],[369,1204,379,1196],[215,1189,218,1185,214,1193,219,1203,214,1213,220,1223,214,1215,208,1215,187,1229,187,1233,182,1233,164,1242,165,1248,161,1245,153,1249,149,1254,151,1260,141,1264,142,1267,136,1273,127,1275,110,1296,153,1350,127,1322,111,1299,101,1291,84,1257,69,1190,94,1160,118,1120,137,1068],[410,1164,425,1181,442,1187,460,1181,473,1163],[473,1163,505,1147,517,1148,520,1154,514,1175,517,1177,531,1178,538,1190,537,1200,529,1213,529,1218,535,1221,547,1214,553,1218,558,1231,554,1263,568,1331,576,1388,574,1388,573,1378],[414,1157,410,1164],[576,520,575,524],[575,524,575,524],[-1013,334,-1012,335],[-1370,-1174,-1378,-1166,-1397,-1161],[-1397,-1133,-1394,-1138],[-1478,-1182,-1426,-1158,-1428,-1153,-1400,-1140,-1408,-1122,-1490,-1159,-1488,-1162],[-1146,344,-1150,333,-1148,329,-1149,313,-1141,309],[-1131,335,-1140,343,-1146,344],[-1023,456,-1020,448,-1016,448,-1007,459,-999,462,-993,472,-994,481,-997,483,-1011,464,-1018,464,-1023,461],[-1023,461,-1024,461],[-1024,461,-1039,476,-1053,475],[-1055,472,-1041,458,-1023,456],[-1022,610,-1031,606,-1034,597,-1022,588,-1023,591,-1012,598,-1016,600,-1020,608],[-1383,102,-1399,92,-1408,93,-1409,99,-1412,99,-1414,85,-1406,81,-1403,72,-1428,38,-1424,35,-1410,33,-1408,23,-1400,9,-1396,7,-1391,10,-1377,4,-1368,14,-1353,17,-1350,24,-1351,33,-1355,37,-1374,27,-1385,26,-1392,29,-1396,38,-1393,51,-1376,56,-1382,75,-1367,94,-1366,101],[759,1273,760,1262,769,1246,763,1244,763,1242,770,1240,778,1223,794,1204,835,1171,840,1156,834,1137,822,1125,803,1118,790,1121,781,1126,780,1134,774,1130,767,1141,760,1173,741,1215,739,1231,740,1277,750,1301,749,1312,758,1320,764,1338,776,1354,789,1362,790,1368,783,1378,798,1394,801,1417,809,1431,806,1440,799,1444,777,1444,783,1443,783,1438,779,1433,773,1430,763,1431,758,1437],[-671,-187,-671,-184,-698,-190,-726,-182,-736,-182,-751,-166,-755,-173,-747,-192,-747,-220,-751,-219,-770,-250,-761,-260,-757,-259,-741,-227,-730,-221,-716,-242,-709,-239,-725,-220,-718,-200,-677,-202,-675,-211,-660,-213,-644,-222,-639,-220,-634,-214,-636,-211,-633,-212,-631,-209,-636,-193,-643,-191,-647,-181,-656,-178,-671,-187],[635,1248,639,1256],[1022,1693,1021,1720,1039,1782,1113,1845,1145,1880,1151,1893,1150,1957,1149,1948,1140,1948,1112,1959,1112,1964,1111,1960,1106,1963,1118,1979,1125,1972,1127,1974,1119,1982,1131,1997],[1131,1999,1092,1954,968,1878,971,1877,977,1859,1095,1930,1121,1903,1051,1834,1045,1838,1043,1834,1024,1846,987,1784,939,1813,936,1810,932,1813,934,1818,932,1817,931,1836,933,1842,935,1841,934,1845,936,1843,934,1848,938,1848,935,1848,953,1906,951,1907,929,1834,937,1755,931,1753,930,1748,939,1740,941,1723,955,1711,985,1705,1022,1693],[-1056,111,-1067,101,-1067,98,-1065,91,-1060,89,-1054,54,-1048,51,-1043,52,-1045,54,-1042,57,-1043,68,-1042,58,-1040,70,-1042,82,-1046,82,-1046,88,-1043,91,-1045,96,-1048,95,-1052,104,-1049,106,-1052,113,-1056,111]],"r":[[168,362,141,353],[108,319,76,267],[141,352,169,360],[169,360,220,375],[383,374,339,393],[331,394,261,388],[344,391,383,372],[339,393,331,394],[334,392,344,391],[220,375,280,390,327,392],[141,353,132,349],[-1344,-1364,-1322,-1336],[-1347,-1362,-1377,-1399],[-1582,-1660,-1539,-1607],[-1539,-1607,-1524,-1588],[-1524,-1588,-1344,-1364],[-1489,-1539,-1509,-1564],[-1456,-1497,-1468,-1513],[-1297,-1306,-1347,-1362],[-1282,-1297,-1221,-1241],[-1322,-1336,-1286,-1300],[-1377,-1399,-1456,-1497],[-1053,-1083,-1022,-1054],[-1221,-1241,-1199,-1220],[-1080,-1104,-1122,-1143],[-1122,-1143,-1171,-1189],[-1022,-1054,-973,-1010,-861,-923],[-1171,-1189,-1297,-1306],[-1155,-1179,-1053,-1083],[-980,-1011,-1080,-1104],[-939,-979,-980,-1011],[-823,-894,-754,-841],[-899,-948,-939,-979],[-191,-121,-170,-94],[-215,-149,-191,-121],[-1199,-1220,-1184,-1205],[-861,-923,-832,-901],[-102,-14,-81,13],[-450,-427,-614,-713,-660,-764],[-11,127,-78,22,-124,-35],[-1286,-1300,-1282,-1297],[-1184,-1205,-1155,-1179],[-169,-94,-141,-60],[-1556,-1623,-1584,-1658],[-1509,-1564,-1556,-1623],[-172,-92,-214,-142],[-125,-37,-169,-89],[76,267,15,170],[-283,-229,-215,-149],[-125,-41,-102,-14],[-81,13,-2,136],[-2,136,18,169],[31,189,54,226],[18,169,31,189],[54,226,59,235],[59,235,75,261],[75,261,104,306],[104,306,123,338,141,352],[-1468,-1513,-1489,-1539],[248,384,216,375],[261,388,248,384],[216,375,168,362],[327,392,334,392],[-556,-618,-454,-439,-412,-383],[-754,-841,-630,-741,-556,-618],[-851,-912,-899,-948],[-822,-890,-824,-891],[-831,-900,-823,-894],[-832,-901,-831,-900],[-124,-35,-125,-37],[-125,-42,-125,-41],[-141,-60,-125,-42],[15,170,2,148],[-214,-142,-218,-147],[-314,-266,-283,-229],[132,349,108,319],[-169,-89,-172,-92],[-660,-764,-822,-890],[-824,-891,-851,-912],[-412,-383,-314,-266],[-170,-94,-169,-94],[2,148,-11,127],[-218,-147,-450,-427]]};
+let geoCache=null;
+// land or water: OpenStreetMap draws every coastline with land on its left, so the side of the nearest coast segment decides
+function onLand(x,y){
+  let bd=1e18,side=1;
+  for(const l of GEO.c) for(let i=0;i+3<l.length;i+=2){
+    const ax=l[i]*10,ay=l[i+1]*10,bx=l[i+2]*10,by=l[i+3]*10,dx=bx-ax,dy=by-ay,L=dx*dx+dy*dy||1;
+    const t=Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/L)),qx=ax+t*dx-x,qy=ay+t*dy-y,d=qx*qx+qy*qy;
+    if(d<bd){bd=d;side=dx*(y-ay)-dy*(x-ax)}
+  }
+  return side>0;
+}
+function geoPaths(Rm,cx,cy,rOf){
+  const key=Rm+"|"+cx+"|"+cy;
+  if(geoCache&&geoCache.key===key) return geoCache;
+  const conv=l=>{const o=[];for(let i=0;i<l.length;i+=2){const x=l[i]*10,y=l[i+1]*10,m=Math.hypot(x,y),r=rOf(m),a=Math.atan2(x,y);o.push(cx+r*Math.sin(a),cy-r*Math.cos(a))}return o};
+  return geoCache={key,c:GEO.c.map(conv),r:GEO.r.map(conv)};
+}
+
+/* ---------- spire lines ----------
+   For a minute t the sun stands at azimuth A and altitude a. Anyone standing on the bearing A+180 from the tower,
+   at the distance where the spire rises exactly a degrees (828 / tan a), sees the sun on the spire at t.
+   Sweeping t over the afternoon and morning gives one line per half-day. Same sun model as everywhere else. */
+const LINE_MIN=1500, LINE_MAX=22000, lineCache={};
+function spireLines(day){
+  if(lineCache[day]) return lineCache[day];
+  const mid=DAY0+day*86400e3, aMin=Math.atan(BURJ.h/LINE_MAX)*D, aMax=Math.atan(BURJ.h/LINE_MIN)*D, out=[];
+  for(const pm of [false,true]){
+    const pts=[];
+    for(let t=mid+(pm?12:4)*3600e3;t<=mid+(pm?20:12)*3600e3;t+=60e3){
+      const p=sunpos(t,BURJ.lat,BURJ.lon);
+      if((p.az>180)!==pm||p.alt<aMin||p.alt>aMax) continue;
+      pts.push({t,th:(p.az+180)%360,m:BURJ.h/Math.tan(p.alt*R)});
+    }
+    if(pts.length>1) out.push({pm,pts});
+  }
+  return lineCache[day]=out;
+}
+
+/* ---------- plan ---------- */
+let planGeo=null;
+function drawPlan(){
+  const cv=$("plan"),{c,w,h}=fit(cv), cx=w/2, cy=h/2, Rm=Math.min(w,h)/2, MAX=12000;
+  const rOf=m=>Rm*m/MAX; // linear: true shapes, about 12 km from the tower to the panel edge
+  planGeo={cx,cy,Rm,MAX};
+  c.fillStyle=css("--ink");c.fillRect(0,0,w,h);
+  const pt=(th,r)=>[cx+r*Math.sin(th*R),cy-r*Math.cos(th*R)];
+  const zone=(a,b,col)=>{c.beginPath();c.moveTo(cx,cy);for(let th=a;th<=b;th+=1){const q=pt(th,Rm);c.lineTo(q[0],q[1])}c.closePath();c.fillStyle=col;c.fill()};
+  const G=geoPaths(Rm,cx,cy,rOf);
+  const stroke=(L,col,wd)=>{c.strokeStyle=col;c.lineWidth=wd;c.lineJoin="round";c.beginPath();L.forEach(a=>{c.moveTo(a[0],a[1]);for(let i=2;i<a.length;i+=2)c.lineTo(a[i],a[i+1])});c.stroke()};
+  stroke(G.r,"rgba(239,231,218,.10)",1);
+  stroke(G.c,"rgba(239,231,218,.2)",1);
+  const Rz=Math.hypot(w,h);
+  {const zone2=(a,b,col)=>{c.beginPath();c.moveTo(cx,cy);for(let th=a;th<=b;th+=1){const q=pt(th,Rz);c.lineTo(q[0],q[1])}c.closePath();c.fillStyle=col;c.fill()};
+   zone2(64.4,116.5,"rgba(255,107,61,.07)");zone2(243.5,295.6,"rgba(159,208,255,.06)");}
+  c.strokeStyle="rgba(239,231,218,.08)";c.fillStyle="rgba(138,134,166,.7)";c.font="8px "+css("--mono");c.lineWidth=1;
+  [2000,5000,10000].forEach(m=>{c.beginPath();c.arc(cx,cy,rOf(m),0,7);c.stroke();c.fillText(m/1000+" KM",cx+3,cy-rOf(m)-3)});
+  c.fillText("N",cx-3,11);
+  // the day's spire lines: every place where the sun sits on the spire at some minute of this day
+  planGeo.lines=spireLines(st.day).map(L=>{
+    const pts=L.pts.map(q=>{const [x,y]=pt(q.th,rOf(q.m));return {...q,x,y}});
+    c.globalAlpha=.9;c.strokeStyle=css(L.pm?"--ember":"--dawn");c.lineWidth=1.6;c.lineJoin="round";
+    c.beginPath();pts.forEach((q,i)=>i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y));c.stroke();c.globalAlpha=1;
+    return {pm:L.pm,pts};
+  });
+  c.fillStyle=css("--text");c.beginPath();c.moveTo(cx,cy-7);c.lineTo(cx+4,cy+5);c.lineTo(cx-4,cy+5);c.closePath();c.fill();
+  const list=st.custom?[...SPOTS,st.custom]:SPOTS;
+  list.forEach(s=>{const q=pt(s.from,rOf(s.d));s._x=q[0];s._y=q[1]});
+  // marks: gold = the spire alignment happens here (the soonest one bright and larger), hollow = landmark, never aligns
+  list.forEach(s=>{
+    const sel=s===st.spot, gold=s.spires.length>0, lead=s===st._best, col=gold?css("--sun"):css("--mute"), x=s._x, y=s._y;
+    if(sel){c.strokeStyle="rgba(255,181,74,.35)";c.setLineDash([2,3]);c.beginPath();c.moveTo(x,y);c.lineTo(cx,cy);c.stroke();c.setLineDash([]);c.strokeStyle=col;c.lineWidth=1.5;c.beginPath();c.arc(x,y,9,0,7);c.stroke();c.lineWidth=1}
+    c.globalAlpha=gold&&!lead&&!sel?.45:1;
+    if(lead){const gl=c.createRadialGradient(x,y,0,x,y,12);gl.addColorStop(0,"rgba(255,181,74,.35)");gl.addColorStop(1,"rgba(255,181,74,0)");c.fillStyle=gl;c.beginPath();c.arc(x,y,12,0,7);c.fill()}
+    if(s.custom&&gold){c.fillStyle=col;c.beginPath();c.moveTo(x,y);c.arc(x,y-9,5,0,7);c.fill()}
+    else if(s.custom){c.strokeStyle=col;c.lineWidth=1.2;c.beginPath();c.moveTo(x,y);c.arc(x,y-9,4.5,Math.PI*.6,Math.PI*2.4);c.closePath();c.stroke();c.lineWidth=1}
+    else if(gold){c.fillStyle=col;c.beginPath();c.arc(x,y,lead||sel?4.8:3.2,0,7);c.fill()}
+    else{c.strokeStyle=col;c.lineWidth=1.2;c.beginPath();c.arc(x,y,3,0,7);c.stroke();c.lineWidth=1}
+    c.globalAlpha=1;
+  });
+  // labels by priority: try the preferred side, then the other side, then above and below.
+  // The Burj mark, the ring labels and every spot mark count as obstacles. A quiet label with no free place is not drawn.
+  const hit=(a,b)=>!(a[2]<b[0]||a[0]>b[2]||a[3]<b[1]||a[1]>b[3]);
+  const boxes=[[cx-9,cy-10,cx+9,cy+8],[cx-6,0,cx+6,14]];
+  [2000,5000,10000].forEach(m=>{const y=cy-rOf(m)-3;boxes.push([cx+1,y-8,cx+32,y+2])});
+  const marks=list.map(s=>[s._x-5,s._y-5,s._x+5,s._y+5]);
+  const order=[st.spot,st._best,...list].filter((s,i,a)=>s&&a.indexOf(s)===i);
+  c.textAlign="left";
+  order.forEach(s=>{
+    const sel=s===st.spot;
+    c.font=(sel?"500 ":"")+"9px "+css("--mono");
+    const txt=(s.name||"").toUpperCase(), tw=c.measureText(txt).width, X=s._x, Y=s._y, dy=s.ly||4;
+    const right=[X+10,Y+dy], left=[X-10-tw,Y+dy], above=[X-tw/2,Y-(s.custom?18:12)], below=[X-tw/2,Y+16];
+    const tries=s.al==="right"?[left,right,above,below]:[right,left,above,below];
+    const own=marks[list.indexOf(s)];
+    let spot=null;
+    for(const [x,y] of tries){
+      const box=[x-3,y-9,x+tw+3,y+3];
+      if(box[0]<4||box[2]>w-4||box[1]<4||box[3]>h-4)continue;
+      if(boxes.some(b=>hit(box,b))||marks.some(m=>m!==own&&hit(box,m)))continue;
+      spot=[x,y,box];break;
+    }
+    if(!spot){if(!sel)return;const [x,y]=tries[0];spot=[Math.max(4,Math.min(w-4-tw,x)),y,null]}
+    if(spot[2])boxes.push(spot[2]);
+    c.fillStyle=sel?css("--text"):s===st._best?"rgba(255,181,74,.9)":"rgba(138,134,166,.85)";c.fillText(txt,spot[0],spot[1]);
+  });
+}
+
+/* ---------- strip ---------- */
+let stripGeo=null;
+function drawStrip(){
+  const cv=$("strip"),{c,w,h}=fit(cv), padL=14,padR=14, top=46, base=h-26, colw=(w-padL-padR)/NDAYS, s=st.spot;
+  stripGeo={padL,colw};
+  c.fillStyle=css("--ink");c.fillRect(0,0,w,h);
+  c.strokeStyle=css("--line");c.beginPath();c.moveTo(padL,base+.5);c.lineTo(w-padR,base+.5);c.stroke();
+  for(let i=0;i<NDAYS;i++){
+    const k=s.days[i].kind,x=padL+i*colw;
+    if(k==="spire"){c.fillStyle=css("--sun");c.fillRect(x,top,Math.max(2,colw),base-top)}
+    else if(k==="behind"){c.fillStyle="rgba(255,107,61,.55)";c.fillRect(x,base-16,Math.max(1,colw),16)}
+  }
+  c.font="8px "+css("--mono");c.fillStyle="rgba(138,134,166,.8)";
+  for(let i=0;i<NDAYS;i++){const d=new Date(DAY0+i*86400e3+TZ);if(d.getUTCDate()===1){const x=padL+i*colw;c.fillRect(x,base,1,4);c.fillText("JFMAMJJASOND"[d.getUTCMonth()],x+3,base+14)}}
+  c.fillStyle=css("--mute");c.fillRect(padL,base-3,1,7);
+  const tx=padL+(st.day+.5)*colw;c.strokeStyle=css("--text");c.lineWidth=1.2;c.beginPath();c.moveTo(tx,top-10);c.lineTo(tx,base);c.stroke();
+  c.fillStyle=css("--text");c.beginPath();c.moveTo(tx-4,top-16);c.lineTo(tx+4,top-16);c.lineTo(tx,top-10);c.fill();
+}
+
+/* ---------- render ---------- */
+let fadeId=0, raf=0;
+function snap(cv){if(!cv.width)return null;const o=document.createElement("canvas");o.width=cv.width;o.height=cv.height;o.getContext("2d").drawImage(cv,0,0);return o}
+function overlay(cv,img,a){if(!img||img.width!==cv.width||img.height!==cv.height)return;const c=cv.getContext("2d");c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=a;c.drawImage(img,0,0);c.restore()}
+function render(animate){
+  const sky=$("sky"),plan=$("plan");
+  const old=animate&&!reduce.matches?[snap(sky),snap(plan)]:null;
+  fadeId++;
+  const {p,t}=drawScene(); readouts(p,t); drawPlan(); drawStrip(); writeHash();
+  if(!old) return;
+  const id=fadeId,t0=performance.now();
+  overlay(sky,old[0],1);overlay(plan,old[1],1);
+  const step=now=>{if(id!==fadeId)return;const a=1-Math.min(1,(now-t0)/260);drawScene();drawPlan();overlay(sky,old[0],a);overlay(plan,old[1],a);if(a>0)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+// continuous input (drag, resize) draws at most once per frame, never animated
+function frame(fn){cancelAnimationFrame(raf);raf=requestAnimationFrame(fn)}
+function go(spot,day,animate=true){st.spot=spot;st.day=day;st.dt=0;render(animate)}
+function setDay(d){d=Math.max(0,Math.min(NDAYS-1,d));if(d!==st.day||st.dt){st.day=d;st.dt=0;frame(()=>render(false))}}
+
+/* ---------- interaction ---------- */
+// strip: tap picks a day; horizontal drag scrubs; vertical swipe still scrolls the page
+(()=>{const box=$("stripBox");let start=null,drag=false;
+  const dayAt=e=>Math.floor((e.clientX-box.getBoundingClientRect().left-stripGeo.padL)/stripGeo.colw);
+  box.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;start={x:e.clientX,y:e.clientY};drag=e.pointerType==="mouse";if(drag){box.setPointerCapture(e.pointerId);setDay(dayAt(e))}});
+  box.addEventListener("pointermove",e=>{if(!start)return;if(!drag){const dx=Math.abs(e.clientX-start.x),dy=Math.abs(e.clientY-start.y);if(dx>6&&dx>dy){drag=true;box.setPointerCapture(e.pointerId)}else return}setDay(dayAt(e))});
+  box.addEventListener("pointerup",e=>{if(start&&!drag)setDay(dayAt(e));start=null;drag=false});
+  box.addEventListener("pointercancel",()=>{start=null;drag=false});
+  box.addEventListener("keydown",e=>{
+    const map={ArrowRight:1,ArrowLeft:-1,PageUp:30,PageDown:-30};
+    if(e.key in map){e.preventDefault();e.stopPropagation();setDay(st.day+map[e.key])}
+    if(e.key==="Home"){e.preventDefault();setDay(0)}
+    if(e.key==="End"){e.preventDefault();setDay(NDAYS-1)}
+  });
+})();
+// arrows walk through every alignment of the year, all spots, in time order
+function jump(dir){
+  const x=st.spot.days[st.day], ref=x.t||DAY0+st.day*86400e3+12*3600e3;
+  const same=e=>e.s===st.spot&&e.i===st.day;
+  const e=dir>0?EVENTS.find(e=>e.t>ref+60e3&&!same(e)):[...EVENTS].reverse().find(e=>e.t<ref-60e3&&!same(e));
+  if(e)go(e.s,e.i);
+}
+$("next").addEventListener("click",()=>jump(1));
+$("prev").addEventListener("click",()=>jump(-1));
+$("home").addEventListener("click",()=>{const e=EVENTS[0];if(e)go(e.s,e.i)});
+// today: stand on today's spire line, at the point closest to the spot that was selected
+function spotOnLine(day,near){
+  const L=spireLines(day); if(!L.length) return null;
+  const line=L.find(l=>l.pm===near.pm)||L[0], nx=near.d*Math.sin(near.from*R), ny=near.d*Math.cos(near.from*R);
+  let best=null,bd=1e12;
+  const xy=q=>[q.m*Math.sin(q.th*R),q.m*Math.cos(q.th*R)];
+  const land=line.pts.filter(q=>q.m>=2000&&onLand(...xy(q)));
+  (land.length?land:line.pts).forEach(q=>{const [x,y]=xy(q),dd=Math.hypot(x-nx,y-ny);if(dd<bd){bd=dd;best=q}});
+  const p=dest(BURJ,best.th,best.m); return makePin(p.lat,p.lon);
+}
+$("today").addEventListener("click",()=>{const pin=spotOnLine(0,st.spot);if(pin){st.custom=pin;$("hint").hidden=true;go(pin,0)}else go(st.spot,0)});
+$("nextAll").addEventListener("click",()=>{const n=st._next;if(n)go(n.s,n.i)});
+$("badge").addEventListener("click",()=>{st.open=!st.open;$("state").classList.toggle("open",st.open);$("badge").setAttribute("aria-expanded",String(st.open))});
+function choose(s){const i=s.spires.find(j=>j>=st.day)??s.spires[0];go(s,i!=null?i:st.day)}
+$("planBox").addEventListener("click",e=>{
+  const r=$("planBox").getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  const list=st.custom?[...SPOTS,st.custom]:SPOTS;let best=null,bd=22;
+  list.forEach(s=>{const d=Math.hypot(s._x-x,s._y-y);if(d<bd){bd=d;best=s}});if(bd>14&&best&&!best.custom)best=null;
+  if(!best){
+    let snap=null,sd=18;
+    (planGeo.lines||[]).forEach(L=>L.pts.forEach(q=>{const d=Math.hypot(q.x-x,q.y-y);if(d<sd){sd=d;snap=q}}));
+    if(snap){const p=dest(BURJ,snap.th,snap.m);best=makePin(p.lat,p.lon);st.custom=best;$("hint").hidden=true;choose(best);return}
+  }
+  if(!best){
+    const {cx,cy,Rm,MAX}=planGeo,dx=x-cx,dy=y-cy,rr=Math.hypot(dx,dy);if(rr<6)return;
+    const m=MAX*rr/Rm,th=(Math.atan2(dx,-dy)*D+360)%360,p=dest(BURJ,th,Math.max(400,m));
+    best=makePin(p.lat,p.lon);st.custom=best;$("hint").hidden=true;
+  }
+  choose(best);
+});
+// spots for keyboard and screen readers, invisible until focused
+SPOTS.forEach(s=>{const b=document.createElement("button");b.textContent=`${s.name}, ${s.spires.length?s.spires.length+" alignments a year":"landmark, never aligns"}`;b.addEventListener("click",()=>choose(s));$("spotList").appendChild(b)});
+// scene: horizontal drag scrubs time, vertical swipe scrolls the page (touch-action: pan-y)
+(()=>{const sc=$("scene");let x0=null,d0=0;
+  const end=()=>{if(x0!=null){x0=null;writeHash()}};
+  sc.addEventListener("pointerdown",e=>{if(e.target.closest("button,a"))return;x0=e.clientX;d0=st.dt});
+  sc.addEventListener("pointermove",e=>{
+    if(x0==null)return;
+    const v=Math.max(-90,Math.min(90,Math.round(d0+(e.clientX-x0)/3)));
+    if(v!==st.dt){if(!sc.hasPointerCapture(e.pointerId))sc.setPointerCapture(e.pointerId);st.dt=v;frame(()=>{fadeId++;const {p,t}=drawScene();readouts(p,t)})}
+  });
+  sc.addEventListener("pointerup",end);
+  sc.addEventListener("pointercancel",end);
+  sc.addEventListener("dblclick",e=>{if(e.target.closest("button,a"))return;st.dt=0;render(false)});
+  sc.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();st.dt=Math.max(-90,Math.min(90,st.dt+(e.key==="ArrowUp"?5:-5)));render(false)}});
+})();
+// share: native sheet where allowed, then clipboard, then the bare link
+$("share").addEventListener("click",async()=>{
+  const url=shareURL(),toast=$("toast");
+  const say=m=>{toast.textContent=m;clearTimeout(say.t);say.t=setTimeout(()=>toast.textContent="",2000)};
+  try{if(navigator.share){await navigator.share({title:"Burjhenge",text:`${$("date").textContent} ${$("time").textContent} · ${st.spot.name}`,url});return}}catch(err){if(err&&err.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(url);say("link copied");return}catch(err){}
+  clearTimeout(say.t);toast.textContent="";const inp=document.createElement("input");inp.className="linkbox";inp.readOnly=true;inp.value=url;inp.setAttribute("aria-label","Link to this alignment");toast.appendChild(inp);inp.focus();inp.select();
+  inp.addEventListener("blur",()=>{toast.textContent=""},{once:true});
+});
+// global keys: days and alignments; never while typing
+document.addEventListener("keydown",e=>{
+  if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey||(e.target.closest&&e.target.closest("input,textarea")))return;
+  if(e.key==="ArrowRight")setDay(st.day+1);
+  if(e.key==="ArrowLeft")setDay(st.day-1);
+  if(e.key==="n")jump(1);
+  if(e.key==="p")jump(-1);
+});
+window.addEventListener("hashchange",()=>{if(location.hash.slice(1)!==lastHash&&readHash())render(true)});
+
+let lastW=0,lastH=0;
+new ResizeObserver(en=>{const r=en[0].contentRect;if(Math.abs(r.width-lastW)<1&&Math.abs(r.height-lastH)<1)return;lastW=r.width;lastH=r.height;frame(()=>render(false))}).observe(document.querySelector(".wrap"));
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>render(false));
+render(false);
+})();
+</script>
+</body>
+</html>
