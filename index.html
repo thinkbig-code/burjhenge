@@ -45,7 +45,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .time b{font-family:var(--display);font-weight:500;font-size:clamp(30px,7vw,52px);line-height:1;font-variant-numeric:tabular-nums}
 .time span{font:10px var(--mono);letter-spacing:var(--ls);color:var(--text);opacity:.75;border-bottom:1px solid rgba(239,231,218,.3);padding-bottom:2px}
 .time:hover span{opacity:1}
-.where{display:grid;justify-items:end;gap:10px;padding-top:22px;text-align:right}
+.where{display:grid;justify-items:end;gap:10px;padding-top:58px;text-align:right}
 .km{font-size:11px;letter-spacing:var(--ls)}
 .km i{display:block;font-style:normal;font-size:9px;color:var(--mute);margin-top:4px}
 .acts{display:flex;gap:2px;margin-right:-10px;pointer-events:auto}
@@ -85,6 +85,24 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .grid button:disabled{opacity:.18;cursor:default;border-color:transparent}
 .grid button.today{color:var(--sun)}
 .grid button.sel{border-color:var(--sun)}
+.minew{position:absolute;right:calc(var(--inset) - 10px);top:calc(var(--inset) + env(safe-area-inset-top,0px) - 4px);z-index:6}
+.mp{position:absolute;right:10px;top:100%;margin-top:8px;width:min(292px,calc(100vw - 2 * var(--inset)));padding:14px;background:rgba(7,8,13,.95);border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:12px;font-size:10px;letter-spacing:.06em;line-height:1.6}
+.pbtn{height:38px;border:1px solid rgba(239,231,218,.25);border-radius:19px;background:none;color:var(--text);font:10px var(--mono);letter-spacing:var(--ls);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px}
+.pbtn:hover{border-color:var(--sun);color:var(--sun)}
+.pbtn.solid{background:var(--sun);border-color:var(--sun);color:#07080d}
+.pbtn svg{width:14px;height:14px}
+.mp .or{font-size:8px;letter-spacing:var(--ls);color:var(--mute)}
+.mp .row{display:flex;gap:8px;align-items:center}
+.mp input{flex:1;min-width:0;height:38px;padding:0 10px;background:rgba(239,231,218,.06);border:1px solid rgba(239,231,218,.18);border-radius:6px;color:var(--text);font:11px var(--mono)}
+.mp input:focus{outline:none;border-color:var(--sun)}
+.floor{display:flex;align-items:center;gap:6px;letter-spacing:var(--ls)}
+.floor span{flex:1;color:var(--mute);font-size:9px}
+.floor button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(239,231,218,.2);background:none;color:var(--text);font:14px var(--mono);cursor:pointer}
+.floor output{min-width:34px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+.pmsg{color:var(--mute);font-size:9px}
+.pmsg b{color:var(--text);font-weight:400}
+.time:disabled{cursor:default}
+.time:disabled span{border-bottom-color:transparent}
 @media (max-width:520px){
   .foot{flex-direction:column;align-items:stretch;gap:12px}
   .tl{order:-1;width:100%}
@@ -92,7 +110,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   .km i{display:inline;margin:0 0 0 6px}
   .toast{position:absolute;right:0;bottom:-16px}
 }
-@media (max-width:360px){.km i{display:none}}
+@media (max-width:420px){.km i{display:none}}
 button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
 .linkbox{font:9px var(--mono);width:200px;background:var(--night);color:var(--text);border:1px solid rgba(239,231,218,.2);border-radius:4px;padding:4px 6px;pointer-events:auto}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -123,6 +141,19 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
         <button class="btn" id="share" aria-label="Share a link to this moment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>SHARE</button>
       </div>
       <div class="toast" id="toast" role="status"></div>
+    </div>
+  </div>
+  <div class="minew">
+    <button class="btn" id="mine" aria-haspopup="dialog" aria-expanded="false" aria-controls="mp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6-5.4-6-11a6 6 0 1 1 12 0c0 5.6-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg><span id="mineTxt">MY PLACE</span></button>
+    <div class="mp" id="mp" role="dialog" aria-label="When it happens at your place" hidden>
+      <button class="pbtn solid" id="geo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>USE MY LOCATION</button>
+      <div class="or">OR PASTE A GOOGLE MAPS LINK OR COORDINATES</div>
+      <div class="row"><input id="coord" inputmode="decimal" autocomplete="off" placeholder="25.2086, 55.3549" aria-label="Google Maps link or coordinates"><button class="pbtn" id="go">GO</button></div>
+      <div class="floor"><span>FLOOR</span><button id="fdn" aria-label="Lower floor">−</button><output id="fl" aria-live="polite">0</output><button id="fup" aria-label="Higher floor">+</button></div>
+      <div class="pmsg" id="pmsg">Worked out on this device. Your location is not sent anywhere.</div>
+      <button class="pbtn" id="ics" hidden>ADD TO CALENDAR</button>
+      <button class="pbtn" id="nearest" hidden>SHOW THE NEAREST SPOT</button>
+      <button class="pbtn" id="back" hidden>BACK TO TODAY'S SPOT</button>
     </div>
   </div>
   <div class="foot">
@@ -220,8 +251,36 @@ function candidates(day,pm){
   const L=spireLines(day).find(l=>l.pm===pm); if(!L) return candCache[k]=[];
   return candCache[k]=L.pts.filter(q=>q.m>=2000&&onLand(q.m*Math.sin(q.th*R),q.m*Math.cos(q.th*R))).sort((a,b)=>a.m-b.m);
 }
-const st={day:0,pm:true,target:8000,q:null,dt:0}; // dt: minutes away from the moment on the spire
+const st={day:0,pm:true,target:8000,q:null,dt:0,place:null}; // dt: minutes away from the moment on the spire
+
+/* ---------- my place ----------
+   From a fixed place the sun crosses the bearing to the tower once a day (afternoon if the tower is to the west,
+   morning if it is to the east). On the days when the sun's altitude at that crossing equals the angle up to the
+   spire, it sits on the spire. Eye height comes from the floor, about 3.2 m a floor. */
+function crossAt(P,mid,b,pm){
+  const a=mid+(pm?11:3.5)*3600e3, z=mid+(pm?20:12.5)*3600e3, step=4*60e3;
+  let pt=a, pv=wrap(sunpos(pt,P.lat,P.lon).az-b);
+  for(let t=a+step;t<=z;t+=step){
+    const v=wrap(sunpos(t,P.lat,P.lon).az-b);
+    if(pv*v<=0&&Math.abs(pv-v)<20){
+      let lo=pt,hi=t,vl=pv;
+      for(let k=0;k<14;k++){const m=(lo+hi)/2,vm=wrap(sunpos(m,P.lat,P.lon).az-b);if(vl*vm<=0)hi=m;else{lo=m;vl=vm}}
+      const tt=(lo+hi)/2,p=sunpos(tt,P.lat,P.lon);return p.alt>-1.2?{t:tt,alt:p.alt}:null;
+    }
+    pt=t;pv=v;
+  }
+  return null;
+}
+function placeEvents(P){
+  const d=dist(P,BURJ), b=bearing(P,BURJ), pm=b>180, tip=Math.atan((BURJ.h-P.h)/d)*D;
+  const xs=[];for(let i=0;i<NDAYS;i++)xs.push(crossAt(P,DAY0+i*86400e3,b,pm));
+  const ev=[];
+  for(let i=0;i<NDAYS;i++){const x=xs[i];if(!x)continue;const e=Math.abs(x.alt-tip),ep=xs[i-1]?Math.abs(xs[i-1].alt-tip):99,en=xs[i+1]?Math.abs(xs[i+1].alt-tip):99;
+    if(e<0.6&&e<=ep&&e<=en&&x.t>Date.now()-30*60e3)ev.push({i,t:x.t})}
+  return {...P,d,b,pm,tip,th:bearing(BURJ,P),events:ev,k:0};
+}
 function pick(){
+  if(st.place){const P=st.place,e=P.events[P.k];st.day=e.i;st.pm=P.pm;st.q={th:P.th,m:P.d,t:e.t,h:P.h,b:P.b,o:P};return}
   const C=candidates(st.day,st.pm); if(!C.length){st.q=null;return}
   let best=C[0];C.forEach(q=>{if(Math.abs(Math.log(q.m/st.target))<Math.abs(Math.log(best.m/st.target)))best=q});
   st.q=best;
@@ -232,7 +291,7 @@ const COMPASS=["NORTH","NORTH-EAST","EAST","SOUTH-EAST","SOUTH","SOUTH-WEST","WE
 const fmtDay=i=>{const d=new Date(DAY0+i*86400e3+TZ);return d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,"0")+String(d.getUTCDate()).padStart(2,"0")};
 const token=()=>fmtDay(st.day)+"~"+(st.pm?"pm":"am")+"~"+(st.target/1000).toFixed(1);
 let lastHash="";
-function writeHash(){const h=token();if(h===lastHash)return;lastHash=h;try{history.replaceState(null,"","#"+h)}catch(e){}}
+function writeHash(){if(st.place)return;const h=token();if(h===lastHash)return;lastHash=h;try{history.replaceState(null,"","#"+h)}catch(e){}}
 function readHash(){
   let h="";try{h=decodeURIComponent(location.hash.slice(1))}catch(e){}
   const m=h.match(/^(\d{8})~(am|pm)(?:~(\d{1,2}(?:\.\d)?))?$/); if(!m) return false;
@@ -256,7 +315,7 @@ function fit(cv){const r=cv.getBoundingClientRect(),p=Math.min(devicePixelRatio|
 function draw(){
   const cv=$("sky"),{c,w,h}=fit(cv), q=st.q;
   if(!q){c.fillStyle="#07080d";c.fillRect(0,0,w,h);return}
-  const o=dest(BURJ,q.th,q.m), d=q.m, b=(q.th+180)%360, tip=Math.atan(BURJ.h/d)*D, p=sunpos(q.t+st.dt*60e3,o.lat,o.lon);
+  const o=q.o||dest(BURJ,q.th,q.m), d=q.m, hO=q.h||0, b=q.b!=null?q.b:(q.th+180)%360, tip=Math.atan((BURJ.h-hO)/d)*D, p=sunpos(q.t+st.dt*60e3,o.lat,o.lon);
   const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?190:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
   const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
@@ -265,8 +324,8 @@ function draw(){
   const glow=c.createRadialGradient(sx,sy,sr*.6,sx,sy,sr*7);glow.addColorStop(0,"rgba(255,190,90,.55)");glow.addColorStop(1,"rgba(255,120,60,0)");c.fillStyle=glow;c.fillRect(0,0,w,h);
   c.fillStyle="#ffe2a8";c.beginPath();c.arc(sx,sy,sr,0,7);c.fill();
   c.fillStyle="#07070f";
-  SKY.forEach(s=>{const x=cx+Math.atan(s.x/d)*D*ppd, bw=Math.max(1,Math.atan(s.w/d)*D*ppd), bh=Math.atan(s.h/d)*D*ppd;c.fillRect(x-bw/2,horizonY-bh,bw,bh)});
-  const pts=PROF.map(([f,hw])=>[Math.atan(hw/d)*D*ppd,horizonY-Math.atan(f*BURJ.h/d)*D*ppd]);
+  SKY.forEach(s=>{const x=cx+Math.atan(s.x/d)*D*ppd, bw=Math.max(1,Math.atan(s.w/d)*D*ppd), bh=Math.atan((s.h-hO)/d)*D*ppd;if(bh>0)c.fillRect(x-bw/2,horizonY-bh,bw,bh)});
+  const pts=PROF.map(([f,hw])=>[Math.atan(hw/d)*D*ppd,horizonY-Math.atan((f*BURJ.h-hO)/d)*D*ppd]);
   c.beginPath();c.moveTo(cx-pts[0][0],horizonY);pts.forEach(v=>c.lineTo(cx-v[0],v[1]));for(let i=pts.length-1;i>=0;i--)c.lineTo(cx+pts[i][0],pts[i][1]);c.closePath();c.fill();
   c.save();c.clip();const rl=c.createRadialGradient(sx,sy,0,sx,sy,sr*5);rl.addColorStop(0,"rgba(255,200,120,.35)");rl.addColorStop(1,"rgba(255,200,120,0)");c.fillStyle=rl;c.fillRect(0,0,w,h);c.restore();
   c.fillStyle="#05050b";c.fillRect(0,horizonY,w,h-horizonY);
@@ -276,8 +335,10 @@ const hhmm=t=>{const L=new Date(t+TZ);return String(L.getUTCHours()).padStart(2,
 const dmon=t=>{const L=new Date(t+TZ);return L.getUTCDate()+" "+MON[L.getUTCMonth()]};
 function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
-  $("rel").textContent=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
-  $("prev").disabled=st.day<=0;$("next").disabled=st.day>=NDAYS-1;
+  const P=st.place, rel=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
+  $("rel").textContent=P?(st.day<=1?rel:"IN "+st.day+" DAYS"):rel;
+  $("prev").disabled=P?P.k<=0:st.day<=0;$("next").disabled=P?P.k>=P.events.length-1:st.day>=NDAYS-1;
+  $("mode").disabled=!!P;$("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
   if(!q){$("time").textContent="--:--";$("km").innerHTML="NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
@@ -286,7 +347,7 @@ function text(){
   $("thumb").style.left=(50+st.dt/180*100)+"%";$("ta").textContent=hhmm(q.t-90*60e3);$("tb").textContent=hhmm(q.t+90*60e3);
   $("track").setAttribute("aria-valuenow",String(Math.round(st.dt)));$("track").setAttribute("aria-valuetext",hhmm(q.t+st.dt*60e3));
   $("play").setAttribute("aria-label",st.pm?"Play the sunset":"Play the sunrise");
-  $("km").innerHTML=`STAND ${(q.m/1000).toFixed(1)} KM ${dir}<i>OF BURJ KHALIFA</i>`;
+  $("km").innerHTML=P?`${(q.m/1000).toFixed(1)} KM ${dir}<i>${P.floor?"FLOOR "+P.floor:"OF BURJ KHALIFA"}</i>`:`STAND ${(q.m/1000).toFixed(1)} KM ${dir}<i>OF BURJ KHALIFA</i>`;
   $("route").href=`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
   $("scene").setAttribute("aria-label",`${st.pm?"Sunset":"Sunrise"} on the spire of Burj Khalifa, ${dmon(q.t)} at ${hhmm(q.t)}, seen from ${(q.m/1000).toFixed(1)} kilometres ${dir.toLowerCase()} of the tower. Left and right arrows change the day, up and down change the time.`);
 }
@@ -346,7 +407,7 @@ $("play").addEventListener("click",()=>{
   sc.addEventListener("dblclick",e=>{if(e.target.closest("button,a,.cal,.tl"))return;stopPlay();st.dt=0;render(true)});
   sc.addEventListener("wheel",e=>{e.preventDefault();setDt(st.dt+(e.deltaX||e.deltaY)/8)},{passive:false});
 })();
-$("prev").addEventListener("click",()=>setDay(st.day-1));
+$("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else setDay(st.day-1)});
 /* ---------- calendar ---------- */
 const MONTHS=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
 const ymd=i=>{const d=new Date(DAY0+i*86400e3+TZ);return [d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()]};
@@ -364,7 +425,7 @@ function drawCal(){
     const i=idxOf(cy,cm,d),b=document.createElement("button");b.textContent=d;
     b.disabled=i<0||i>=NDAYS; if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");
     b.setAttribute("aria-label",`${d} ${MONTHS[cm].toLowerCase()} ${cy}`);
-    b.addEventListener("click",()=>{closeCal();setDay(i)});
+    b.addEventListener("click",()=>{closeCal();if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}st.day=-1;setDay(i)});
     g.appendChild(b);
   }
 }
@@ -375,12 +436,82 @@ $("cprev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}drawCal()});
 $("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}drawCal()});
 document.addEventListener("pointerdown",e=>{if(!$("cal").hidden&&!e.target.closest(".cal,#date"))closeCal()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCal()});
-$("next").addEventListener("click",()=>setDay(st.day+1));
-$("mode").addEventListener("click",()=>{stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
+$("next").addEventListener("click",()=>{if(st.place){if(st.place.k<st.place.events.length-1){stopPlay();st.place.k++;st.dt=0;render(true)}}else setDay(st.day+1)});
+$("mode").addEventListener("click",()=>{if(st.place)return;stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
+
+/* ---------- my place: panel ---------- */
+let floor=0,lastP=null;
+const say=(html)=>{$("pmsg").innerHTML=html};
+function placeUI(){const P=st.place;$("back").hidden=!P;$("ics").hidden=!(P&&P.events.length)}
+function openMine(){$("mp").hidden=false;$("mine").setAttribute("aria-expanded","true");placeUI()}
+function closeMine(){if($("mp").hidden)return;$("mp").hidden=true;$("mine").setAttribute("aria-expanded","false")}
+$("mine").addEventListener("click",()=>$("mp").hidden?openMine():closeMine());
+document.addEventListener("pointerdown",e=>{if(!$("mp").hidden&&!e.target.closest(".minew"))closeMine()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMine()});
+function usePlace(lat,lon,label,stay){
+  $("nearest").hidden=true;
+  const d=dist({lat,lon},BURJ);
+  if(d>40000){say("That place is more than 40 km from Burj Khalifa.");return}
+  if(d<400){say("That is right next to the tower. Try a place at least half a kilometre away.");return}
+  lastP={lat,lon,label};
+  const P=placeEvents({lat,lon,h:floor*3.2+1.6,floor,label});
+  if(!P.events.length){
+    st.place=null;placeUI();render(true);
+    say(`From here the sun never sits on the spire.<br><b>Sunsets</b> line up only east of the tower, <b>sunrises</b> only west of it, roughly along the line toward it.`);
+    $("nearest").hidden=false;return;
+  }
+  stopPlay();if(!st.place)st.prevPm=st.pm;st.place=P;st.dt=0;render(true);placeUI();
+  const list=P.events.map(e=>`<b>${dmon(e.t)} · ${hhmm(e.t)}</b>`).join(" · ");
+  say(`${P.pm?"Sunset":"Sunrise"} on the spire from here: ${list}. Worked out on this device.`);
+  if(!stay)closeMine();
+}
+$("geo").addEventListener("click",()=>{
+  if(!navigator.geolocation){say("This browser can't share its location. Paste coordinates instead.");return}
+  say("Finding you…");
+  navigator.geolocation.getCurrentPosition(p=>usePlace(p.coords.latitude,p.coords.longitude,"YOUR PLACE"),
+    ()=>say("Location is blocked here. Paste a Google Maps link or coordinates instead."),{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+});
+function parseCoords(s){
+  const pats=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|query|destination|ll)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i,/(-?\d{1,2}\.\d+)\s*[,;\s]\s*(-?\d{1,3}\.\d+)/];
+  for(const r of pats){const m=s.match(r);if(m)return [+m[1],+m[2]]}
+  return null;
+}
+function fromInput(){
+  const v=$("coord").value.trim();if(!v)return;
+  const c=parseCoords(v);
+  if(!c){say(/goo\.gl|maps\.app/.test(v)?"Short links can't be read here. Open it, then copy the coordinates (long-press the spot in Google Maps).":"Couldn't find coordinates. Try something like 25.2086, 55.3549");return}
+  usePlace(c[0],c[1],"THIS PLACE");
+}
+$("go").addEventListener("click",fromInput);
+$("coord").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();fromInput()}});
+const setFloor=f=>{floor=Math.max(0,Math.min(160,f));$("fl").textContent=floor;if(lastP)usePlace(lastP.lat,lastP.lon,lastP.label,true)};
+$("fdn").addEventListener("click",()=>setFloor(floor-1));
+$("fup").addEventListener("click",()=>setFloor(floor+1));
+$("back").addEventListener("click",()=>{st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;st.day=-1;setDay(0);placeUI();say("Worked out on this device. Your location is not sent anywhere.");closeMine()});
+// nearest place to the given point where the sun sits on the spire on some day this year, on land
+$("nearest").addEventListener("click",()=>{
+  if(!lastP)return;const ux=(lastP.lon-BURJ.lon)*Math.cos(BURJ.lat*R)*111320,uy=(lastP.lat-BURJ.lat)*110574;
+  const all=[];
+  for(let i=0;i<NDAYS;i++)spireLines(i).forEach(L=>L.pts.forEach(q=>{const x=q.m*Math.sin(q.th*R),y=q.m*Math.cos(q.th*R);all.push({x,y,q,dd:Math.hypot(x-ux,y-uy)})}));
+  all.sort((a,b)=>a.dd-b.dd);
+  const hit=all.slice(0,400).find(a=>a.q.m>=1500&&onLand(a.x,a.y));
+  if(!hit){say("No spot on land found nearby.");return}
+  const o=dest(BURJ,hit.q.th,hit.q.m),keepFloor=floor;floor=0;$("fl").textContent=0;
+  usePlace(o.lat,o.lon,"NEAREST SPOT");floor=keepFloor;
+  if(st.place)say(`Nearest spot: <b>${(hit.dd/1000).toFixed(1)} km</b> from your place. `+$("pmsg").innerHTML);
+});
+// calendar file for the shown alignment
+$("ics").addEventListener("click",()=>{
+  const P=st.place;if(!P)return;const e=P.events[P.k],f=t=>new Date(t).toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Burjhenge//EN","BEGIN:VEVENT",`UID:${e.t}-${P.lat.toFixed(4)}@burjhenge`,`DTSTAMP:${f(Date.now())}`,`DTSTART:${f(e.t-15*60e3)}`,`DTEND:${f(e.t+10*60e3)}`,
+    `SUMMARY:Burjhenge: sun on the spire at ${hhmm(e.t)}`,`LOCATION:${P.lat.toFixed(5)}\\,${P.lon.toFixed(5)}`,`DESCRIPTION:The ${P.pm?"setting":"rising"} sun sits on the spire of Burj Khalifa at ${hhmm(e.t)}. Be in place a few minutes early.`,
+    "BEGIN:VALARM","TRIGGER:-PT1H","ACTION:DISPLAY","DESCRIPTION:Burjhenge in one hour","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));a.download="burjhenge-"+fmtDay(e.i)+".ics";document.body.appendChild(a);a.click();a.remove();
+});
 document.addEventListener("keydown",e=>{
-  if(e.altKey||e.ctrlKey||e.metaKey||(e.target.closest&&e.target.closest("input"))||!$("cal").hidden)return;
-  if(e.key==="ArrowRight")setDay(st.day+1);
-  else if(e.key==="ArrowLeft")setDay(st.day-1);
+  if(e.altKey||e.ctrlKey||e.metaKey||(e.target.closest&&e.target.closest("input"))||!$("cal").hidden||!$("mp").hidden)return;
+  if(e.key==="ArrowRight")$("next").click();
+  else if(e.key==="ArrowLeft")$("prev").click();
   else if(e.key==="ArrowUp"){e.preventDefault();setDt(st.dt+5)}
   else if(e.key==="ArrowDown"){e.preventDefault();setDt(st.dt-5)}
   else if(e.key==="s")$("mode").click();
