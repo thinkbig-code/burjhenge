@@ -88,6 +88,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .grid button:disabled{opacity:.18;cursor:default;border-color:transparent}
 .grid button.today{color:var(--sun)}
 .grid button.sel{border-color:var(--sun)}
+.cfoot{display:flex;justify-content:flex-end;margin-top:6px}
+.cfoot button{height:34px;padding:0 12px;border:0;border-radius:17px;background:none;color:var(--sun);font:10px var(--mono);letter-spacing:var(--ls);cursor:pointer}
+.cfoot button:hover{background:rgba(255,181,74,.1)}
 .minew{position:absolute;right:calc(var(--inset) - 10px);top:calc(var(--inset) + env(safe-area-inset-top,0px) - 4px);z-index:6}
 .mp{position:absolute;right:10px;top:100%;margin-top:8px;width:min(292px,calc(100vw - 2 * var(--inset)));padding:14px;background:rgba(7,8,13,.95);border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:12px;font-size:10px;letter-spacing:.06em;line-height:1.6}
 .pbtn{height:38px;border:1px solid rgba(239,231,218,.25);border-radius:19px;background:none;color:var(--text);font:10px var(--mono);letter-spacing:var(--ls);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px}
@@ -104,9 +107,12 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .floor output{min-width:34px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
 .pmsg{color:var(--mute);font-size:9px}
 .pmsg b{color:var(--text);font-weight:400}
+.note{font-size:9px;letter-spacing:.08em;line-height:1.6;color:var(--text);max-width:280px;min-height:0;opacity:0;transition:opacity .25s;text-shadow:0 0 12px rgba(7,8,13,.8)}
+.note.on{opacity:.9}
 .time:disabled{cursor:default}
 .time:disabled span{border-bottom-color:transparent}
 @media (max-width:520px){
+  .note{position:fixed;left:var(--inset);right:var(--inset);bottom:calc(var(--inset) + 134px + env(safe-area-inset-bottom,0px));max-width:none;text-shadow:none}
   .foot{flex-direction:column;align-items:stretch;gap:12px}
   .tl{order:-1;width:100%}
   .where{position:fixed;left:var(--inset);right:var(--inset);top:auto;bottom:calc(var(--inset) + 82px + env(safe-area-inset-bottom,0px));padding-top:0;display:flex;justify-content:space-between;align-items:center;text-align:left}
@@ -134,8 +140,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="cal" id="cal" role="dialog" aria-label="Pick a day" hidden>
         <header><button id="cprev" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></button><span id="cmonth">OCTOBER 2026</span><button id="cnext" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"/></svg></button></header>
         <div class="grid" id="grid"></div>
+        <div class="cfoot"><button id="ctoday">TODAY</button></div>
       </div>
       <button class="time" id="mode" aria-label="Switch between sunset and sunrise"><b id="time">17:30</b><span id="modeTxt">SUNSET</span></button>
+      <div class="note" id="note" role="status"></div>
     </div>
     <div class="where">
       <div class="km" id="km">STAND 8.2 KM EAST<i>OF BURJ KHALIFA</i></div>
@@ -341,7 +349,7 @@ function text(){
   const P=st.place, rel=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
   $("rel").textContent=P?(st.day<=1?rel:"IN "+st.day+" DAYS"):rel;
   $("prev").disabled=P?P.k<=0:st.day<=0;$("next").disabled=P?P.k>=P.events.length-1:st.day>=NDAYS-1;
-  $("mode").disabled=!!P;$("mineTxt").textContent=P?P.label:"MY PLACE";
+  $("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
   if(!q){$("time").textContent="--:--";$("km").innerHTML="NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
@@ -352,7 +360,7 @@ function text(){
   $("play").setAttribute("aria-label",st.pm?"Play the sunset":"Play the sunrise");
   $("km").innerHTML=P?`${(q.m/1000).toFixed(1)} KM ${dir}<i>${P.floor?"FLOOR "+P.floor:"OF BURJ KHALIFA"}</i>`:`STAND ${(q.m/1000).toFixed(1)} KM ${dir}<i>OF BURJ KHALIFA</i>`;
   $("route").href=`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
-  $("scene").setAttribute("aria-label",`${st.pm?"Sunset":"Sunrise"} on the spire of Burj Khalifa, ${dmon(q.t)} at ${hhmm(q.t)}, seen from ${(q.m/1000).toFixed(1)} kilometres ${dir.toLowerCase()} of the tower. Left and right arrows change the day, up and down change the time.`);
+  $("scene").setAttribute("aria-label",`${st.pm?"Sunset":"Sunrise"} on the spire of Burj Khalifa, ${dmon(q.t)} at ${hhmm(q.t)}, seen from ${(q.m/1000).toFixed(1)} kilometres ${dir.toLowerCase()} of Burj Khalifa. Left and right arrows change the day, up and down change the time.`);
 }
 
 /* ---------- render with a short crossfade for day changes ---------- */
@@ -440,7 +448,13 @@ $("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}drawCal()});
 document.addEventListener("pointerdown",e=>{if(!$("cal").hidden&&!e.target.closest(".cal,#date"))closeCal()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCal()});
 $("next").addEventListener("click",()=>{if(st.place){if(st.place.k<st.place.events.length-1){stopPlay();st.place.k++;st.dt=0;render(true)}}else setDay(st.day+1)});
-$("mode").addEventListener("click",()=>{if(st.place)return;stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
+$("mode").addEventListener("click",()=>{
+  if(st.place){ // one place only ever gets one of the two: the tower has to stand between you and the sun
+    const P=st.place,n=$("note");
+    n.textContent=`${P.pm?"SUNRISE":"SUNSET"} ISN'T POSSIBLE FROM HERE. PICK A SPOT ${P.pm?"WEST":"EAST"} OF BURJ KHALIFA.`;
+    n.classList.add("on");clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove("on"),5000);return}
+  stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
+$("ctoday").addEventListener("click",()=>{closeCal();if(st.place){st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}stopPlay();st.dt=0;st.day=-1;setDay(0)});
 
 /* ---------- my place: panel ---------- */
 let floor=0,lastP=null;
@@ -455,12 +469,12 @@ function usePlace(lat,lon,label,stay){
   $("nearest").hidden=true;
   const d=dist({lat,lon},BURJ);
   if(d>40000){say("That place is more than 40 km from Burj Khalifa.");return}
-  if(d<400){say("That is right next to the tower. Try a place at least half a kilometre away.");return}
+  if(d<400){say("That is right next to Burj Khalifa. Try a place at least half a kilometre away.");return}
   lastP={lat,lon,label};
   const P=placeEvents({lat,lon,h:floor*3.2+1.6,floor,label});
   if(!P.events.length){
     st.place=null;placeUI();render(true);
-    say(`From here the sun never sits on the spire.<br><b>Sunsets</b> line up only east of the tower, <b>sunrises</b> only west of it, roughly along the line toward it.`);
+    say(`From here the sun never sits on the spire.<br><b>Sunsets</b> line up only east of Burj Khalifa, <b>sunrises</b> only west of it, roughly along the line toward it.`);
     $("nearest").hidden=false;return;
   }
   stopPlay();if(!st.place)st.prevPm=st.pm;st.place=P;st.dt=0;render(true);placeUI();
