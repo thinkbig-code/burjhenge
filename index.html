@@ -79,6 +79,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .thumb{position:absolute;top:3px;width:2px;height:22px;margin-left:-1px;background:var(--text);border-radius:1px;left:50%}
 .tlab{position:absolute;bottom:0;font-size:8px;letter-spacing:.08em;color:var(--mute);font-variant-numeric:tabular-nums}
 .tlab.a{left:0}.tlab.b{right:0}
+.tnow{position:absolute;bottom:0;transform:translateX(-50%);font-size:9px;letter-spacing:.08em;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
 .navx{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:96px;border:0;background:none;color:var(--text);opacity:.35;cursor:pointer;display:grid;place-items:center}
 .cal{position:absolute;left:0;top:100%;margin-top:12px;z-index:5;pointer-events:auto;width:266px;padding:12px 12px 10px;background:rgba(7,8,13,.94);border:1px solid rgba(239,231,218,.14);border-radius:10px;font-size:10px}
 .cal header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;letter-spacing:var(--ls)}
@@ -181,7 +182,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     <div class="tl">
       <button class="play" id="play" aria-label="Play the sunset"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></button>
       <div class="track" id="track" tabindex="0" role="slider" aria-label="Minutes from the moment on the spire" aria-valuemin="-90" aria-valuemax="90" aria-valuenow="0">
-        <div class="ticks"></div><div class="moment" aria-hidden="true"></div><div class="thumb" id="thumb"></div>
+        <div class="ticks"></div><div class="moment" aria-hidden="true"></div><div class="thumb" id="thumb"></div><span class="tnow" id="tnow" hidden></span>
         <span class="tlab a" id="ta">16:00</span><span class="tlab b" id="tb">19:00</span>
       </div>
     </div>
@@ -342,7 +343,8 @@ function draw(){
   const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?190:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
   const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
-  if(night>0){c.fillStyle=`rgba(239,231,218,${.7*night})`;STARS.forEach(([x,y,r])=>c.fillRect(x*w,y*horizonY,r>.85?1.6:1,r>.85?1.6:1))}
+  // stars come out one by one, the brightest first, and only high in the darker sky
+  if(night>0)STARS.forEach(([x,y,r])=>{const big=r>.85,a=Math.max(0,Math.min(1,(night-(1-r)*.7-y*.25)/.3));if(a<=0)return;c.fillStyle=`rgba(239,231,218,${(big?.85:.6)*a})`;const z=big?1.6:1;c.fillRect(x*w,y*horizonY,z,z)});
   const sx=cx+wrap(p.az-b)*ppd, sy=horizonY-p.alt*ppd, sr=Math.max(3,0.267*ppd);
   const glow=c.createRadialGradient(sx,sy,sr*.6,sx,sy,sr*7);glow.addColorStop(0,"rgba(255,190,90,.55)");glow.addColorStop(1,"rgba(255,120,60,0)");c.fillStyle=glow;c.fillRect(0,0,w,h);
   c.fillStyle="#ffe2a8";c.beginPath();c.arc(sx,sy,sr,0,7);c.fill();
@@ -366,7 +368,11 @@ function text(){
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
   if(!q){$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
   const o=dest(BURJ,q.th,q.m), dir=COMPASS[Math.round(q.th/45)%8];
-  $("time").textContent=hhmm(q.t+st.dt*60e3);$("time").style.color=Math.abs(st.dt)>=.5?"var(--text)":"";
+  // the big time is always the moment to be there; the time being previewed sits under the timeline marker
+  $("time").textContent=hhmm(q.t);
+  const off=Math.abs(st.dt)>=.5, pct=50+st.dt/180*100;
+  $("tnow").hidden=!off;$("tnow").textContent=hhmm(q.t+st.dt*60e3);$("tnow").style.left=Math.max(6,Math.min(94,pct))+"%";
+  $("ta").style.visibility=off&&pct<24?"hidden":"";$("tb").style.visibility=off&&pct>76?"hidden":"";
   $("thumb").style.left=(50+st.dt/180*100)+"%";$("ta").textContent=hhmm(q.t-90*60e3);$("tb").textContent=hhmm(q.t+90*60e3);
   $("track").setAttribute("aria-valuenow",String(Math.round(st.dt)));$("track").setAttribute("aria-valuetext",hhmm(q.t+st.dt*60e3));
   $("play").setAttribute("aria-label",st.pm?"Play the sunset":"Play the sunrise");
@@ -400,44 +406,53 @@ function hideHint(){}
 
 
 /* ---------- gestures: drag sideways = time around the moment, double tap = back to the moment ---------- */
-const setDt=v=>{stopPlay();v=Math.max(-90,Math.min(90,Math.round(v)));if(v!==st.dt){st.dt=v;frame()}};
+// the scene at rest always tells the truth: after any preview the sun glides back onto the spire
+let homeT=0,homeId=0;
+function goHome(delay=1100){clearTimeout(homeT);homeId++;homeT=setTimeout(()=>{
+  if(!st.dt)return;const id=++homeId,a=st.dt,t0=performance.now(),T=reduce.matches?0:1400+380*Math.sqrt(Math.abs(a));
+  // slow at both ends like a time-lapse: the sky, the stars and the glow change on the way back
+  const io=x=>(1-Math.cos(Math.PI*x))/2;
+  const step=now=>{if(homeId!==id||playId)return;const x=T?Math.min(1,(now-t0)/T):1;st.dt=a*(1-io(x));if(x>=1)st.dt=0;frame();if(x<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step)},delay)}
+function holdHome(){clearTimeout(homeT);homeId++}
+const setDt=v=>{stopPlay();holdHome();v=Math.max(-90,Math.min(90,Math.round(v)));if(v!==st.dt){st.dt=v;frame()}};
 /* ---------- timeline: drag or tap the ruler; play runs the moment as a short time-lapse ---------- */
 (()=>{const tr=$("track");let on=false;
   const at=e=>{const r=tr.getBoundingClientRect();return ((e.clientX-r.left)/r.width-.5)*180};
   tr.addEventListener("pointerdown",e=>{on=true;tr.setPointerCapture(e.pointerId);setDt(at(e))});
   tr.addEventListener("pointermove",e=>{if(on)setDt(at(e))});
-  tr.addEventListener("pointerup",()=>{on=false});tr.addEventListener("pointercancel",()=>{on=false});
-  tr.addEventListener("keydown",e=>{const k={ArrowRight:5,ArrowUp:5,ArrowLeft:-5,ArrowDown:-5}[e.key];if(k){e.preventDefault();e.stopPropagation();setDt(st.dt+k)}if(e.key==="Home"){e.preventDefault();setDt(0)}});
+  tr.addEventListener("pointerup",()=>{on=false;goHome()});tr.addEventListener("pointercancel",()=>{on=false;goHome()});
+  tr.addEventListener("keydown",e=>{const k={ArrowRight:5,ArrowUp:5,ArrowLeft:-5,ArrowDown:-5}[e.key];if(k){e.preventDefault();e.stopPropagation();setDt(st.dt+k);goHome(1500)}if(e.key==="Home"){e.preventDefault();setDt(0)}});
 })();
 let playId=0;
 function stopPlay(){if(playId){playId=0;$("play").innerHTML=PLAY}}
 const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>';
 const PAUSE='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
 $("play").addEventListener("click",()=>{
-  if(playId){stopPlay();return}
+  holdHome();if(playId){stopPlay();goHome();return}
   if(reduce.matches){st.dt=0;frame();return}
   // -40 min to the moment at an easing pace, a short hold on the spire, then on to +30 min
-  const id=playId=Date.now(),A=-40,B=30,T1=3200,HOLD=900,T2=2600,t0=performance.now();
+  const id=playId=Date.now(),A=-40,B=30,T1=5200,HOLD=1600,T2=4200,t0=performance.now();
   $("play").innerHTML=PAUSE;
-  const ease=x=>1-Math.pow(1-x,2.2);
+  const ease=x=>(1-Math.cos(Math.PI*x))/2;
   const step=now=>{
     if(playId!==id)return;const e=now-t0;
     if(e<T1) st.dt=A*(1-ease(e/T1));
     else if(e<T1+HOLD) st.dt=0;
     else if(e<T1+HOLD+T2){const x=(e-T1-HOLD)/T2;st.dt=B*x*x}
-    else {st.dt=B;playId=0;$("play").innerHTML=PLAY;frame();setTimeout(()=>{if(!playId&&st.dt===B){st.dt=0;render(true)}},1400);return}
+    else {st.dt=B;playId=0;$("play").innerHTML=PLAY;frame();goHome(1200);return}
     fid++;pick();draw();text();requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
 });
 (()=>{const sc=$("scene");let s=null;
-  sc.addEventListener("pointerdown",e=>{if(e.target.closest("button,a,.cal,.tl"))return;s={x:e.clientX,d:st.dt};sc.setPointerCapture(e.pointerId)});
+  sc.addEventListener("pointerdown",e=>{if(e.target.closest("button,a,.cal,.tl"))return;holdHome();s={x:e.clientX,d:st.dt};sc.setPointerCapture(e.pointerId)});
   sc.addEventListener("pointermove",e=>{if(s)setDt(s.d+(e.clientX-s.x)/3)});
-  sc.addEventListener("pointerup",()=>{s=null});sc.addEventListener("pointercancel",()=>{s=null});
+  sc.addEventListener("pointerup",()=>{if(s)goHome();s=null});sc.addEventListener("pointercancel",()=>{if(s)goHome();s=null});
   sc.addEventListener("dblclick",e=>{if(e.target.closest("button,a,.cal,.tl"))return;stopPlay();st.dt=0;render(true)});
-  sc.addEventListener("wheel",e=>{e.preventDefault();setDt(st.dt+(e.deltaX||e.deltaY)/8)},{passive:false});
+  sc.addEventListener("wheel",e=>{e.preventDefault();setDt(st.dt+(e.deltaX||e.deltaY)/8);goHome(900)},{passive:false});
 })();
-$("alt").addEventListener("click",()=>{stopPlay();st.sea=!st.sea;st.dt=0;render(true)});
+$("alt").addEventListener("click",()=>{stopPlay();st.sea=!st.sea;render(true)});
 $("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else setDay(st.day-1)});
 /* ---------- calendar ---------- */
 const MONTHS=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
@@ -550,8 +565,8 @@ document.addEventListener("keydown",e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||(e.target.closest&&e.target.closest("input"))||!$("cal").hidden||!$("mp").hidden)return;
   if(e.key==="ArrowRight")$("next").click();
   else if(e.key==="ArrowLeft")$("prev").click();
-  else if(e.key==="ArrowUp"){e.preventDefault();setDt(st.dt+5)}
-  else if(e.key==="ArrowDown"){e.preventDefault();setDt(st.dt-5)}
+  else if(e.key==="ArrowUp"){e.preventDefault();setDt(st.dt+5);goHome(1500)}
+  else if(e.key==="ArrowDown"){e.preventDefault();setDt(st.dt-5);goHome(1500)}
   else if(e.key==="s")$("mode").click();
   else return;
   hideHint();
