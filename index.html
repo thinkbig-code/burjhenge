@@ -144,6 +144,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .linkbox{font:9px var(--mono);width:200px;background:var(--night);color:var(--text);border:1px solid rgba(239,231,218,.2);border-radius:4px;padding:4px 6px;pointer-events:auto}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.minew{display:flex;align-items:center}
+.unplace{padding:10px;margin-left:-4px;color:var(--mute)}
+.unplace svg{width:14px;height:14px}
+.unplace:hover,.unplace:focus-visible{color:var(--text)}
 </style>
 
 </head>
@@ -177,7 +181,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     </div>
   </div>
   <div class="minew">
-    <button class="btn" id="mine" aria-haspopup="dialog" aria-expanded="false" aria-controls="mp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6-5.4-6-11a6 6 0 1 1 12 0c0 5.6-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg><span id="mineTxt">MY PLACE</span></button>
+    <button class="btn" id="mine" aria-haspopup="dialog" aria-expanded="false" aria-controls="mp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6-5.4-6-11a6 6 0 1 1 12 0c0 5.6-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg><span id="mineTxt">MY PLACE</span></button><button class="btn unplace" id="unplace" hidden aria-label="Leave your place and go back to today's spot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="mp" id="mp" role="dialog" aria-label="When it happens at your place" hidden>
       <button class="pbtn solid" id="geo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>USE MY LOCATION</button>
       <div class="or">OR PASTE A GOOGLE MAPS LINK OR COORDINATES</div>
@@ -507,7 +511,7 @@ $("ctoday").addEventListener("click",()=>{closeCal();if(st.place){st.place=null;
 /* ---------- my place: panel ---------- */
 let floor=0,lastP=null;
 const say=(html)=>{$("pmsg").innerHTML=html};
-function placeUI(){const P=st.place;$("back").hidden=!P;$("ics").hidden=!(P&&P.events.length)}
+function placeUI(){const P=st.place;$("unplace").hidden=!P;$("back").hidden=!P;$("ics").hidden=!(P&&P.events.length)}
 function openMine(){$("mp").hidden=false;$("mine").setAttribute("aria-expanded","true");placeUI()}
 function closeMine(){if($("mp").hidden)return;$("mp").hidden=true;$("mine").setAttribute("aria-expanded","false")}
 $("mine").addEventListener("click",()=>$("mp").hidden?openMine():closeMine());
@@ -562,6 +566,7 @@ $("coord").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault()
 const setFloor=f=>{floor=Math.max(0,Math.min(160,f));$("fl").textContent=floor;if(lastP)usePlace(lastP.lat,lastP.lon,lastP.label,true)};
 $("fdn").addEventListener("click",()=>setFloor(floor-1));
 $("fup").addEventListener("click",()=>setFloor(floor+1));
+$("unplace").addEventListener("click",()=>$("back").click());
 $("back").addEventListener("click",()=>{st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;st.day=-1;setDay(0);placeUI();say("Worked out on this device. Your location is not sent anywhere.");closeMine()});
 // nearest place to the given point where the sun sits on the spire on some day this year, on land
 $("nearest").addEventListener("click",()=>{
