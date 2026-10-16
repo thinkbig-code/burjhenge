@@ -57,7 +57,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .time:hover span{opacity:1}
 .where{display:grid;justify-items:end;gap:10px;padding-top:58px;text-align:right}
 .kmrow{display:flex;align-items:center;gap:8px;pointer-events:auto}
-.km{font-size:11px;letter-spacing:var(--ls)}
+.km{font-size:11px;letter-spacing:.08em}
 .km i{display:block;font-style:normal;font-size:9px;color:var(--mute);margin-top:4px}
 .acts{display:flex;align-items:center;gap:2px;margin-right:-10px;pointer-events:auto}
 .go{display:flex;align-items:center;gap:2px}
@@ -73,7 +73,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .brandrow{display:flex;align-items:baseline;gap:16px;pointer-events:auto}
 .brand{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.32em}
 .ig{font-size:9px;letter-spacing:var(--ls);color:var(--mute);text-decoration:none;padding:8px 0}
-.ig:hover,.ig:focus-visible{color:var(--sun)}
+/* links stay muted; on phones a tapped link kept a sticky orange hover, so hover only exists where there is a mouse */
+@media (hover:hover){.ig:hover{color:var(--text)}}
+.ig:focus-visible{color:var(--text)}
 .brand b{color:var(--sun);font-weight:800}
 .tl{display:flex;align-items:center;gap:12px;pointer-events:auto;width:min(440px,60%)}
 .play{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid rgba(239,231,218,.28);background:none;color:var(--text);display:grid;place-items:center;cursor:pointer}
@@ -162,8 +164,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .route:hover,.route:focus-visible{background:var(--sun);color:var(--night)}
 #share{color:var(--mute)}#share:hover,#share:active{color:var(--text)}
 .play{width:36px;height:36px;border:0;color:var(--mute);margin-left:-11px}
-.play:hover{color:var(--sun)}
-.play svg{width:14px;height:14px}
+.play{color:var(--text)}
+@media (hover:hover){.play:hover{color:var(--sun)}}
+.play svg{width:15px;height:15px}
 .moment{top:5px;width:1px;height:14px;margin-left:0;border-radius:0;background:rgba(255,181,74,.6);box-shadow:none}
 .thumb{top:14px;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--sun);box-shadow:0 0 8px rgba(255,181,74,.8)}
 .tlab{display:none}
@@ -176,7 +179,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .mbtn:active,.play:active,#share:active,.ig:active{opacity:.7}
 /* the handle belongs to the name: one small identity block on the left, help on the right */
 .ident{display:flex;flex-direction:column;align-items:flex-start}
-.ident .soc{padding:6px 0 10px;margin:-1px 0 -10px;letter-spacing:.1em}
+.ident .soc{padding:6px 0 10px;margin:-1px 0 -10px;letter-spacing:.1em;opacity:.85}
 </style>
 
 </head>
