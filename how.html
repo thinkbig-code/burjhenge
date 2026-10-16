@@ -32,7 +32,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--night);color:var(--text)}
-body{font-family:var(--mono);font-size:12.5px;line-height:1.9;letter-spacing:.02em;-webkit-text-size-adjust:100%}
+body{font-family:var(--mono);font-size:12.5px;line-height:1.75;letter-spacing:0;-webkit-text-size-adjust:100%}
 a{color:var(--text)}
 b{font-weight:500}
 .wrap{max-width:640px;margin:0 auto;padding:calc(var(--inset) + env(safe-area-inset-top,0px)) var(--inset) calc(var(--inset) + 24px + env(safe-area-inset-bottom,0px))}
@@ -55,48 +55,48 @@ h1{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size
 h1 em{font-style:normal;color:var(--sun)}
 .lead{margin:30px 0 0;max-width:34em}
 
-section{margin-top:clamp(64px,13vw,96px)}
+section{margin-top:clamp(44px,9vw,64px)}
 /* section labels read like interface labels, not headlines */
-h2{display:flex;align-items:baseline;gap:12px;margin:0 0 20px;font-size:10px;font-weight:400;letter-spacing:var(--ls);text-transform:uppercase;color:var(--text);opacity:.75}
+h2{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;font-size:10px;font-weight:400;letter-spacing:var(--ls);text-transform:uppercase;color:var(--text);opacity:.75}
 h2 span{color:var(--mute);font-variant-numeric:tabular-nums}
-p{margin:0 0 14px;max-width:36em}
+p{margin:0 0 12px;max-width:36em}
 .mute{color:var(--mute)}
 
 /* the geometry in the numerals of the gold time: display weight 500 */
-.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:30px 0}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
 .figs div{margin:0}
 .figs dt{font-family:var(--display);font-weight:500;font-size:clamp(30px,8vw,44px);line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
 .figs small{font-size:.42em;letter-spacing:.06em;margin-left:.15em}
 .figs dd{margin:8px 0 0;font-size:9px;letter-spacing:var(--ls);line-height:1.6;color:var(--mute);text-transform:uppercase}
 
 ol,ul{list-style:none;margin:0;padding:0;max-width:36em}
-li{position:relative;padding-left:34px;margin:0 0 16px}
+li{position:relative;padding-left:34px;margin:0 0 10px}
 ol{counter-reset:n}
 ol li{counter-increment:n}
 ol li:before{content:counter(n,decimal-leading-zero);position:absolute;left:0;top:.15em;font-size:9px;letter-spacing:.08em;color:var(--mute)}
 ul li:before{content:"";position:absolute;left:2px;top:.9em;width:12px;height:1px;background:var(--mute)}
 
-table{width:100%;border-collapse:collapse;margin:26px 0 14px;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;margin:18px 0 12px;font-variant-numeric:tabular-nums}
 th,td{text-align:left;white-space:nowrap;padding:10px 10px 10px 0;border-bottom:1px solid var(--line);vertical-align:top}
 td:last-child,th:last-child{white-space:normal;padding-right:0}
 th{font-size:9px;font-weight:400;letter-spacing:var(--ls);color:var(--mute);text-transform:uppercase}
 
 dl.qa{margin:0}
-.qa dt{font-weight:500;margin:26px 0 6px}
+.qa dt{font-weight:500;margin:18px 0 4px}
 .qa dt:first-child{margin-top:0}
 .qa dd{margin:0;max-width:36em}
 .mail{display:inline-block;margin-top:10px;font-size:10px;letter-spacing:var(--ls);color:var(--sun);text-decoration:none;padding:6px 0}
 
 /* the one action, drawn exactly like ROUTE */
-.end{margin-top:clamp(72px,14vw,104px)}
+.end{margin-top:clamp(48px,10vw,72px)}
 .cta{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border:1px solid rgba(255,181,74,.7);border-radius:20px;color:var(--sun);text-decoration:none;font-size:10px;letter-spacing:var(--ls)}
 .cta:active{background:var(--sun);color:var(--night)}
 @media (hover:hover){.cta:hover{background:var(--sun);color:var(--night)}}
-footer{margin-top:48px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:9px;letter-spacing:.1em;color:var(--mute)}
+footer{margin-top:36px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:9px;letter-spacing:.1em;color:var(--mute)}
 footer a{color:var(--mute);text-decoration:none}
 a:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
 /* the loop, read like the timeline labels on the main screen */
-.loop{margin:28px 0 0;font-size:9px;letter-spacing:var(--ls);color:var(--mute);line-height:2.2}
+.loop{margin:20px 0 0;font-size:9px;letter-spacing:var(--ls);color:var(--mute);line-height:2.2}
 .loop span{white-space:nowrap}
 .loop i{font-style:normal;margin:0 .2em;opacity:.6}
 /* the handle: same small caps as on the main screen, brighter here because this is where it is the action */
