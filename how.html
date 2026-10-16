@@ -150,6 +150,29 @@ footer{margin-top:36px;display:flex;justify-content:space-between;gap:16px;flex-
 footer a{color:var(--mute);text-decoration:none}
 a:focus-visible,summary:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* final pass */
+.loop a:active{color:var(--text)}
+.loop a:focus-visible{color:var(--text)}
+.geo .sight{stroke-dasharray:1;stroke-dashoffset:0}
+.js .geo .sight{stroke-dashoffset:1;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
+.js .geo.on .sight{stroke-dashoffset:0}
+.ropt svg{width:20px;height:20px}
+.ropt{height:44px;padding:0 10px}
+.sub{margin-top:calc(var(--block) + 12px)}
+.tips li.first{font-size:13.5px}
+.tips li.first b{color:var(--sun);font-weight:400}
+.tips li.first:before{background:var(--sun)}
+.shot:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,transparent 55%,rgba(7,8,13,.55) 100%);pointer-events:none}
+.shot:after{content:"";position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vf{z-index:1}
+.vf .af{position:absolute;left:50%;top:46%;width:96px;height:96px;margin:-48px 0 0 -48px;border:1px solid rgba(239,231,218,.55);border-radius:2px;-webkit-mask:linear-gradient(#000 0 0) 0 0/16px 16px no-repeat,linear-gradient(#000 0 0) 100% 0/16px 16px no-repeat,linear-gradient(#000 0 0) 0 100%/16px 16px no-repeat,linear-gradient(#000 0 0) 100% 100%/16px 16px no-repeat;mask:linear-gradient(#000 0 0) 0 0/16px 16px no-repeat,linear-gradient(#000 0 0) 100% 0/16px 16px no-repeat,linear-gradient(#000 0 0) 0 100%/16px 16px no-repeat,linear-gradient(#000 0 0) 100% 100%/16px 16px no-repeat}
+.js .vf{opacity:0;transition:opacity .9s ease .2s}
+.js .shot.on .vf{opacity:1}
+.qa details[open]>div{animation:qa .25s ease}
+@keyframes qa{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.cta{height:44px;padding:0 20px;font-size:10.5px}
+@media (prefers-reduced-motion:reduce){.js .geo .sight{stroke-dashoffset:0}.js .vf{opacity:1}.qa details[open]>div{animation:none}}
 </style>
 </head>
 <body>
@@ -172,19 +195,19 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--sun);outline-offse
       <path d="M300 160V38" stroke="var(--text)" stroke-width="1"/>
       <path d="M293 160l3.2-40 1.6-30 1.4-30 .8-22h.1l.8 22 1.4 30 1.6 30 3.2 40z" fill="var(--text)" opacity=".9"/>
       <path d="M318 160V38M314 38h8M314 160h8" stroke="rgba(239,231,218,.35)" stroke-width="1"/>
-      <text x="326" y="102" class="big" style="font-size:18px">828</text><text x="326" y="114">M</text>
+      <text x="326" y="103">828 M</text>
       <line x1="170" y1="160" x2="300" y2="38" stroke="var(--mute)" stroke-width="1" stroke-dasharray="3 3"/>
       <path d="M196 160A26 26 0 0 0 189.5 142.6" fill="none" stroke="var(--mute)" stroke-width="1"/>
-      <text x="200" y="152" class="big" style="fill:var(--mute)">15°</text>
-      <line x1="30" y1="160" x2="300" y2="38" stroke="var(--sun)" stroke-width="1"/>
+      <text x="200" y="152" class="big" style="fill:var(--mute);font-size:16px">15°</text>
+      <line class="sight" x1="30" y1="160" x2="300" y2="38" stroke="var(--sun)" stroke-width="1.6" pathLength="1"/>
       <line x1="300" y1="38" x2="338" y2="20.8" stroke="var(--sun)" stroke-width="1" stroke-dasharray="2 3"/>
       <circle cx="340" cy="20" r="8" fill="var(--sun)"/><circle cx="340" cy="20" r="16" fill="var(--sun)" opacity=".12"/>
       <path d="M78 160A48 48 0 0 0 73.7 140.4" fill="none" stroke="var(--sun)" stroke-width="1"/>
-      <text x="84" y="152" class="big" style="fill:var(--sun)">6°</text>
+      <text x="84" y="151" class="big" style="fill:var(--sun);font-size:19px">6°</text>
       <circle cx="30" cy="160" r="3" fill="var(--text)"/><circle cx="170" cy="160" r="2.5" fill="var(--mute)"/>
       <text x="30" y="178" text-anchor="middle">8 KM</text><text x="170" y="178" text-anchor="middle">3 KM</text>
       <text x="300" y="178" text-anchor="middle">BURJ</text>
-      <text x="8" y="12">NOT TO SCALE</text>
+      <text x="8" y="12" style="opacity:.6">NOT TO SCALE</text>
     </svg>
     <p>Where the sun sets slides north along the horizon until June and back south until December. It crosses any one direction twice a year, once each way. Those are the two days.</p>
     <p class="mute">Closer to the tower the tip is higher, so the moment comes earlier. Farther away it comes just before sunset.</p>
@@ -193,7 +216,6 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--sun);outline-offse
   <section id="find">
     <h2><span>02</span>Find your spot</h2>
     <p><b>Today.</b> The main screen opens on today's spot: the date, the gold time to be there, and how far it is from Burj Khalifa. Arrows or the date change the day.</p>
-    <p><b>Your own place.</b> Open MY PLACE, allow your location or paste a Google Maps link, and set your floor. Burjhenge finds the dates when the sun lands on the tip as seen from there.</p>
     <a class="ui" href="./?open=place" aria-label="Open MY PLACE on the main screen">
       <div class="panel" aria-hidden="true">
         <div class="row"><span style="display:flex;align-items:center;gap:8px;color:var(--text)"><svg style="width:14px;height:14px" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></svg>MY PLACE</span><span>FESTIVAL CITY</span></div>
@@ -203,6 +225,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--sun);outline-offse
       </div>
       <p class="cap" aria-hidden="true">Example: Festival City, ground floor</p>
     </a>
+    <p><b>Your own place.</b> Open MY PLACE, allow your location or paste a Google Maps link, and set your floor. Burjhenge finds the dates when the sun lands on the tip as seen from there.</p>
     <p class="mute">Everything is worked out on your phone. Your location is not sent anywhere.</p>
   </section>
 
@@ -210,24 +233,27 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--sun);outline-offse
     <h2><span>03</span>Get there</h2>
     <p><b>ROUTE</b> opens the spot in Google Maps. When the day has a spot on land and one on the water, it asks how you are going.</p>
     <a class="ui" href="./?open=route" aria-label="Open ROUTE on the main screen">
-      <div class="panel" aria-hidden="true" style="gap:2px;padding:6px">
+      <div class="panel" aria-hidden="true" style="gap:2px;padding:8px 10px;max-width:290px">
         <div class="ropt on"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,112H211.31L168,68.69A15.86,15.86,0,0,0,156.69,64H44.28A16,16,0,0,0,31,71.12L1.34,115.56A8.07,8.07,0,0,0,0,120v48a16,16,0,0,0,16,16H33a32,32,0,0,0,62,0h66a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V128A16,16,0,0,0,240,112ZM44.28,80H156.69l32,32H23ZM64,192a16,16,0,1,1,16-16A16,16,0,0,1,64,192Zm128,0a16,16,0,1,1,16-16A16,16,0,0,1,192,192Zm48-24H223a32,32,0,0,0-62,0H95a32,32,0,0,0-62,0H16V128H240Z"/></svg><span>BY CAR</span><em>8.3 KM</em></div>
         <div class="ropt"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M247.21,172.53A8,8,0,0,0,240,168H144V144h72a8,8,0,0,0,5.92-13.38L144,44.91V8a8,8,0,0,0-14.21-5l-104,128A8,8,0,0,0,32,144h96v24H16a8,8,0,0,0-6.25,13l29.6,37a15.93,15.93,0,0,0,12.49,6H204.16a15.93,15.93,0,0,0,12.49-6l29.6-37A8,8,0,0,0,247.21,172.53ZM197.92,128H144V68.69ZM48.81,128,128,30.53V128Zm155.35,80H51.84l-19.2-24H223.36Z"/></svg><span>BY BOAT</span><em>8.0 KM</em></div>
       </div>
       <div class="pill line" style="margin-top:8px">ROUTE ›</div>
-      <div class="tl"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg><div class="ruler"><i class="m"></i><i class="s"></i><span class="t">17:24</span></div></div>
     </a>
-    <p class="mute">Drag the timeline or press play to see the sun move past the tip before you go. It always glides back to the moment.</p>
+    <div class="sub">
+      <p class="cap" style="margin:0 0 4px">Timeline</p>
+      <a class="ui" href="./" aria-label="Open the timeline on the main screen" style="margin:0"><div class="tl" aria-hidden="true" style="margin-top:6px"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg><div class="ruler"><i class="m"></i><i class="s"></i><span class="t">17:24</span></div></div></a>
+      <p class="mute" style="margin-top:16px">Drag the timeline or press play to see the sun move past the tip before you go. It always glides back to the moment.</p>
+    </div>
   </section>
 
   <section id="shot">
     <h2><span>04</span>Take the shot</h2>
     <p>The point is not the pin on a map. It is standing there when the sun touches the tip.</p>
     <div class="shot" role="img" aria-label="Framing example: the sun sitting on the tip of Burj Khalifa, 5 November at 17:06 from 8.3 kilometres east, looking west-south-west">
-      <div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="tl1">5 NOV</span><span class="tr1 gold">17:06</span><span class="bl1">8.3 KM EAST</span><span class="br1">LOOKING WSW</span></div>
+      <div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i><b class="af"></b><span class="tl1">5 NOV</span><span class="tr1 gold">17:06</span><span class="bl1">8.3 KM EAST</span><span class="br1">LOOKING WSW</span></div>
     </div>
     <ul class="tips">
-      <li><b>Be there 15 minutes early.</b> The sun takes about two minutes to cross the tip. The centred moment lasts seconds.</li>
+      <li class="first"><b>Be there 15 minutes early.</b> The sun takes about two minutes to cross the tip. The centred moment lasts seconds.</li>
       <li><b>Stay on the pin.</b> Walking toward or away from the tower shifts the time by seconds. Stepping sideways moves the sun off the tip.</li>
       <li><b>Watch the haze.</b> Dust often hides the sun low on the horizon. A closer spot means a higher sun and better odds.</li>
       <li><b>Expose for the sun</b> and the tower turns into a clean silhouette.</li>
@@ -263,7 +289,8 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--sun);outline-offse
 
   <footer><span>© Burjhenge · Map data © OpenStreetMap contributors</span><a href="https://www.instagram.com/burjhenge/" target="_blank" rel="noopener">@BURJHENGE</a></footer>
 </main></div>
-<script>document.getElementById("igLink").addEventListener("click",()=>{try{window.goatcounter&&goatcounter.count({path:"how-instagram",title:"how-instagram",event:true})}catch(e){}});
+<script>(()=>{const els=[...document.querySelectorAll(".geo,.shot")];if(!("IntersectionObserver" in window))return;document.documentElement.classList.add("js");const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("on");io.unobserve(e.target)}}),{threshold:.35});els.forEach(el=>io.observe(el))})();
+document.getElementById("igLink").addEventListener("click",()=>{try{window.goatcounter&&goatcounter.count({path:"how-instagram",title:"how-instagram",event:true})}catch(e){}});
 document.getElementById("mail").addEventListener("click",e=>{e.preventDefault();location.href="mai"+"lto:"+["hello","burjhenge.com"].join("@")+"?subject=Burjhenge"})</script>
 </body>
 </html>
