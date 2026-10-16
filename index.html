@@ -132,11 +132,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   .note{display:none}
   .where.noting .km{display:none}
   .where.noting .note2{display:block}
-  .foot{flex-direction:column;align-items:stretch;gap:16px}
-  .brandrow{gap:18px}
+  .foot{flex-direction:column;align-items:stretch;gap:8px}
+  .brandrow{gap:16px;border-top:1px solid rgba(239,231,218,.08);padding-top:14px}
   .tl{order:-1;width:100%}
-  .where{position:fixed;left:var(--inset);right:var(--inset);top:auto;bottom:calc(var(--inset) + 88px + env(safe-area-inset-bottom,0px));padding-top:0;display:grid;justify-items:stretch;gap:8px;text-align:left}
-  .acts{justify-content:space-between;margin:0 -10px}
+  .where{position:fixed;left:var(--inset);right:var(--inset);top:auto;bottom:calc(var(--inset) + 82px + env(safe-area-inset-bottom,0px));padding-top:0;display:grid;justify-items:stretch;gap:8px;text-align:left}
+  .acts{justify-content:space-between;margin:0 -10px 0 0}
   .km i{display:inline;margin:0 0 0 6px}
   .toast{position:absolute;right:0;bottom:-16px}
 }
@@ -150,6 +150,26 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .unplace svg{width:14px;height:14px}
 .unplace:hover,.unplace:focus-visible{color:var(--text)}
 .igl{margin-left:auto}
+
+/* footer: one left edge, one right edge; gold only for the moment: time, sun, ROUTE, centre tick */
+.go{gap:8px}
+.modes{display:flex;gap:2px;margin-left:-9px}
+.mbtn{width:36px;height:40px;border:0;background:none;color:var(--mute);opacity:.45;display:grid;place-items:center;cursor:pointer;padding:0}
+.mbtn svg{width:18px;height:18px}
+.mbtn[aria-pressed="true"]{color:var(--text);opacity:1}
+.mbtn:hover{opacity:1}
+.route{height:40px;padding:0 16px;border:1px solid rgba(255,181,74,.7);border-radius:20px;color:var(--sun);display:flex;align-items:center;gap:8px;font:10px var(--mono);letter-spacing:var(--ls);text-decoration:none}
+.route:hover,.route:focus-visible{background:var(--sun);color:var(--night)}
+#share{color:var(--mute)}#share:hover,#share:active{color:var(--text)}
+.play{width:36px;height:36px;border:0;color:var(--mute);margin-left:-11px}
+.play:hover{color:var(--sun)}
+.play svg{width:14px;height:14px}
+.moment{top:5px;width:1px;height:14px;margin-left:0;border-radius:0;background:rgba(255,181,74,.6);box-shadow:none}
+.thumb{top:14px;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--sun);box-shadow:0 0 8px rgba(255,181,74,.8)}
+.tlab{display:none}
+.brand{font-size:11px;color:var(--mute)}
+.brand b{color:var(--mute)}
+.ig{padding:17px 0;margin-top:-17px;margin-bottom:-17px}
 </style>
 
 </head>
@@ -176,7 +196,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     <div class="where">
       <div class="kmrow"><div class="note2" id="note2" role="status"></div><div class="km" id="km">8.2 KM EAST<i>OF BURJ KHALIFA</i></div></div>
       <div class="acts">
-        <div class="go"><a class="btn" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></span><span id="routeTxt">ROUTE</span></a><button class="alt" id="alt" aria-label="Watch from a boat instead" hidden><span id="altIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 18H2a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4Z"/><path d="M21 14 10 2 3 14h18Z"/><path d="M10 2v16"/></svg></span></button></div>
+        <div class="go"><div class="modes" id="modes" role="group" aria-label="Get there by" hidden><button class="mbtn" id="mCar" aria-label="By car" aria-pressed="true"></button><button class="mbtn" id="mBoat" aria-label="By boat" aria-pressed="false"></button></div><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a></div>
         <button class="btn" id="share" aria-label="Share a link to this moment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span class="lbl">SHARE</span></button>
       </div>
       <div class="toast" id="toast" role="status"></div>
@@ -358,7 +378,7 @@ function draw(){
   const cv=$("sky"),{c,w,h}=fit(cv), q=st.q;
   if(!q){c.fillStyle="#07080d";c.fillRect(0,0,w,h);return}
   const o=q.o||dest(BURJ,q.th,q.m), d=q.m, hO=q.h||0, b=q.b!=null?q.b:(q.th+180)%360, tip=Math.atan((BURJ.h-hO)/d)*D, p=sunpos(q.t+st.dt*60e3,o.lat,o.lon);
-  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?196:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
+  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?188:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
   const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
   // stars come out one by one, the brightest first, and only high in the darker sky
@@ -399,10 +419,10 @@ function text(){
   // land spot: directions; water spot: a pin to hand to the skipper
   const atSea=st.sea&&!P;
   if(atSea)$("route").href=`https://www.google.com/maps/search/?api=1&query=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
-  $("routeIco").innerHTML=atSea?BOAT:CAR;$("route").setAttribute("aria-label",atSea?"Open this spot on the water in Google Maps":"Open the route to this spot in Google Maps");
+  $("route").setAttribute("aria-label",atSea?"Open this spot on the water in Google Maps":"Open the route to this spot in Google Maps");
   // car and boat appear only for the options this day really has
   const other=!P&&candidates(st.day,st.pm,!st.sea).length>0;
-  $("alt").hidden=!other;$("altIco").innerHTML=st.sea?CAR:BOAT;$("alt").setAttribute("aria-label",st.sea?"Stand on land instead":"Watch from a boat instead");
+  $("modes").hidden=!other;$("mCar").setAttribute("aria-pressed",String(!atSea));$("mBoat").setAttribute("aria-pressed",String(atSea));
   $("scene").setAttribute("aria-label",`${st.pm?"Sunset":"Sunrise"} on the spire of Burj Khalifa, ${dmon(q.t)} at ${hhmm(q.t)}, seen from ${(q.m/1000).toFixed(1)} kilometres ${dir.toLowerCase()} of Burj Khalifa. Left and right arrows change the day, up and down change the time.`);
 }
 
@@ -470,7 +490,9 @@ $("play").addEventListener("click",()=>{
   sc.addEventListener("dblclick",e=>{if(e.target.closest("button,a,.cal,.tl"))return;stopPlay();st.dt=0;render(true)});
   sc.addEventListener("wheel",e=>{e.preventDefault();setDt(st.dt+(e.deltaX||e.deltaY)/8);goHome(900)},{passive:false});
 })();
-$("alt").addEventListener("click",()=>{stopPlay();st.sea=!st.sea;render(true)});
+$("mCar").innerHTML=CAR;$("mBoat").innerHTML=BOAT;
+const setSea=v=>{if(st.sea===v)return;stopPlay();st.sea=v;render(true)};
+$("mCar").addEventListener("click",()=>setSea(false));$("mBoat").addEventListener("click",()=>setSea(true));
 $("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else setDay(st.day-1)});
 /* ---------- calendar ---------- */
 const MONTHS=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
