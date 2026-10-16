@@ -684,6 +684,10 @@ $("share").addEventListener("click",async()=>{
 window.addEventListener("hashchange",()=>{if(location.hash.slice(1)!==lastHash&&readHash())render(true)});
 new ResizeObserver(()=>frame()).observe(document.documentElement);
 (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>frame());
+// deep links from /how: ?open=place opens MY PLACE, ?open=route opens the car / boat choice; the query is then dropped from the address
+(()=>{const q=new URLSearchParams(location.search).get("open");if(!q)return;
+  history.replaceState(null,"",location.pathname+location.hash);
+  setTimeout(()=>{if(q==="place")openMine();else if(q==="route"&&st.both){$("rmenu").hidden=false;$("route").setAttribute("aria-expanded","true")}},350)})();
 render(false);
 })();
 </script>
