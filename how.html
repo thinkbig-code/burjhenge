@@ -16,7 +16,7 @@
 <link rel="canonical" href="https://burjhenge.com/how">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preload" as="image" href="how-hero-960.jpg" imagesrcset="how-hero-960.jpg 960w, how-hero.jpg 1536w" imagesizes="(min-width:680px) 640px, 100vw">
+<link rel="preload" as="image" href="how-hero-960.jpg" imagesrcset="how-hero-960.jpg 960w, how-hero.jpg 1536w" imagesizes="(min-width:680px) 720px, 100vw">
 <meta name="theme-color" content="#07080d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800&family=Martian+Mono:wght@400;500&display=swap">
@@ -38,7 +38,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--night);color:var(--text)}
-body{font-family:var(--mono);font-size:12px;line-height:1.85;letter-spacing:.02em;-webkit-text-size-adjust:100%}
+body{font-family:var(--mono);font-size:12.5px;line-height:1.9;letter-spacing:.02em;-webkit-text-size-adjust:100%}
 a{color:var(--text)}
 b{font-weight:500}
 .wrap{max-width:640px;margin:0 auto;padding:calc(var(--inset) + env(safe-area-inset-top,0px)) var(--inset) calc(var(--inset) + 24px + env(safe-area-inset-bottom,0px))}
@@ -51,16 +51,16 @@ b{font-weight:500}
 .brand b{color:var(--mute);font-weight:800}
 
 /* the picture as an illustration of the phenomenon: whole frame, no crop, edges dissolve into the night */
-.hero{--fx:50%;--fy:40%;margin:28px 0 0;aspect-ratio:3/2}
+.hero{--fx:50%;--fy:40%;margin:28px calc(-1 * var(--inset)) 0;aspect-ratio:7/5}
 .hero img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--fx) var(--fy);
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%),linear-gradient(transparent 0,#000 14%,#000 60%,transparent 100%);
   -webkit-mask-composite:source-in;
   mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%),linear-gradient(transparent 0,#000 14%,#000 60%,transparent 100%);
   mask-composite:intersect}
 
-h1{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(44px,12vw,72px);line-height:.86;letter-spacing:.005em;margin:28px 0 0}
+h1{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(44px,12vw,72px);line-height:.86;letter-spacing:.005em;margin:36px 0 0}
 h1 em{font-style:normal;color:var(--sun)}
-.lead{margin:24px 0 0;max-width:34em}
+.lead{margin:30px 0 0;max-width:34em}
 
 section{margin-top:clamp(64px,13vw,96px)}
 /* section labels read like interface labels, not headlines */
@@ -108,7 +108,7 @@ a:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
 <div class="wrap">
 <header class="bar"><a class="back" href="./">‹ BACK TO TODAY</a><a class="brand" href="./" aria-label="Burjhenge home">BURJ<b>HENGE</b></a></header>
 
-<figure class="hero"><img src="how-hero-960.jpg" srcset="how-hero-960.jpg 960w, how-hero.jpg 1536w" sizes="(min-width:680px) 640px, 100vw" width="1536" height="1024" alt="Dubai skyline at dusk with the sun sitting exactly on the spire of Burj Khalifa" fetchpriority="high"></figure>
+<figure class="hero"><img src="how-hero-960.jpg" srcset="how-hero-960.jpg 960w, how-hero.jpg 1536w" sizes="(min-width:680px) 720px, 100vw" width="1536" height="1024" alt="Dubai skyline at dusk with the sun sitting exactly on the spire of Burj Khalifa" fetchpriority="high"></figure>
 
 <main>
   <h1>The sun<br>on the <em>spire</em></h1>
