@@ -58,7 +58,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .where{display:grid;justify-items:end;gap:10px;padding-top:58px;text-align:right}
 .kmrow{display:flex;align-items:center;gap:8px;pointer-events:auto}
 .km{font-size:11px;letter-spacing:.08em}
-.km i{display:block;font-style:normal;font-size:9px;color:var(--mute);margin-top:4px}
+.km i{display:block;font-style:normal;font-size:9px;color:#aaa5c2;margin-top:4px}
 .acts{display:flex;align-items:center;gap:2px;margin-right:-10px;pointer-events:auto}
 .go{display:flex;align-items:center;gap:2px}
 #route svg,#altIco svg{width:16px;height:16px}
@@ -156,7 +156,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 /* footer: one left edge, one right edge; gold only for the moment: time, sun, ROUTE, centre tick */
 .go{gap:8px}
 .modes{display:flex;gap:2px;margin-left:-9px}
-.mbtn{width:36px;height:40px;border:0;background:none;color:var(--mute);opacity:.45;display:grid;place-items:center;cursor:pointer;padding:0}
+.mbtn{width:36px;height:40px;border:0;background:none;color:var(--mute);opacity:.62;display:grid;place-items:center;cursor:pointer;padding:0}
 .mbtn svg{width:18px;height:18px}
 .mbtn[aria-pressed="true"]{color:var(--text);opacity:1}
 .mbtn:hover{opacity:1}
@@ -356,7 +356,7 @@ function pick(){
   let best=C[0];C.forEach(q=>{if(Math.abs(Math.log(q.m/st.target))<Math.abs(Math.log(best.m/st.target)))best=q});
   st.q=best;
 }
-const CAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>', BOAT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 18H2a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4Z"/><path d="M21 14 10 2 3 14h18Z"/><path d="M10 2v16"/></svg>';
+const CAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.4 17.5H2.2v-4c0-.8.6-1.5 1.4-1.7l3.5-.9 2.6-3.9h5.9l3 3.9 2.4.6c.8.2 1.4.9 1.4 1.7v4.3h-2.2"/><path d="M9 17.5h6"/><circle cx="6.7" cy="17.5" r="2.2"/><circle cx="17.3" cy="17.5" r="2.2"/></svg>', BOAT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8v12.6"/><path d="M12 3.8l7 11.6h-7"/><path d="M10 6.4l-5.2 9H10"/><path d="M2 17.4h20l-2 2.6H4z"/></svg>';
 const COMPASS=["NORTH","NORTH-EAST","EAST","SOUTH-EAST","SOUTH","SOUTH-WEST","WEST","NORTH-WEST"];
 
 /* ---------- URL: #YYYYMMDD~pm~8.0 ---------- */
