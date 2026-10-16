@@ -135,7 +135,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   .foot{flex-direction:column;align-items:stretch;gap:14px}
   .brandrow{gap:16px}
   .tl{order:-1;width:100%}
-  .where{position:fixed;left:var(--inset);right:var(--inset);top:auto;bottom:calc(var(--inset) + 73px + env(safe-area-inset-bottom,0px));padding-top:0;display:grid;justify-items:stretch;gap:8px;text-align:left}
+  .where{position:fixed;left:var(--inset);right:var(--inset);top:auto;bottom:calc(var(--inset) + 88px + env(safe-area-inset-bottom,0px));padding-top:0;display:grid;justify-items:stretch;gap:8px;text-align:left}
   .acts{justify-content:space-between;margin:0 -10px 0 0}
   .km i{display:inline;margin:0 0 0 6px}
   .toast{position:absolute;right:0;bottom:-16px}
@@ -174,6 +174,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 *{-webkit-tap-highlight-color:transparent}
 .route:active{background:var(--sun);color:var(--night)}
 .mbtn:active,.play:active,#share:active,.ig:active{opacity:.7}
+/* the handle belongs to the name: one small identity block on the left, help on the right */
+.ident{display:flex;flex-direction:column;align-items:flex-start}
+.ident .soc{padding:6px 0 10px;margin:-1px 0 -10px;letter-spacing:.1em}
 </style>
 
 </head>
@@ -220,7 +223,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     </div>
   </div>
   <div class="foot">
-    <div class="brandrow"><div class="brand">BURJ<b>HENGE</b></div><a class="ig igl" id="howLink" href="how">HOW IT WORKS</a></div>
+    <div class="brandrow"><div class="ident"><div class="brand">BURJ<b>HENGE</b></div><a class="ig soc" id="igLink" href="https://www.instagram.com/burjhenge/" target="_blank" rel="noopener" aria-label="Burjhenge on Instagram">@BURJHENGE</a></div><a class="ig igl" id="howLink" href="how">HOW IT WORKS</a></div>
     <div class="tl">
       <button class="play" id="play" aria-label="Play the sunset"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></button>
       <div class="track" id="track" tabindex="0" role="slider" aria-label="Minutes from the moment on the spire" aria-valuemin="-90" aria-valuemax="90" aria-valuenow="0">
@@ -382,7 +385,7 @@ function draw(){
   const cv=$("sky"),{c,w,h}=fit(cv), q=st.q;
   if(!q){c.fillStyle="#07080d";c.fillRect(0,0,w,h);return}
   const o=q.o||dest(BURJ,q.th,q.m), d=q.m, hO=q.h||0, b=q.b!=null?q.b:(q.th+180)%360, tip=Math.atan((BURJ.h-hO)/d)*D, p=sunpos(q.t+st.dt*60e3,o.lat,o.lon);
-  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?179:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
+  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?194:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
   const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
   // stars come out one by one, the brightest first, and only high in the darker sky
@@ -635,6 +638,7 @@ const track=n=>{try{window.goatcounter&&goatcounter.count&&goatcounter.count({pa
 $("route").addEventListener("click",()=>track(st.sea?"route-boat":"route-car"));
 $("share").addEventListener("click",()=>track("share"));
 $("howLink").addEventListener("click",()=>track("how-it-works"));
+$("igLink").addEventListener("click",()=>track("instagram"));
 $("ics").addEventListener("click",()=>track("calendar"));
 $("play").addEventListener("click",()=>track("play"));
 $("mine").addEventListener("click",()=>track("my-place-open"));
