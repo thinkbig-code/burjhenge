@@ -139,7 +139,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   .tl{order:-1;width:100%}
   .where{position:fixed;left:var(--inset);right:var(--inset);top:auto;bottom:calc(var(--inset) + 100px + env(safe-area-inset-bottom,0px));padding-top:0;display:grid;justify-items:stretch;gap:12px;text-align:left}
   .acts{justify-content:space-between;margin:0 -10px 0 0}
-  .rmenu{right:10px}
   .km i{display:inline;margin:0 0 0 6px}
   .toast{position:absolute;right:0;bottom:-16px}
 }
@@ -183,13 +182,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .ident .soc{padding:6px 0 10px;margin:-1px 0 -10px;letter-spacing:.1em;opacity:.85}
 /* the choice spans the whole action row, so it fully covers the distance line whatever the font width */
 .acts{position:relative}
-.rmenu{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:7;padding:6px;background:#0b0c12;border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+/* a small, content-sized selector; the distance line under it steps aside while it is open */
+.rmenu{position:absolute;left:0;box-sizing:border-box;width:min(290px,calc(100vw - 64px));bottom:calc(100% + 8px);z-index:7;padding:8px 10px;background:#0b0c12;border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .ropt{display:flex;align-items:center;gap:12px;height:44px;padding:0 10px;border-radius:6px;color:var(--text);text-decoration:none;font-size:10px;letter-spacing:var(--ls)}
 .ropt .ri{display:grid;color:var(--mute)}.ropt .ri svg{width:20px;height:20px}
 .ropt em{margin-left:auto;font-style:normal;color:var(--mute);font-size:9px;letter-spacing:.08em}
 .ropt.on .ri{color:var(--text)}
 .ropt:active{background:rgba(239,231,218,.06)}
 @media (hover:hover){.ropt:hover{background:rgba(239,231,218,.06)}}
+.where.routing .km,.where.routing .note2{visibility:hidden}
 </style>
 
 </head>
@@ -524,10 +525,10 @@ function spotFor(sea){const C=candidates(st.day,st.pm,sea);let b=C[0];C.forEach(
 const mapsDir=o=>`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
 const mapsPin=o=>`https://www.google.com/maps/search/?api=1&query=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
 $("rCarIco").innerHTML=CAR;$("rBoatIco").innerHTML=BOAT;
-function closeRoute(){if($("rmenu").hidden)return;$("rmenu").hidden=true;$("route").setAttribute("aria-expanded","false")}
+function closeRoute(){if($("rmenu").hidden)return;$("rmenu").hidden=true;$("route").setAttribute("aria-expanded","false");document.querySelector(".where").classList.remove("routing")}
 $("route").addEventListener("keydown",e=>{if(st.both&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("route").click()}});
 $("route").addEventListener("click",e=>{if(!st.both){track(st.sea?"route-boat":"route-car");return}
-  e.preventDefault();const m=$("rmenu");m.hidden=!m.hidden;$("route").setAttribute("aria-expanded",String(!m.hidden))});
+  e.preventDefault();const m=$("rmenu");m.hidden=!m.hidden;$("route").setAttribute("aria-expanded",String(!m.hidden));document.querySelector(".where").classList.toggle("routing",!m.hidden)});
 // the screen follows the choice, so coming back from Maps it shows the spot you went to
 $("rCar").addEventListener("click",()=>{track("route-car");closeRoute();setTimeout(()=>setSea(false),0)});
 $("rBoat").addEventListener("click",()=>{track("route-boat");closeRoute();setTimeout(()=>setSea(true),0)});
@@ -695,7 +696,7 @@ new ResizeObserver(()=>frame()).observe(document.documentElement);
 // deep links from /how: ?open=place opens MY PLACE, ?open=route opens the car / boat choice; the query is then dropped from the address
 (()=>{const q=new URLSearchParams(location.search).get("open");if(!q)return;
   history.replaceState(null,"",location.pathname+location.hash);
-  setTimeout(()=>{if(q==="place")openMine();else if(q==="route"&&st.both){$("rmenu").hidden=false;$("route").setAttribute("aria-expanded","true")}},350)})();
+  setTimeout(()=>{if(q==="place")openMine();else if(q==="route"&&st.both){$("rmenu").hidden=false;$("route").setAttribute("aria-expanded","true");document.querySelector(".where").classList.add("routing")}},350)})();
 render(false);
 })();
 </script>
