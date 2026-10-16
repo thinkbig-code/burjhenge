@@ -170,6 +170,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .brand{font-size:11px;color:var(--mute)}
 .brand b{color:var(--mute)}
 .ig{padding:17px 0;margin-top:-17px;margin-bottom:-17px}
+/* no grey rectangle on tap in mobile browsers; each control shows its own pressed state */
+*{-webkit-tap-highlight-color:transparent}
+.route:active{background:var(--sun);color:var(--night)}
+.mbtn:active,.play:active,#share:active,.ig:active{opacity:.7}
 </style>
 
 </head>
