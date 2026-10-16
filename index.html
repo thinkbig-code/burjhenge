@@ -527,10 +527,20 @@ function usePlace(lat,lon,label,stay){
   if(!stay)closeMine();
 }
 $("geo").addEventListener("click",()=>{
+  // in-app browsers (Instagram, Facebook, TikTok...) often ask for location and then never answer
+  const inApp=/Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|Snapchat|Line\//i.test(navigator.userAgent);
+  const OPEN="Instagram's browser can't share your location. Tap ⋯ at the top and choose Open in browser, or paste coordinates.";
   if(!navigator.geolocation){say("This browser can't share its location. Paste coordinates instead.");return}
   say("Finding you…");
-  navigator.geolocation.getCurrentPosition(p=>usePlace(p.coords.latitude,p.coords.longitude,"YOUR PLACE"),
-    ()=>say("Location is blocked here. Paste a Google Maps link or coordinates instead."),{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  let done=false;
+  const ok=p=>{if(done)return;done=true;clearTimeout(dog);usePlace(p.coords.latitude,p.coords.longitude,"YOUR PLACE")};
+  const fail=e=>{if(done)return;done=true;clearTimeout(dog);
+    say(inApp?OPEN:e&&e.code===1?"Location is blocked for this site. Allow it in your browser settings, or paste a Google Maps link or coordinates.":"Couldn't find your location. Try again outside, or paste a Google Maps link or coordinates.")};
+  // first a quick network fix, then GPS if that fails; a watchdog ends the wait either way
+  const dog=setTimeout(()=>fail(null),inApp?8000:20000);
+  navigator.geolocation.getCurrentPosition(ok,e=>{if(e.code===1)return fail(e);
+    navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:true,timeout:12000,maximumAge:0})},
+    {enableHighAccuracy:false,timeout:6000,maximumAge:300000});
 });
 function parseCoords(s){
   const pats=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|query|destination|ll)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i,/(-?\d{1,2}\.\d+)\s*[,;\s]\s*(-?\d{1,3}\.\d+)/];
