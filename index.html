@@ -160,7 +160,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .mbtn svg{width:18px;height:18px}
 .mbtn[aria-pressed="true"]{color:var(--text);opacity:1}
 .mbtn:hover{opacity:1}
-.route{height:40px;padding:0 16px;border:1px solid rgba(255,181,74,.7);border-radius:20px;color:var(--sun);display:flex;align-items:center;gap:8px;font:10px var(--mono);letter-spacing:var(--ls);text-decoration:none}
+.route{cursor:pointer;height:40px;padding:0 16px;border:1px solid rgba(255,181,74,.7);border-radius:20px;color:var(--sun);display:flex;align-items:center;gap:8px;font:10px var(--mono);letter-spacing:var(--ls);text-decoration:none}
 .route:hover,.route:focus-visible{background:var(--sun);color:var(--night)}
 /* SHARE is the second product action: brighter than the footer links, still well below ROUTE */
 #share{color:#b4afca}#share:hover,#share:active{color:var(--text)}
@@ -444,6 +444,8 @@ function text(){
   // car and boat appear only for the options this day really has
   const other=!P&&candidates(st.day,st.pm,!st.sea).length>0;
   st.both=other;$("route").setAttribute("aria-haspopup",other?"menu":"false");
+  // with a choice to make, ROUTE is a button, not a link, so no browser or in-app viewer can follow it before the choice
+  const R=$("route");if(other){R.removeAttribute("href");R.removeAttribute("target");R.setAttribute("role","button");R.tabIndex=0}else{R.setAttribute("target","_blank");R.removeAttribute("role")}
   if(other){const land=spotFor(false),sea=spotFor(true);
     $("rCar").href=mapsDir(land.o);$("rBoat").href=mapsPin(sea.o);
     $("rCarKm").textContent=(land.m/1000).toFixed(1)+" KM";$("rBoatKm").textContent=(sea.m/1000).toFixed(1)+" KM";
@@ -523,6 +525,7 @@ const mapsDir=o=>`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toF
 const mapsPin=o=>`https://www.google.com/maps/search/?api=1&query=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
 $("rCarIco").innerHTML=CAR;$("rBoatIco").innerHTML=BOAT;
 function closeRoute(){if($("rmenu").hidden)return;$("rmenu").hidden=true;$("route").setAttribute("aria-expanded","false")}
+$("route").addEventListener("keydown",e=>{if(st.both&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("route").click()}});
 $("route").addEventListener("click",e=>{if(!st.both){track(st.sea?"route-boat":"route-car");return}
   e.preventDefault();const m=$("rmenu");m.hidden=!m.hidden;$("route").setAttribute("aria-expanded",String(!m.hidden))});
 // the screen follows the choice, so coming back from Maps it shows the spot you went to
