@@ -155,7 +155,6 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 
 /* footer: one left edge, one right edge; gold only for the moment: time, sun, ROUTE, centre tick */
 .go{gap:8px}
-.modes{display:flex;gap:2px;margin-left:-9px}
 .mbtn{width:36px;height:40px;border:0;background:none;color:var(--mute);opacity:.62;display:grid;place-items:center;cursor:pointer;padding:0}
 .mbtn svg{width:18px;height:18px}
 .mbtn[aria-pressed="true"]{color:var(--text);opacity:1}
@@ -181,6 +180,14 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 /* the handle belongs to the name: one small identity block on the left, help on the right */
 .ident{display:flex;flex-direction:column;align-items:flex-start}
 .ident .soc{padding:6px 0 10px;margin:-1px 0 -10px;letter-spacing:.1em;opacity:.85}
+.go{position:relative}
+.rmenu{position:absolute;left:0;bottom:calc(100% + 8px);z-index:7;min-width:200px;padding:6px;background:#0b0c12;border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.ropt{display:flex;align-items:center;gap:12px;height:44px;padding:0 10px;border-radius:6px;color:var(--text);text-decoration:none;font-size:10px;letter-spacing:var(--ls)}
+.ropt .ri{display:grid;color:var(--mute)}.ropt .ri svg{width:18px;height:18px}
+.ropt em{margin-left:auto;font-style:normal;color:var(--mute);font-size:9px;letter-spacing:.08em}
+.ropt.on .ri{color:var(--text)}
+.ropt:active{background:rgba(239,231,218,.06)}
+@media (hover:hover){.ropt:hover{background:rgba(239,231,218,.06)}}
 </style>
 
 </head>
@@ -207,7 +214,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     <div class="where">
       <div class="kmrow"><div class="note2" id="note2" role="status"></div><div class="km" id="km">8.2 KM EAST<i>OF BURJ KHALIFA</i></div></div>
       <div class="acts">
-        <div class="go"><div class="modes" id="modes" role="group" aria-label="Get there by" hidden><button class="mbtn" id="mCar" aria-label="By car" aria-pressed="true"></button><button class="mbtn" id="mBoat" aria-label="By boat" aria-pressed="false"></button></div><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a></div>
+        <div class="go" id="go"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="menu" aria-label="Get there by" hidden><a class="ropt" id="rCar" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a></div></div>
         <button class="btn" id="share" aria-label="Share a link to this moment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span class="lbl">SHARE</span></button>
       </div>
       <div class="toast" id="toast" role="status"></div>
@@ -433,7 +440,12 @@ function text(){
   $("route").setAttribute("aria-label",atSea?"Open this spot on the water in Google Maps":"Open the route to this spot in Google Maps");
   // car and boat appear only for the options this day really has
   const other=!P&&candidates(st.day,st.pm,!st.sea).length>0;
-  $("modes").hidden=!other;$("mCar").setAttribute("aria-pressed",String(!atSea));$("mBoat").setAttribute("aria-pressed",String(atSea));
+  st.both=other;$("route").setAttribute("aria-haspopup",other?"menu":"false");
+  if(other){const land=spotFor(false),sea=spotFor(true);
+    $("rCar").href=mapsDir(land.o);$("rBoat").href=mapsPin(sea.o);
+    $("rCarKm").textContent=(land.m/1000).toFixed(1)+" KM";$("rBoatKm").textContent=(sea.m/1000).toFixed(1)+" KM";
+    $("rCar").classList.toggle("on",!atSea);$("rBoat").classList.toggle("on",atSea)}
+  else closeRoute();
   $("scene").setAttribute("aria-label",`${st.pm?"Sunset":"Sunrise"} on the spire of Burj Khalifa, ${dmon(q.t)} at ${hhmm(q.t)}, seen from ${(q.m/1000).toFixed(1)} kilometres ${dir.toLowerCase()} of Burj Khalifa. Left and right arrows change the day, up and down change the time.`);
 }
 
@@ -501,9 +513,21 @@ $("play").addEventListener("click",()=>{
   sc.addEventListener("dblclick",e=>{if(e.target.closest("button,a,.cal,.tl"))return;stopPlay();st.dt=0;render(true)});
   sc.addEventListener("wheel",e=>{e.preventDefault();setDt(st.dt+(e.deltaX||e.deltaY)/8);goHome(900)},{passive:false});
 })();
-$("mCar").innerHTML=CAR;$("mBoat").innerHTML=BOAT;
+/* ROUTE is the one action; when the day has both a land spot and a water spot, it opens a small choice above itself */
+function spotFor(sea){const C=candidates(st.day,st.pm,sea);let b=C[0];C.forEach(q=>{if(Math.abs(Math.log(q.m/st.target))<Math.abs(Math.log(b.m/st.target)))b=q});
+  const o=dest(BURJ,b.th,b.m);return {o,m:b.m}}
+const mapsDir=o=>`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
+const mapsPin=o=>`https://www.google.com/maps/search/?api=1&query=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
+$("rCarIco").innerHTML=CAR;$("rBoatIco").innerHTML=BOAT;
+function closeRoute(){if($("rmenu").hidden)return;$("rmenu").hidden=true;$("route").setAttribute("aria-expanded","false")}
+$("route").addEventListener("click",e=>{if(!st.both){track(st.sea?"route-boat":"route-car");return}
+  e.preventDefault();const m=$("rmenu");m.hidden=!m.hidden;$("route").setAttribute("aria-expanded",String(!m.hidden))});
+// the screen follows the choice, so coming back from Maps it shows the spot you went to
+$("rCar").addEventListener("click",()=>{track("route-car");closeRoute();setTimeout(()=>setSea(false),0)});
+$("rBoat").addEventListener("click",()=>{track("route-boat");closeRoute();setTimeout(()=>setSea(true),0)});
+document.addEventListener("pointerdown",e=>{if(!$("rmenu").hidden&&!e.target.closest("#go"))closeRoute()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRoute()});
 const setSea=v=>{if(st.sea===v)return;stopPlay();st.sea=v;render(true)};
-$("mCar").addEventListener("click",()=>setSea(false));$("mBoat").addEventListener("click",()=>setSea(true));
 $("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else setDay(st.day-1)});
 /* ---------- calendar ---------- */
 const MONTHS=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
@@ -639,7 +663,6 @@ function shareURL(){
 }
 // counts what people actually use; no personal data, no cookies
 const track=n=>{try{window.goatcounter&&goatcounter.count&&goatcounter.count({path:n,title:n,event:true})}catch(e){}try{window.umami&&umami.track(n)}catch(e){}};
-$("route").addEventListener("click",()=>track(st.sea?"route-boat":"route-car"));
 $("share").addEventListener("click",()=>track("share"));
 $("howLink").addEventListener("click",()=>track("how-it-works"));
 $("igLink").addEventListener("click",()=>track("instagram"));
