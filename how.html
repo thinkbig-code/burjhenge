@@ -9,13 +9,14 @@
 <meta property="og:title" content="How Burjhenge works">
 <meta property="og:description" content="Twice a year, from the right spot, the sun sits exactly on the tip of Burj Khalifa. Here is how to catch it.">
 <meta property="og:url" content="https://burjhenge.com/how">
-<meta property="og:image" content="https://burjhenge.com/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image" content="https://burjhenge.com/how-hero.jpg">
+<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="1024">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://burjhenge.com/how">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" as="image" href="how-hero-960.jpg" imagesrcset="how-hero-960.jpg 960w, how-hero.jpg 1536w" imagesizes="100vw">
 <meta name="theme-color" content="#07080d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800&family=Martian+Mono:wght@400;500&display=swap">
@@ -28,107 +29,154 @@
 {"@type":"Question","name":"Does it work from my balcony?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open MY PLACE, use your location or paste a Google Maps link, set your floor, and Burjhenge finds the dates when the sun lines up with the tip from there. The calculation runs on your phone and your location is not sent anywhere."}}
 ]}</script>
 <style>
+/* Explanation mode: same night, same type, same restraint as the main screen. The picture opens the page; the words follow it out of the dark. */
 :root{
-  --night:#07080d;--sun:#ffb54a;--text:#efe7da;--mute:#8a86a6;--line:rgba(239,231,218,.12);
+  --night:#07080d;--sun:#ffb54a;--text:#efe7da;--mute:#8a86a6;--line:rgba(239,231,218,.1);
   --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
   --mono:"Martian Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --ls:.14em;color-scheme:dark;
+  --ls:.14em;--gut:clamp(20px,5vw,40px);color-scheme:dark;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--night);color:var(--text)}
-body{font-family:var(--mono);font-size:13px;line-height:1.75;-webkit-text-size-adjust:100%}
-.wrap{max-width:640px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top,0px)) 20px 64px}
+body{font-family:var(--mono);font-size:13px;line-height:1.8;-webkit-text-size-adjust:100%}
 a{color:var(--text)}
-.top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:56px}
-.back{font-size:10px;letter-spacing:var(--ls);color:var(--mute);text-decoration:none;padding:8px 0}
-.back:hover,.back:focus-visible{color:var(--text)}
-.brand{font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:.32em;text-decoration:none}
+
+/* the bar floats on the dark top of the sky, so there is no empty band above the picture */
+.bar{position:absolute;z-index:2;left:0;right:0;top:0;padding:calc(18px + env(safe-area-inset-top,0px)) var(--gut) 0;display:flex;justify-content:space-between;align-items:center}
+.back{font-size:10px;letter-spacing:var(--ls);color:var(--text);opacity:.75;text-decoration:none;padding:12px 0}
+.back:hover,.back:focus-visible{opacity:1}
+.brand{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:.32em;text-decoration:none;padding:10px 0}
 .brand b{color:var(--sun);font-weight:800}
-.hero{display:block;width:100%;height:auto;border-radius:2px;margin:0 0 40px}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,11vw,64px);line-height:.95;letter-spacing:.01em;margin:0 0 20px;text-transform:uppercase}
-.lead{font-size:14px;color:var(--text);margin:0 0 48px}
-h2{font-size:10px;font-weight:500;letter-spacing:var(--ls);color:var(--sun);margin:48px 0 14px;text-transform:uppercase}
-p{margin:0 0 14px}
+
+/* full-bleed picture: tall crop on phones keeps the tower and the sun in the middle; the city melts into the page */
+.hero{position:relative;margin:0;height:min(122vw,74svh);min-height:420px;overflow:hidden}
+.hero img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 36%;
+  -webkit-mask-image:linear-gradient(#000 0,#000 58%,rgba(0,0,0,.35) 82%,transparent 100%);
+          mask-image:linear-gradient(#000 0,#000 58%,rgba(0,0,0,.35) 82%,transparent 100%)}
+@media (min-width:760px){.hero{height:min(74vh,720px)}.hero img{object-position:50% 40%}h1{margin-top:-.38em;font-size:104px}}
+
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 var(--gut) calc(56px + env(safe-area-inset-bottom,0px))}
+h1{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:clamp(60px,17vw,128px);line-height:.86;letter-spacing:.005em;margin:-.62em 0 0;text-shadow:0 2px 30px rgba(7,8,13,.6)}
+h1 em{font-style:normal;color:var(--sun)}
+.lead{font-size:15px;line-height:1.75;margin:28px 0 0;max-width:34em}
+
+section{margin-top:clamp(72px,14vw,112px)}
+h2{display:flex;align-items:baseline;gap:14px;font-size:10px;font-weight:500;letter-spacing:var(--ls);text-transform:uppercase;color:var(--sun);margin:0 0 22px}
+h2 span{color:var(--mute);font-variant-numeric:tabular-nums}
+p{margin:0 0 16px;max-width:36em}
 .mute{color:var(--mute)}
-ol,ul{margin:0 0 14px;padding-left:1.4em}
-li{margin:0 0 8px}
-li::marker{color:var(--mute)}
-table{width:100%;border-collapse:collapse;margin:6px 0 14px;font-variant-numeric:tabular-nums}
-th,td{text-align:left;white-space:nowrap;padding:9px 8px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+b{font-weight:500}
+
+/* the geometry, said with three numbers */
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:36px 0 36px;padding:0}
+.figs div{margin:0}
+.figs dt{font-family:var(--display);font-weight:800;font-size:clamp(44px,13vw,76px);line-height:.9;font-variant-numeric:tabular-nums}
+.figs dt{white-space:nowrap}
+.figs small{font-size:.38em;letter-spacing:.06em;margin-left:.12em}
+.figs dd{margin:10px 0 0;font-size:9px;letter-spacing:var(--ls);color:var(--mute);text-transform:uppercase;line-height:1.6}
+
+ol,ul{list-style:none;margin:0;padding:0;max-width:36em}
+li{position:relative;padding-left:36px;margin:0 0 18px}
+ol{counter-reset:n}
+ol li{counter-increment:n}
+ol li:before{content:counter(n,decimal-leading-zero);position:absolute;left:0;top:.2em;font-size:10px;letter-spacing:.08em;color:var(--mute)}
+ul li:before{content:"";position:absolute;left:2px;top:.85em;width:14px;height:1px;background:var(--mute)}
+
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;white-space:nowrap;padding:11px 10px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child,th:last-child{white-space:normal;padding-right:0}
 th{font-size:9px;font-weight:500;letter-spacing:var(--ls);color:var(--mute);text-transform:uppercase}
-dt{font-weight:500;margin:22px 0 6px}
-dd{margin:0}
-.cta{display:inline-block;margin:56px 0 0;padding:14px 22px;border:1px solid var(--sun);border-radius:999px;color:var(--sun);text-decoration:none;font-size:11px;letter-spacing:var(--ls)}
-.cta:hover,.cta:focus-visible{background:var(--sun);color:var(--night)}
-footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.06em;color:var(--mute);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+dl.qa{margin:0}
+.qa dt{font-weight:500;margin:30px 0 8px}
+.qa dt:first-child{margin-top:0}
+.qa dd{margin:0;max-width:36em}
+.mail{display:inline-block;margin-top:12px;font-size:10px;letter-spacing:var(--ls);color:var(--sun);text-decoration:none;padding:6px 0}
+
+.end{margin-top:clamp(80px,16vw,128px)}
+.cta{display:inline-block;padding:14px 22px;border:1px solid rgba(255,181,74,.7);border-radius:999px;color:var(--sun);text-decoration:none;font-size:11px;letter-spacing:var(--ls)}
+.cta:hover,.cta:focus-visible,.cta:active{background:var(--sun);color:var(--night)}
+footer{margin-top:56px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:9px;letter-spacing:.08em;color:var(--mute)}
 footer a{color:var(--mute);text-decoration:none}
-td:last-child,th:last-child{white-space:normal}
-.mail{display:inline-block;margin-top:10px;font-size:10px;letter-spacing:var(--ls);color:var(--sun);text-decoration:none;padding:6px 0}
-*{-webkit-tap-highlight-color:transparent}
-.cta:active{background:var(--sun);color:var(--night)}
+a:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top"><a class="back" href="./">‹ BACK TO TODAY</a><a class="brand" href="./">BURJ<b>HENGE</b></a></div>
+<header class="bar"><a class="back" href="./">‹ BACK TO TODAY</a><a class="brand" href="./" aria-label="Burjhenge home">BURJ<b>HENGE</b></a></header>
 
-  <img class="hero" src="og.png" width="1200" height="630" alt="The sun sitting exactly on the spire of Burj Khalifa at sunset">
+<figure class="hero"><img src="how-hero-960.jpg" srcset="how-hero-960.jpg 960w, how-hero.jpg 1536w" sizes="100vw" width="1536" height="1024" alt="Dubai skyline at dusk with the sun sitting exactly on the spire of Burj Khalifa" fetchpriority="high"></figure>
 
-  <h1>The sun on the spire</h1>
+<main class="wrap">
+  <h1>The sun<br>on the <em>spire</em></h1>
   <p class="lead">Twice a year, from the right spot in Dubai, the setting or rising sun sits exactly on the tip of Burj Khalifa. Burjhenge tells you where to stand, at what minute, and how to get there.</p>
 
-  <h2>How it works</h2>
-  <p>From any spot, the tip of the tower is at a fixed height above your horizon: about 6° from 8 km away, about 15° from 3 km. The sun crosses that height once on the way down every evening, but only on a few days is it also in the direction of the tower at that moment. Burjhenge works out that geometry minute by minute for every day of the year, then picks a spot you can actually reach.</p>
-  <p>The closer you stand, the higher the tower looks and the earlier the moment comes. Farther away, the sun is lower and the moment comes just before sunset.</p>
+  <section>
+    <h2><span>01</span>How it works</h2>
+    <p>From any spot, the tip of the tower is at a fixed height above your horizon. The sun crosses that height once on the way down every evening, but only on a few days is it also in the direction of the tower at that moment.</p>
+    <dl class="figs">
+      <div><dt>828<small>M</small></dt><dd>Burj Khalifa<br>to the tip</dd></div>
+      <div><dt>6°</dt><dd>Tip above<br>the horizon<br>from 8 km</dd></div>
+      <div><dt>15°</dt><dd>Tip above<br>the horizon<br>from 3 km</dd></div>
+    </dl>
+    <p>Burjhenge works out that geometry minute by minute for every day of the year, then picks a spot you can actually reach.</p>
+    <p class="mute">The closer you stand, the higher the tower looks and the earlier the moment comes. Farther away, the sun is lower and the moment comes just before sunset.</p>
+  </section>
 
-  <h2>How to use it</h2>
-  <ol>
-    <li><b>The date and the gold time</b> are the moment to be there. Arrows or tap the date to change the day.</li>
-    <li><b>ROUTE</b> opens the spot in Google Maps. The car gives a spot on land, the boat a spot on the water, when there is one that day.</li>
-    <li><b>Drag the timeline</b> or press play to watch the sun move past the tip. It always glides back to the moment.</li>
-    <li><b>MY PLACE</b> finds the dates for your own balcony, office or favourite café. Set the floor for a better answer.</li>
-  </ol>
+  <section>
+    <h2><span>02</span>How to use it</h2>
+    <ol>
+      <li><b>The date and the gold time</b> are the moment to be there. Arrows or tap the date to change the day.</li>
+      <li><b>ROUTE</b> opens the spot in Google Maps. The car gives a spot on land, the boat a spot on the water, when there is one that day.</li>
+      <li><b>Drag the timeline</b> or press play to watch the sun move past the tip. It always glides back to the moment.</li>
+      <li><b>MY PLACE</b> finds the dates for your own balcony, office or favourite café. Set the floor for a better answer.</li>
+    </ol>
+  </section>
 
-  <h2>Tips for the photo</h2>
-  <ul>
-    <li><b>Be there 15 minutes early.</b> The sun takes about two minutes to slide across the tip. The centred moment lasts a few seconds.</li>
-    <li><b>Small moves change the time, not the shot.</b> Walking 50 m along the line toward or away from the tower shifts the moment by seconds. Stepping sideways moves the sun off the tip, so stay close to the pin.</li>
-    <li><b>Haze is the real risk.</b> Dubai's dust often hides the sun in the last few degrees before it sets. A closer spot means a higher sun and better odds.</li>
-    <li><b>Lock focus and exposure on the sun</b> and the tower turns into a clean silhouette.</li>
-  </ul>
-  <p>Which lens to bring, to fit the whole tower with a little sky (35 mm full-frame equivalent):</p>
-  <table>
-    <tr><th>Distance</th><th>Tower</th><th>Lens</th><th>Phone</th></tr>
-    <tr><td>3 km</td><td>15°</td><td>~60 mm</td><td>2–3×</td></tr>
-    <tr><td>5 km</td><td>9°</td><td>~100 mm</td><td>3–5×</td></tr>
-    <tr><td>8 km</td><td>6°</td><td>~150 mm</td><td>5×</td></tr>
-    <tr><td>15 km</td><td>3°</td><td>~300 mm</td><td>10×, steady hand</td></tr>
-  </table>
-  <p class="mute">The sun is the same size in every case, about half a degree. The farther you stand, the bigger it looks next to the tower.</p>
+  <section>
+    <h2><span>03</span>Tips for the photo</h2>
+    <ul>
+      <li><b>Be there 15 minutes early.</b> The sun takes about two minutes to slide across the tip. The centred moment lasts a few seconds.</li>
+      <li><b>Small moves change the time, not the shot.</b> Walking 50 m along the line toward or away from the tower shifts the moment by seconds. Stepping sideways moves the sun off the tip, so stay close to the pin.</li>
+      <li><b>Haze is the real risk.</b> Dubai's dust often hides the sun in the last few degrees before it sets. A closer spot means a higher sun and better odds.</li>
+      <li><b>Lock focus and exposure on the sun</b> and the tower turns into a clean silhouette.</li>
+    </ul>
+    <table>
+      <tr><th>Distance</th><th>Tower</th><th>Lens</th><th>Phone</th></tr>
+      <tr><td>3 km</td><td>15°</td><td>~60 mm</td><td>2–3×</td></tr>
+      <tr><td>5 km</td><td>9°</td><td>~100 mm</td><td>3–5×</td></tr>
+      <tr><td>8 km</td><td>6°</td><td>~150 mm</td><td>5×</td></tr>
+      <tr><td>15 km</td><td>3°</td><td>~300 mm</td><td>10×, steady hand</td></tr>
+    </table>
+    <p class="mute">Lens to fit the whole tower with a little sky, 35 mm full-frame equivalent. The sun is the same size in every case, about half a degree. The farther you stand, the bigger it looks next to the tower.</p>
+  </section>
 
-  <h2>Accuracy</h2>
-  <p>The sun position matches NOAA's solar calculator to within a few seconds, with atmospheric refraction included. The curve of the Earth is ignored, which shifts the moment by a few seconds at most. Times are in Dubai time.</p>
+  <section>
+    <h2><span>04</span>Accuracy</h2>
+    <p>The sun position matches NOAA's solar calculator to within a few seconds, with atmospheric refraction included. The curve of the Earth is ignored, which shifts the moment by a few seconds at most. Times are in Dubai time.</p>
+  </section>
 
-  <h2>Questions</h2>
-  <dl>
-    <dt>Why only twice a year?</dt>
-    <dd>Where the sun sets slides north along the horizon from December to June and back south from June to December. It passes any one direction twice, once each way, and only on those days is it at the right height when it lines up with the tower.</dd>
-    <dt>Can I see it from a boat?</dt>
-    <dd>Yes. Many spots on the line are on the water. Switch to the boat icon and you get a point at sea.</dd>
-    <dt>What about sunrise?</dt>
-    <dd>Same idea, from spots west of the tower: Jumeirah, the coast, the sea. Tap SUNSET to switch to SUNRISE.</dd>
-    <dt>Does it work from my balcony?</dt>
-    <dd>Yes, if your balcony faces the tower from the east (for sunset) or the west (for sunrise). Open MY PLACE and set your floor. The calculation runs on your phone and your location is not sent anywhere.</dd>
-    <dt>Found a mistake or have an idea?</dt>
-    <dd>Write to us. If a time or a spot was off, say where you stood and what you saw.<br><a class="mail" id="mail" href="./">WRITE TO US ›</a></dd>
-    <dt>Got the shot?</dt>
-    <dd>Tag it <a href="https://www.instagram.com/explore/tags/burjhenge/" target="_blank" rel="noopener">#burjhenge</a> or send it to <a href="https://www.instagram.com/burjhenge/" target="_blank" rel="noopener">@burjhenge</a>.</dd>
-  </dl>
+  <section>
+    <h2><span>05</span>Questions</h2>
+    <dl class="qa">
+      <dt>Why only twice a year?</dt>
+      <dd>Where the sun sets slides north along the horizon from December to June and back south from June to December. It passes any one direction twice, once each way, and only on those days is it at the right height when it lines up with the tower.</dd>
+      <dt>Can I see it from a boat?</dt>
+      <dd>Yes. Many spots on the line are on the water. Switch to the boat icon and you get a point at sea.</dd>
+      <dt>What about sunrise?</dt>
+      <dd>Same idea, from spots west of the tower: Jumeirah, the coast, the sea. Tap SUNSET to switch to SUNRISE.</dd>
+      <dt>Does it work from my balcony?</dt>
+      <dd>Yes, if your balcony faces the tower from the east (for sunset) or the west (for sunrise). Open MY PLACE and set your floor. The calculation runs on your phone and your location is not sent anywhere.</dd>
+      <dt>Found a mistake or have an idea?</dt>
+      <dd>Write to us. If a time or a spot was off, say where you stood and what you saw.<br><a class="mail" id="mail" href="./">WRITE TO US ›</a></dd>
+      <dt>Got the shot?</dt>
+      <dd>Tag it <a href="https://www.instagram.com/explore/tags/burjhenge/" target="_blank" rel="noopener">#burjhenge</a> or send it to <a href="https://www.instagram.com/burjhenge/" target="_blank" rel="noopener">@burjhenge</a>.</dd>
+    </dl>
+  </section>
 
-  <a class="cta" href="./">FIND TODAY'S SPOT ›</a>
+  <div class="end"><a class="cta" href="./">FIND TODAY'S SPOT ›</a></div>
 
   <footer><span>© Burjhenge · Map data © OpenStreetMap contributors</span><a href="https://www.instagram.com/burjhenge/" target="_blank" rel="noopener">@BURJHENGE</a></footer>
-</div>
+</main>
 <script>document.getElementById("mail").addEventListener("click",e=>{e.preventDefault();location.href="mai"+"lto:"+["hello","burjhenge.com"].join("@")+"?subject=Burjhenge"})</script>
 </body>
 </html>
