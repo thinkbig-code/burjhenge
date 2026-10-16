@@ -183,10 +183,12 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 /* the choice spans the whole action row, so it fully covers the distance line whatever the font width */
 .acts{position:relative}
 /* a small, content-sized selector; the distance line under it steps aside while it is open */
-.rmenu{position:absolute;left:0;box-sizing:border-box;width:min(268px,calc(100vw - 64px));bottom:calc(100% + 8px);z-index:7;padding:4px;background:#0b0c12;border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:0;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.rmenu{position:absolute;left:0;box-sizing:border-box;width:max-content;max-width:calc(100vw - 64px);bottom:calc(100% + 8px);z-index:7;padding:4px;background:#0b0c12;border:1px solid rgba(239,231,218,.14);border-radius:10px;display:grid;gap:0;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .ropt{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:6px;color:var(--text);text-decoration:none;font-size:10px;letter-spacing:var(--ls)}
 .ropt .ri{display:grid;color:var(--mute)}.ropt .ri svg{width:20px;height:20px}
-.ropt em{margin-left:auto;font-style:normal;color:var(--mute);font-size:9px;letter-spacing:.08em}
+/* label column of fixed width, so both distances line up a short step after the longest label */
+.ropt>span:not(.ri){min-width:7.6em}
+.ropt em{margin-left:20px;font-style:normal;color:var(--mute);font-size:9px;letter-spacing:.08em;text-align:right;min-width:4.6em}
 /* both icons stay quiet; a pressed row warms its icon */
 .ropt:active .ri{color:var(--sun)}
 .ropt:active{background:rgba(239,231,218,.06)}
