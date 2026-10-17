@@ -187,13 +187,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .ropt{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:6px;color:var(--text);text-decoration:none;font-size:10px;letter-spacing:var(--ls)}
 .ropt .ri{display:grid;color:var(--mute)}.ropt .ri svg{width:20px;height:20px}
 /* label column of fixed width, so both distances line up a short step after the longest label */
-.ropt>span:not(.ri){min-width:7.6em}
+.ropt>span:not(.ri){min-width:7.6em;text-align:left}
 .ropt em{margin-left:20px;font-style:normal;color:var(--mute);font-size:9px;letter-spacing:.08em;text-align:right;min-width:4.6em}
 /* both icons stay quiet; a pressed row warms its icon */
 .ropt:active .ri{color:var(--sun)}
 .ropt:active{background:rgba(239,231,218,.06)}
 @media (hover:hover){.ropt:hover{background:rgba(239,231,218,.06)}}
 .where.routing .km,.where.routing .note2{visibility:hidden}
+@media (min-width:521px){.rmenu{left:auto;right:0;bottom:auto;top:calc(100% + 8px)}}
+@media (max-height:760px){.calopen .where{visibility:hidden}}
 </style>
 
 </head>
@@ -220,7 +222,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     <div class="where">
       <div class="kmrow"><div class="note2" id="note2" role="status"></div><div class="km" id="km">8.2 KM EAST<i>OF BURJ KHALIFA</i></div></div>
       <div class="acts">
-        <div class="go" id="go"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="menu" aria-label="Get there by" hidden><a class="ropt" id="rCar" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a></div></div>
+        <div class="go" id="routeWrap"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="menu" aria-label="Get there by" hidden><a class="ropt" id="rCar" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a></div></div>
         <button class="btn" id="share" aria-label="Share a link to this moment"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z"/></svg><span class="lbl">SHARE</span></button>
       </div>
       <div class="toast" id="toast" role="status"></div>
@@ -230,8 +232,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     <button class="btn" id="mine" aria-haspopup="dialog" aria-expanded="false" aria-controls="mp"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></svg><span id="mineTxt">MY PLACE</span></button><button class="btn unplace" id="unplace" hidden aria-label="Leave your place and go back to today's spot"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
     <div class="mp" id="mp" role="dialog" aria-label="When it happens at your place" hidden>
       <button class="pbtn solid" id="geo"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,191.63V184a8,8,0,0,0-16,0v31.63A88.13,88.13,0,0,1,40.37,136H72a8,8,0,0,0,0-16H40.37A88.13,88.13,0,0,1,120,40.37V72a8,8,0,0,0,16,0V40.37A88.13,88.13,0,0,1,215.63,120H184a8,8,0,0,0,0,16h31.63A88.13,88.13,0,0,1,136,215.63Z"/></svg>USE MY LOCATION</button>
-      <div class="or">OR PASTE A GOOGLE MAPS LINK OR COORDINATES</div>
-      <div class="row"><input id="coord" inputmode="decimal" autocomplete="off" placeholder="25.2086, 55.3549" aria-label="Google Maps link or coordinates"><button class="pbtn" id="go">GO</button></div>
+      <div class="or">OR PASTE COORDINATES FROM GOOGLE MAPS</div>
+      <div class="row"><input id="coord" inputmode="decimal" autocomplete="off" placeholder="e.g. 25.2086, 55.3549" aria-label="Coordinates, for example 25.2086, 55.3549"><button class="pbtn" id="go">GO</button></div>
       <div class="floor"><span>FLOOR</span><button id="fdn" aria-label="Lower floor">−</button><output id="fl" aria-live="polite">0</output><button id="fup" aria-label="Higher floor">+</button></div>
       <div class="pmsg" id="pmsg">Worked out on this device. Your location is not sent anywhere.</div>
       <button class="pbtn" id="ics" hidden>ADD TO CALENDAR</button>
@@ -535,7 +537,7 @@ $("route").addEventListener("click",e=>{if(!st.both){track(st.sea?"route-boat":"
 // the screen follows the choice, so coming back from Maps it shows the spot you went to
 $("rCar").addEventListener("click",()=>{track("route-car");closeRoute();setTimeout(()=>setSea(false),0)});
 $("rBoat").addEventListener("click",()=>{track("route-boat");closeRoute();setTimeout(()=>setSea(true),0)});
-document.addEventListener("pointerdown",e=>{if(!$("rmenu").hidden&&!e.target.closest("#go"))closeRoute()});
+document.addEventListener("pointerdown",e=>{if(!$("rmenu").hidden&&!e.target.closest("#routeWrap"))closeRoute()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRoute()});
 const setSea=v=>{if(st.sea===v)return;stopPlay();st.sea=v;render(true)};
 $("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else setDay(st.day-1)});
@@ -560,8 +562,8 @@ function drawCal(){
     g.appendChild(b);
   }
 }
-function openCal(){[cy,cm]=ymd(st.day);drawCal();$("cal").hidden=false;$("date").setAttribute("aria-expanded","true");const f=$("grid").querySelector(".sel");if(f)f.focus()}
-function closeCal(){if($("cal").hidden)return;$("cal").hidden=true;$("date").setAttribute("aria-expanded","false")}
+function openCal(){[cy,cm]=ymd(st.day);drawCal();$("cal").hidden=false;document.body.classList.add("calopen");$("date").setAttribute("aria-expanded","true");const f=$("grid").querySelector(".sel");if(f)f.focus()}
+function closeCal(){if($("cal").hidden)return;$("cal").hidden=true;document.body.classList.remove("calopen");$("date").setAttribute("aria-expanded","false")}
 $("date").addEventListener("click",()=>$("cal").hidden?openCal():closeCal());
 $("cprev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}drawCal()});
 $("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}drawCal()});
@@ -594,7 +596,8 @@ function usePlace(lat,lon,label,stay){
   lastP={lat,lon,label};
   const P=placeEvents({lat,lon,h:floor*3.2+1.6,floor,label});
   if(!P.events.length){
-    st.place=null;placeUI();render(true);
+    const was=!!st.place;st.place=null;placeUI();
+    if(was){if(st.prevPm!=null)st.pm=st.prevPm;stopPlay();st.dt=0;st.day=-1;setDay(0)}else render(true);
     say(`From here the sun never sits on the spire.<br><b>Sunsets</b> line up only east of Burj Khalifa, <b>sunrises</b> only west of it, roughly along the line toward it.`);
     $("nearest").hidden=false;return;
   }
