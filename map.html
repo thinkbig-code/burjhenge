@@ -11,6 +11,10 @@
 <meta property="og:title" content="Burjhenge">
 <meta property="og:description" content="When and where the sun sets or rises exactly behind Burj Khalifa.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#07080d">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Burjhenge","applicationCategory":"ReferenceApplication","operatingSystem":"Any","description":"Calculates the dates, times and viewing spots in Dubai where the sun aligns with the spire of Burj Khalifa.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -126,8 +130,8 @@ button:focus-visible,.ico:focus-visible{outline:2px solid var(--sun);outline-off
       <div class="where">
         <div class="spot" id="spot">Creek Harbour<span class="km">7.3 KM</span></div>
         <div class="acts">
-          <a class="ico route" id="dir" href="#" target="_blank" rel="noopener" aria-label="Open directions to this spot in maps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8z"/></svg>ROUTE</a>
-          <button class="ico" id="share" aria-label="Share a link to this alignment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></button>
+          <a class="ico route" id="dir" href="#" target="_blank" rel="noopener" aria-label="Open directions to this spot in maps"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M237.33,106.21,61.41,41l-.16-.05A16,16,0,0,0,40.9,61.25a1,1,0,0,0,.05.16l65.26,175.92A15.77,15.77,0,0,0,121.28,248h.3a15.77,15.77,0,0,0,15-11.29l.06-.2,21.84-78,78-21.84.2-.06a16,16,0,0,0,.62-30.38ZM149.84,144.3a8,8,0,0,0-5.54,5.54L121.3,232l-.06-.17L56,56l175.82,65.22.16.06Z"/></svg>ROUTE</a>
+          <button class="ico" id="share" aria-label="Share a link to this alignment"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z"/></svg></button>
         </div>
         <div class="toast" id="toast" role="status"></div>
       </div>
@@ -148,7 +152,7 @@ button:focus-visible,.ico:focus-visible{outline:2px solid var(--sun);outline-off
   <div class="right">
     <div class="panel plan" id="planBox" aria-label="Map of viewing spots around Burj Khalifa. Tap a spot to select it, or tap elsewhere to drop a pin.">
       <canvas id="plan" aria-hidden="true"></canvas>
-      <div class="hint" id="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6-5.4-6-11a6 6 0 1 1 12 0c0 5.6-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg>tap the line to stand there</div>
+      <div class="hint" id="hint"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></svg>tap the line to stand there</div>
       <a class="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
       <div class="sr" id="spotList" aria-label="Viewing spots"></div>
     </div>
@@ -156,8 +160,8 @@ button:focus-visible,.ico:focus-visible{outline:2px solid var(--sun);outline-off
       <canvas id="strip" aria-hidden="true"></canvas>
       <button class="today" id="today" aria-label="Go to today">TODAY</button>
       <div class="nav">
-        <button id="prev" aria-label="Previous alignment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
-        <button id="next" aria-label="Next alignment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+        <button id="prev" aria-label="Previous alignment"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button>
+        <button id="next" aria-label="Next alignment"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>
       </div>
     </div>
   </div>
@@ -305,12 +309,14 @@ function skyCols(alt){
   for(let i=1;i<P.length;i++) if(alt<=P[i][0]){const t=(alt-P[i-1][0])/(P[i][0]-P[i-1][0]);return [mix(P[i-1][1],P[i][1],t),mix(P[i-1][2],P[i][2],t)]}
   return [P[4][1],P[4][2]];
 }
-const PROF=[[0,46],[.12,46],[.12,40],[.27,38],[.27,32],[.42,29],[.42,24],[.55,21],[.55,16],[.66,13],[.66,9.5],[.74,8],[.74,5],[.79,4],[.82,2.6],[.9,1.6],[1,.5]];
+const PROFL=[[0,46],[.14,46],[.14,38],[.31,36],[.31,27],[.48,25],[.48,17],[.63,15],[.63,9],[.75,7.5],[.75,4.6],[.8,3.8],[.83,2.6],[.9,1.6],[1,.5]];
+const PROFR=[[0,44],[.08,44],[.08,40],[.23,38],[.23,31],[.4,29],[.4,21],[.56,19],[.56,12.5],[.69,10.5],[.69,5.5],[.77,4.4],[.8,3.8],[.83,2.6],[.9,1.6],[1,.5]];
+function sunCol(alt){const P=[[0,[255,150,78]],[3,[255,184,104]],[8,[255,218,152]],[20,[255,238,204]]];if(alt<=0)return P[0][1];for(let i=1;i<P.length;i++)if(alt<=P[i][0])return mix(P[i-1][1],P[i][1],(alt-P[i-1][0])/(P[i][0]-P[i-1][0]));return P[3][1]}
 function rand(seed){return()=>((seed=(seed*16807)%2147483647)/2147483647)}
-const SKY=(()=>{const r=rand(7),a=[];for(let i=0;i<70;i++){const x=(r()*2-1)*2600;if(Math.abs(x)<110)continue;a.push({x,h:40+r()**2*330*(1-Math.abs(x)/3200),w:18+r()*45})}return a})();
+const SKY=(()=>{const r=rand(7),a=[];for(let i=0;i<70;i++){const x=(r()*2-1)*2600;if(Math.abs(x)<110)continue;a.push({x,h:40+r()**2*330*(1-Math.abs(x)/3200),w:18+r()*45})}const q=rand(13);a.forEach(b=>{b.k=q()<.45?.34+q()*.32:q()*.06;const t=q();b.t=t<.4?0:t<.65?1:t<.8?2:3;b.f=q()<.5?-1:1});a.sort((m,n)=>n.k-m.k);return a})();
 const STARS=(()=>{const r=rand(11),a=[];for(let i=0;i<120;i++)a.push([r(),r()*.7,r()]);return a})();
 const GLYPH={};
-function sunGlyph(set){return GLYPH[set]||(GLYPH[set]=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 18h20"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M12 ${set?"4v5m0 0l-2.5-2.5M12 9l2.5-2.5":"9V4m0 0L9.5 6.5M12 4l2.5 2.5"}"/></svg>`)}
+function sunGlyph(set){return GLYPH[set]||(GLYPH[set]=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18.5h18"/><path d="M7 18.5a5 5 0 0 1 10 0"/><path d="M12 ${set?"3.5v6m0 0l-2.5-2.5M12 9.5l2.5-2.5":"9.5v-6m0 0L9.5 6M12 3.5l2.5 2.5"}"/></svg>`)}
 const hhmm=t=>{const L=new Date(t+TZ);return String(L.getUTCHours()).padStart(2,"0")+":"+String(L.getUTCMinutes()).padStart(2,"0")};
 const dmon=t=>{const L=new Date(t+TZ);return L.getUTCDate()+" "+MON[L.getUTCMonth()]};
 // touch the DOM only when something actually changed
@@ -331,18 +337,24 @@ function drawScene(){
   c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
   if(night>0){c.fillStyle=`rgba(239,231,218,${.7*night})`;STARS.forEach(([x,y,r])=>{c.fillRect(x*w,y*horizonY,r>.85?1.6:1,r>.85?1.6:1)})}
-  const sx=cx+wrap(p.az-s.b)*ppd, sy=horizonY-p.alt*ppd, sr=Math.max(3,0.267*ppd);
+  const sx=cx+wrap(p.az-s.b)*ppd, sy=horizonY-p.alt*ppd, sr=Math.max(3,0.267*ppd), sc=sunCol(p.alt), lo=Math.max(0,Math.min(1,1-p.alt/14))*Math.max(0,Math.min(1,(p.alt+5)/5));
   const on=sx>-sr&&sx<w+sr&&sy<horizonY+sr;
   if(on){
-    const glow=c.createRadialGradient(sx,sy,sr*.6,sx,sy,sr*7);glow.addColorStop(0,"rgba(255,190,90,.55)");glow.addColorStop(1,"rgba(255,120,60,0)");
-    c.fillStyle=glow;c.fillRect(0,0,w,h);
-    c.fillStyle="#ffe2a8";c.beginPath();c.arc(sx,sy,sr,0,7);c.fill();
+    if(lo>0){c.save();c.translate(sx,horizonY);c.scale(4.5,1);const R=Math.max(horizonY*.55,(horizonY-sy)*1.6);const band=c.createRadialGradient(0,0,0,0,0,R);band.addColorStop(0,`rgba(${sc[0]},${Math.round(sc[1]*.82)},${Math.round(sc[2]*.6)},${.42*lo})`);band.addColorStop(1,"rgba(255,120,60,0)");c.fillStyle=band;c.fillRect(-w,-R,w*2+R,R*2);c.restore()}
+    c.save();c.translate(sx,sy);c.scale(1.9,1);const glow=c.createRadialGradient(0,0,sr*.6,0,0,sr*6);glow.addColorStop(0,`rgba(${sc[0]},${sc[1]},${sc[2]},.5)`);glow.addColorStop(.3,`rgba(${sc[0]},${Math.round(sc[1]*.85)},${Math.round(sc[2]*.7)},.2)`);glow.addColorStop(.65,"rgba(255,140,70,.05)");glow.addColorStop(1,"rgba(255,120,60,0)");c.fillStyle=glow;c.fillRect(-sr*7,-sr*7,sr*14,sr*14);c.restore();
+    c.fillStyle=rgb(sc);c.beginPath();c.arc(sx,sy,sr,0,7);c.fill();
   }
-  c.fillStyle="#07070f";
-  SKY.forEach(b=>{const x=cx+Math.atan(b.x/s.d)*D*ppd, bw=Math.max(1,Math.atan(b.w/s.d)*D*ppd), bh=Math.atan(b.h/s.d)*D*ppd;c.fillRect(x-bw/2,horizonY-bh,bw,bh)});
-  c.beginPath();
-  const pts=PROF.map(([f,hw])=>[Math.atan(hw/s.d)*D*ppd,horizonY-Math.atan(f*BURJ.h/s.d)*D*ppd]);
-  c.moveTo(cx-pts[0][0],horizonY);pts.forEach(q=>c.lineTo(cx-q[0],q[1]));for(let i=pts.length-1;i>=0;i--)c.lineTo(cx+pts[i][0],pts[i][1]);c.closePath();c.fill();
+  const ink=[7,7,15];
+  SKY.forEach(b=>{const x=cx+Math.atan(b.x/s.d)*D*ppd, bw=Math.max(1,Math.atan(b.w/s.d)*D*ppd), bh=Math.atan(b.h/s.d)*D*ppd;if(bh<=0)return;
+    const y=horizonY-bh;if(b.k>.1){const hg=c.createLinearGradient(0,y,0,horizonY);hg.addColorStop(0,rgb(mix(ink,hor,b.k)));hg.addColorStop(1,rgb(mix(ink,hor,Math.min(.85,b.k+.14))));c.fillStyle=hg}else c.fillStyle=rgb(mix(ink,hor,b.k));
+    if(b.t===1){const cw=bw*.6,ch=bh*.1;c.fillRect(x-bw/2,y+ch,bw,bh-ch);c.fillRect(x-cw/2,y,cw,ch+1)}
+    else if(b.t===2){c.fillRect(x-bw/2,y,bw,bh);const mh=bh*.18;c.fillRect(x+b.f*bw*.18-.5,y-mh,Math.max(1,bw*.04),mh+1)}
+    else if(b.t===3){const dy=Math.min(bh*.12,bw*.5);c.beginPath();c.moveTo(x-bw/2,horizonY);c.lineTo(x-bw/2,y+(b.f>0?dy:0));c.lineTo(x+bw/2,y+(b.f>0?0:dy));c.lineTo(x+bw/2,horizonY);c.closePath();c.fill()}
+    else c.fillRect(x-bw/2,y,bw,bh)});
+  c.fillStyle=rgb(mix(ink,hor,.05));
+  const px=([f,hw])=>[Math.atan(hw/s.d)*D*ppd,horizonY-Math.atan(f*BURJ.h/s.d)*D*ppd];
+  const L=PROFL.map(px),Rt=PROFR.map(px);
+  c.beginPath();c.moveTo(cx-L[0][0],horizonY);L.forEach(v=>c.lineTo(cx-v[0],v[1]));for(let i=Rt.length-1;i>=0;i--)c.lineTo(cx+Rt[i][0],Rt[i][1]);c.lineTo(cx+Rt[0][0],horizonY);c.closePath();c.fill();
   if(on && p.alt>-1){c.save();c.clip();const rl=c.createRadialGradient(sx,sy,0,sx,sy,sr*5);rl.addColorStop(0,"rgba(255,200,120,.35)");rl.addColorStop(1,"rgba(255,200,120,0)");c.fillStyle=rl;c.fillRect(0,0,w,h);c.restore()}
   c.fillStyle="#05050b";c.fillRect(0,horizonY,w,h-horizonY);
   c.strokeStyle="rgba(255,181,74,.25)";c.beginPath();c.moveTo(0,horizonY+.5);c.lineTo(w,horizonY+.5);c.stroke();
