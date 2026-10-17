@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800&family=Martian+Mono:wght@400;500&display=swap">
 <script data-goatcounter="https://burjhenge.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How accurate are the times?", "acceptedAnswer": {"@type": "Answer", "text": "The sun position matches NOAA's solar calculator to within a few seconds, with refraction included. The curve of the Earth is ignored, which shifts the moment by a few seconds at most. Times are in Dubai time."}}, {"@type": "Question", "name": "What about sunrise?", "acceptedAnswer": {"@type": "Answer", "text": "Same idea, from spots west of the tower: Jumeirah, the coast, the sea. Tap SUNSET to switch to SUNRISE."}}, {"@type": "Question", "name": "Does it work from my balcony?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, if it faces the tower from the east (for sunset) or the west (for sunrise). Open MY PLACE and set your floor."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How accurate are the times?", "acceptedAnswer": {"@type": "Answer", "text": "The sun position matches NOAA's solar calculator to within a few seconds, with refraction included. The curve of the Earth is ignored, which shifts the moment by a few seconds at most. Times are in Dubai time."}}, {"@type": "Question", "name": "What about sunrise?", "acceptedAnswer": {"@type": "Answer", "text": "Same idea, from spots west of the tower: Jumeirah, the coast, the sea. Tap SUNSET to switch to SUNRISE."}}, {"@type": "Question", "name": "Does it work from my balcony?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, if it faces the tower from the east (for sunset) or the west (for sunrise). Open MY PLACE and set your floor."}}, {"@type": "Question", "name": "Found a mistake or have an idea?", "acceptedAnswer": {"@type": "Answer", "text": "Write to us. If a time or a spot was off, say where you stood and what you saw."}}]}</script>
 <style>
 /* /how is a field guide: the instrument explaining itself. Same night, type and cream / lavender / gold roles as the main screen.
    Rhythm: text, diagram, text, the real UI, text, the shot, questions. */
@@ -66,7 +66,7 @@ h1 em{font-style:normal;color:var(--sun)}
 .loop li:not(:last-child):after{content:"›";color:var(--mute);opacity:.5;font-size:9px;margin:0 8px}
 @media (hover:hover){.loop a:hover{color:var(--text)}}
 
-section{margin-top:var(--sec);scroll-margin-top:16px}
+section,#align{scroll-margin-top:16px}section{margin-top:var(--sec)}
 h2{display:flex;align-items:baseline;gap:12px;margin:0 0 var(--h2gap);font-size:10px;font-weight:400;letter-spacing:var(--ls);text-transform:uppercase;color:var(--text);opacity:.75}
 h2 span{color:var(--mute);font-variant-numeric:tabular-nums}
 p{margin:0 0 var(--pgap);max-width:36em}
@@ -187,7 +187,7 @@ footer a{padding:12px 0;margin:-12px 0}
   <h1>The sun<br>on the <em>spire</em></h1>
   <p class="lead">Every day, from somewhere in Dubai, the setting or rising sun sits exactly on the tip of Burj Khalifa. Burjhenge tells you where to stand, at what minute, and how to get there.</p>
   <ol class="loop" aria-label="Chapters">
-    <li><a href="#find">FIND THE SPOT</a></li><li><a href="#go">GO THERE</a></li><li><a href="#shot">ALIGN THE SUN</a></li><li><a href="#shot">TAKE THE SHOT</a></li><li><a href="#share">SHARE IT</a></li>
+    <li><a href="#find">FIND THE SPOT</a></li><li><a href="#go">GO THERE</a></li><li><a href="#align">ALIGN THE SUN</a></li><li><a href="#shot">TAKE THE SHOT</a></li><li><a href="#share">SHARE IT</a></li>
   </ol>
 
   <section id="how">
@@ -197,15 +197,15 @@ footer a{padding:12px 0;margin:-12px 0}
       <line x1="8" y1="160" x2="352" y2="160" stroke="rgba(239,231,218,.25)" stroke-width="1"/>
       <path d="M292.21 160 292.21 142.92 293.56 142.92 293.9 122.18 295.43 122.18 295.76 101.44 297.12 101.44 297.46 83.14 298.48 83.14 298.73 68.5 299.22 68.5 299.36 62.4 299.56 58.74 299.73 50.2 299.92 38 300.08 38 300.27 50.2 300.44 58.74 300.64 62.4 300.75 66.06 300.93 75.82 301.78 75.82 302.12 91.68 303.22 91.68 303.56 111.2 304.91 111.2 305.25 131.94 306.44 131.94 306.78 150.24 307.46 150.24 307.46 160Z" fill="var(--text)" opacity=".9"/>
       <path d="M318 160V38M314 38h8M314 160h8" stroke="rgba(239,231,218,.35)" stroke-width="1"/>
-      <text x="326" y="103">828 M</text>
+      <text x="326" y="103" style="opacity:.8">828 M</text>
       <line x1="170" y1="160" x2="300" y2="38" stroke="var(--mute)" stroke-width="1" stroke-dasharray="3 3"/>
       <path d="M196 160A26 26 0 0 0 189.5 142.6" fill="none" stroke="var(--mute)" stroke-width="1"/>
-      <text x="200" y="152" class="big" style="fill:var(--mute);font-size:16px">15°</text>
+      <text x="200" y="152" class="big" style="fill:var(--mute);font-size:13px">15°</text>
       <line class="sight" x1="30" y1="160" x2="300" y2="38" stroke="var(--sun)" stroke-width="1.6" pathLength="1"/>
       <line x1="300" y1="38" x2="338" y2="20.8" stroke="var(--sun)" stroke-width="1" stroke-dasharray="2 3"/>
       <defs><radialGradient id="sunglow"><stop offset=".35" stop-color="#ffcc7d" stop-opacity=".35"/><stop offset="1" stop-color="#ff8c46" stop-opacity="0"/></radialGradient></defs><ellipse cx="340" cy="20" rx="26" ry="16" fill="url(#sunglow)"/><circle cx="340" cy="20" r="7" fill="#ffcc7d"/>
       <path d="M78 160A48 48 0 0 0 73.7 140.4" fill="none" stroke="var(--sun)" stroke-width="1"/>
-      <text x="84" y="151" class="big" style="fill:var(--sun);font-size:19px">6°</text>
+      <text x="84" y="151" class="big" style="fill:var(--sun);font-size:16px">6°</text>
       <circle cx="30" cy="160" r="3" fill="var(--text)"/><circle cx="170" cy="160" r="2.5" fill="var(--mute)"/>
       <text x="30" y="178" text-anchor="middle">8 KM</text><text x="170" y="178" text-anchor="middle">3 KM</text>
       <text x="300" y="178" text-anchor="middle">BURJ</text>
@@ -241,7 +241,7 @@ footer a{padding:12px 0;margin:-12px 0}
       </div>
       <div class="pill line" style="margin-top:8px">ROUTE ›</div>
     </a>
-    <div class="sub">
+    <div class="sub" id="align">
       <p class="cap" style="margin:0 0 4px">Timeline</p>
       <a class="ui" href="./" aria-label="Open the timeline on the main screen" style="margin:0"><div class="tl" aria-hidden="true" style="margin-top:6px"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg><div class="ruler"><i class="m"></i><i class="s"></i><span class="t">17:24</span></div></div></a>
       <p class="mute" style="margin-top:16px">Drag the timeline or press play to see the sun move past the tip before you go. It always glides back to the moment.</p>

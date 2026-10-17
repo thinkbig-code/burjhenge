@@ -40,7 +40,7 @@ html,body{height:100%;background:var(--night);color:var(--text);overflow:hidden}
 body{font-family:var(--mono)}
 .scene{position:fixed;inset:0;touch-action:pinch-zoom;user-select:none;-webkit-user-select:none;cursor:grab}
 .scene:active{cursor:grabbing}
-.scene:focus-visible{outline:none}
+.scene:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(255,181,74,.55)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .top{position:absolute;left:var(--inset);right:var(--inset);top:calc(var(--inset) + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;align-items:flex-start;gap:16px;pointer-events:none}
 .when{position:relative;display:grid;gap:10px;min-width:0}
@@ -68,7 +68,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .btn.q{color:var(--mute)}
 .toast{font-size:9px;letter-spacing:var(--ls);color:var(--sun);min-height:11px}
 .foot{position:absolute;left:var(--inset);right:var(--inset);bottom:calc(var(--inset) + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;gap:12px;pointer-events:none}
-.brandrow{display:flex;align-items:baseline;gap:16px;pointer-events:auto}
+.brandrow{display:flex;align-items:center;gap:16px;pointer-events:auto}
 .brand{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.32em}
 .ig{font-size:9px;letter-spacing:var(--ls);color:var(--mute);text-decoration:none;padding:8px 0}
 /* links stay muted; on phones a tapped link kept a sticky orange hover, so hover only exists where there is a mouse */
@@ -189,7 +189,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .ropt:active .ri{color:var(--sun)}
 .ropt:active{background:rgba(239,231,218,.06)}
 @media (hover:hover){.ropt:hover{background:rgba(239,231,218,.06)}}
-.where.routing .km,.where.routing .note2{visibility:hidden}
+@media (max-width:520px){.where.routing .km,.where.routing .note2{visibility:hidden}}
 @media (min-width:521px){.rmenu{left:auto;right:0;bottom:auto;top:calc(100% + 8px)}}
 @media (max-height:760px){.calopen .where{visibility:hidden}}
 /* the gold time is the moment on the spire, not the time of sunset; the sunset / sunrise switch sits under that caption */
@@ -205,8 +205,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 </head>
 <body>
 <div class="sr"><h1>Burjhenge: where to stand in Dubai to see the sun set on the spire of Burj Khalifa</h1><p>Every day, from somewhere in Dubai, the sun sets or rises exactly behind the tip of Burj Khalifa. Burjhenge shows today's spot, the exact time and a route by car or boat, and finds the dates for your own balcony or window.</p></div>
-<div class="scene" id="scene" tabindex="0" role="img" aria-label="Burj Khalifa with the sun on its spire">
-  <canvas id="sky"></canvas>
+<div class="scene" id="scene" tabindex="0" role="group" aria-label="Burj Khalifa with the sun on its spire">
+  <canvas id="sky" aria-hidden="true"></canvas>
   <div class="top">
     <div class="when">
       <div class="days">
