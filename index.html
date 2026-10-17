@@ -182,18 +182,20 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 /* the choice spans the whole action row, so it fully covers the distance line whatever the font width */
 .acts{position:relative}
 /* a small, content-sized selector; the distance line under it steps aside while it is open */
-.rmenu{display:flex;align-items:center;gap:8px}
-.where.routing #route,.where.routing #share{display:none}
-.where.routing .go{flex:1}
-.where.routing .rmenu{width:100%}
-.ropt{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px 0 13px;border:1px solid rgba(255,181,74,.7);border-radius:20px;color:var(--sun);text-decoration:none;font:10px var(--mono);letter-spacing:var(--ls);white-space:nowrap}
-.ropt .ri{display:grid}.ropt .ri svg{width:18px;height:18px}
-.ropt>span:not(.ri){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.ropt em{font-style:normal}
-.ropt:active,.ropt:focus-visible{background:var(--sun);color:var(--night)}
-@media (hover:hover){.ropt:hover{background:var(--sun);color:var(--night)}}
-.rclose{margin-left:auto;width:40px;height:40px;display:grid;place-items:center;padding:0;border:0;background:none;color:var(--mute);cursor:pointer}
-.rclose svg{width:16px;height:16px}
+.rmenu{position:absolute;left:0;box-sizing:border-box;width:max-content;max-width:calc(100vw - 32px);bottom:calc(100% + 8px);z-index:7;padding:4px;background:#0b0c12;border:1px solid rgba(239,231,218,.12);border-radius:8px;display:grid;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+/* each option is a strict three-column grid: icon box, label, right-aligned distance */
+.ropt{display:grid;grid-template-columns:26px 1fr auto;align-items:center;column-gap:9px;height:38px;padding:0 10px 0 6px;border-radius:5px;color:var(--text);text-decoration:none;font-size:10px;letter-spacing:var(--ls);line-height:1}
+.ropt .ri{display:grid;place-items:center;width:26px;height:28px;color:var(--mute)}
+/* optical centring: the car's ink sits low in its box and the boat's sits high, so nudge them to share one visual centre */
+#rCarIco svg{width:20px;height:20px;transform:translateY(-.6px)}
+#rBoatIco svg{width:18px;height:18px;transform:translateY(1.1px)}
+.ropt>span:not(.ri){text-align:left}
+.ropt em{justify-self:end;padding-left:12px;font-style:normal;color:var(--mute);font-size:9px;letter-spacing:.08em;text-align:right}
+.ropt:active .ri{color:var(--sun)}
+.ropt:active{background:rgba(239,231,218,.06)}
+@media (hover:hover){.ropt:hover{background:rgba(239,231,218,.06)}}
+@media (max-width:520px){.where.routing .km,.where.routing .note2{visibility:hidden}}
+@media (min-width:521px){.rmenu{left:auto;right:0;bottom:auto;top:calc(100% + 8px)}}
 @media (max-height:760px){.calopen .where{visibility:hidden}}
 /* the gold time is the moment on the spire, not the time of sunset; the sunset / sunrise switch sits under that caption */
 .time{cursor:default}
@@ -229,7 +231,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     <div class="where">
       <div class="kmrow"><div class="note2" id="note2" role="status"></div><div class="km" id="km">8.2 KM EAST<i>OF BURJ KHALIFA</i></div></div>
       <div class="acts">
-        <div class="go" id="routeWrap"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="group" aria-label="Get there by" hidden><a class="ropt" id="rCar" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a><button class="rclose" id="rClose" aria-label="Close"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button></div></div>
+        <div class="go" id="routeWrap"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="menu" aria-label="Get there by" hidden><a class="ropt" id="rCar" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a></div></div>
         <button class="btn" id="share" aria-label="Share a link to this moment"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z"/></svg><span class="lbl">SHARE</span></button>
       </div>
       <div class="toast" id="toast" role="status"></div>
@@ -471,7 +473,7 @@ function text(){
   $("route").setAttribute("aria-label",atSea?"Open this spot on the water in Google Maps":"Open the route to this spot in Google Maps");
   // car and boat appear only for the options this day really has
   const other=!P&&candidates(st.day,st.pm,!st.sea).length>0;
-  st.both=other;$("route").setAttribute("aria-haspopup",other?"true":"false");
+  st.both=other;$("route").setAttribute("aria-haspopup",other?"menu":"false");
   // with a choice to make, ROUTE is a button, not a link, so no browser or in-app viewer can follow it before the choice
   const R=$("route");if(other){R.removeAttribute("href");R.removeAttribute("target");R.setAttribute("role","button");R.tabIndex=0}else{R.setAttribute("target","_blank");R.removeAttribute("role")}
   if(other){const land=spotFor(false),sea=spotFor(true);
@@ -552,11 +554,10 @@ function spotFor(sea){const C=candidates(st.day,st.pm,sea);let b=C[0];C.forEach(
 const mapsDir=o=>`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
 const mapsPin=o=>`https://www.google.com/maps/search/?api=1&query=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
 $("rCarIco").innerHTML=CAR;$("rBoatIco").innerHTML=BOAT;
-function closeRoute(){if($("rmenu").hidden)return;const f=$("rmenu").contains(document.activeElement);$("rmenu").hidden=true;$("route").setAttribute("aria-expanded","false");document.querySelector(".where").classList.remove("routing");if(f)$("route").focus()}
-$("rClose").addEventListener("click",closeRoute);
+function closeRoute(){if($("rmenu").hidden)return;$("rmenu").hidden=true;$("route").setAttribute("aria-expanded","false");document.querySelector(".where").classList.remove("routing")}
 $("route").addEventListener("keydown",e=>{if(st.both&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("route").click()}});
 $("route").addEventListener("click",e=>{if(!st.both){track(st.sea?"route-boat":"route-car");return}
-  e.preventDefault();const m=$("rmenu");m.hidden=!m.hidden;$("route").setAttribute("aria-expanded",String(!m.hidden));document.querySelector(".where").classList.toggle("routing",!m.hidden);if(!m.hidden)$("rCar").focus({preventScroll:true})});
+  e.preventDefault();const m=$("rmenu");m.hidden=!m.hidden;$("route").setAttribute("aria-expanded",String(!m.hidden));document.querySelector(".where").classList.toggle("routing",!m.hidden)});
 // the screen follows the choice, so coming back from Maps it shows the spot you went to
 $("rCar").addEventListener("click",()=>{track("route-car");closeRoute();setTimeout(()=>setSea(false),0)});
 $("rBoat").addEventListener("click",()=>{track("route-boat");closeRoute();setTimeout(()=>setSea(true),0)});
