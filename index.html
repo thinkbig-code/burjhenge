@@ -38,7 +38,7 @@
 }
 html,body{height:100%;background:var(--night);color:var(--text);overflow:hidden}
 body{font-family:var(--mono)}
-.scene{position:fixed;inset:0;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.scene{position:fixed;inset:0;touch-action:pinch-zoom;user-select:none;-webkit-user-select:none;cursor:grab}
 .scene:active{cursor:grabbing}
 .scene:focus-visible{outline:none}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -383,11 +383,12 @@ const COMPASS=["NORTH","NORTH-EAST","EAST","SOUTH-EAST","SOUTH","SOUTH-WEST","WE
 /* ---------- URL: #YYYYMMDD~pm~8.0 ---------- */
 const fmtDay=i=>{const d=new Date(DAY0+i*86400e3+TZ);return d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,"0")+String(d.getUTCDate()).padStart(2,"0")};
 const token=()=>fmtDay(st.day)+"~"+(st.pm?"pm":"am")+"~"+(st.target/1000).toFixed(1)+(st.sea?"~s":"");
-let lastHash="";
+let lastHash="",sharedPlace=null;
 function writeHash(){if(st.place)return;const h=token();if(h===lastHash)return;lastHash=h;try{history.replaceState(null,"","#"+h)}catch(e){}}
 function readHash(){
   let h="";try{h=decodeURIComponent(location.hash.slice(1))}catch(e){}
-  const m=h.match(/^(\d{8})~(am|pm)(?:~(\d{1,2}(?:\.\d)?))?(~s)?$/); if(!m) return false;
+  const m=h.match(/^(\d{8})~(am|pm)(?:~(\d{1,2}(?:\.\d)?))?(~s)?(?:~p(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+),f(\d{1,3}))?$/); if(!m) return false;
+  if(m[5])sharedPlace={lat:+m[5],lon:+m[6],floor:+m[7]};
   let y=+m[1].slice(0,4),mo=+m[1].slice(4,6),d=+m[1].slice(6,8);
   const idx=()=>Math.round((Date.UTC(y,mo-1,d)-TZ-DAY0)/86400e3);
   let i=idx(); while(i<0){y++;i=idx()} while(i>=NDAYS){y--;i=idx()}
@@ -608,7 +609,7 @@ function usePlace(lat,lon,label,stay){
   stopPlay();if(!st.place)st.prevPm=st.pm;st.place=P;st.dt=0;render(true);placeUI();
   const list=P.events.map(e=>`<b>${dmon(e.t)} · ${hhmm(e.t)}</b>`).join(" · ");
   say(`${P.pm?"Sunset":"Sunrise"} on the spire from here: ${list}. Worked out on this device.`);
-  if(!stay)closeMine();
+  // the panel stays open: the dates and ADD TO CALENDAR are the answer, and a tap outside closes it
 }
 $("geo").addEventListener("click",()=>{
   // in-app browsers (Instagram, Facebook, TikTok...) often ask for location and then never answer
@@ -676,7 +677,8 @@ document.addEventListener("keydown",e=>{
 });
 function shareURL(){
   const sandbox=!/^https?:$/.test(location.protocol)||/claude/i.test(location.hostname);
-  return (sandbox?SANDBOX_SHARE_BASE:location.origin+location.pathname)+"#"+token();
+  const place=st.place&&lastP?`~p${lastP.lat.toFixed(5)},${lastP.lon.toFixed(5)},f${floor}`:"";
+  return (sandbox?SANDBOX_SHARE_BASE:location.origin+location.pathname)+"#"+token()+place;
 }
 // counts what people actually use; no personal data, no cookies
 const track=n=>{try{window.goatcounter&&goatcounter.count&&goatcounter.count({path:n,title:n,event:true})}catch(e){}try{window.umami&&umami.track(n)}catch(e){}};
@@ -700,9 +702,13 @@ new ResizeObserver(()=>frame()).observe(document.documentElement);
   if(seen||reduce.matches||new URLSearchParams(location.search).get("open"))return;
   let stop=false;const quit=()=>{stop=true};addEventListener("pointerdown",quit,{once:true});addEventListener("keydown",quit,{once:true});
   setTimeout(()=>{if(stop||st.place||playId||st.dt)return;try{localStorage.setItem("bh-hint","1")}catch(e){}
-    const t0=performance.now(),T=1100,A=9,io=x=>(1-Math.cos(Math.PI*x))/2;
+    const t0=performance.now(),T=1100,A=4,io=x=>(1-Math.cos(Math.PI*x))/2;
     const step=now=>{if(stop){goHome(0);return}const x=Math.min(1,(now-t0)/T);st.dt=A*io(x);frame();if(x<1)requestAnimationFrame(step);else goHome(450)};
-    requestAnimationFrame(step)},1400)})();
+    requestAnimationFrame(step)},4000)})();
+// a shared place opens in place mode on the shared date; the address bar goes back to the plain spot
+if(sharedPlace){const sp=sharedPlace,day=st.day;sharedPlace=null;setFloor(Math.max(0,Math.min(200,sp.floor)));usePlace(sp.lat,sp.lon,"SHARED PLACE",true);
+  if(st.place){const k=st.place.events.findIndex(e=>e.i===day);if(k>=0){st.place.k=k;render(true)}}
+  try{history.replaceState(null,"",location.pathname+"#"+token())}catch(e){}}
 // deep links from /how: ?open=place opens MY PLACE, ?open=route opens the car / boat choice; the query is then dropped from the address
 (()=>{const q=new URLSearchParams(location.search).get("open");if(!q)return;
   history.replaceState(null,"",location.pathname+location.hash);
