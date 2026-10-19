@@ -60,6 +60,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .kmrow{display:flex;align-items:center;gap:8px;pointer-events:auto}
 .km{font-size:11px;letter-spacing:.08em}
 .vpon{pointer-events:auto;background:none;border:0;padding:4px 0;margin:-4px 0 0;color:var(--sun);font:9px var(--mono);letter-spacing:.08em;text-align:inherit;cursor:pointer;line-height:1.5}
+.km i.vpby{color:var(--sun)}.km i.vpby::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--sun);margin:0 6px 1px 0;vertical-align:middle}
 .vpon:hover{text-decoration:underline;text-underline-offset:3px}
 .where.noting .vpon,.where.routing .vpon{visibility:hidden}
 .km i{display:block;font-style:normal;font-size:9px;color:#aaa5c2;margin-top:4px}
@@ -516,13 +517,17 @@ function vpOnLine(day,pm){
   }
   return vpLineCache[k]=best;
 }
-var vpTxt="",vpH=0; // on phones the horizon rises by the height of the viewpoint line while it shows
+var vpTxt="",vpH=0,vpNext=-1; // on phones the horizon rises by the height of the viewpoint line while it shows
 function vpShow(){
   const V=!st.place&&!st.sea&&st.q?vpOnLine(st.day,st.pm):null, on=!!(st.q&&st.q.vp);
-  let t="";if(V){if(on){const g=geoQ(false);t=g&&Math.abs(g.m-V.v.d)>=1000?`OR THE ${(g.m/1000).toFixed(0)} KM SPOT · ${hhmm(g.t)} ›`:""}else t=`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`}
+  let t="",nx=-1;
+  if(!V&&!st.place&&!st.sea&&st.q){for(let d=st.day+1;d<Math.min(NDAYS,st.day+60);d++)if(vpOnLine(d,st.pm)){nx=d;break}
+    if(nx>=0){const N=vpOnLine(nx,st.pm);t=`NEXT VIEWPOINT DAY: ${dmon(DAY0+nx*86400e3+12*3600e3)} · ${N.v.l} ›`}}
+  vpNext=nx;
+  if(V){if(on){const g=geoQ(false);t=g&&Math.abs(g.m-V.v.d)>=1000?`OR THE ${(g.m/1000).toFixed(0)} KM SPOT · ${hhmm(g.t)} ›`:""}else t=`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`}
   if(t===vpTxt)return;vpTxt=t;$("vpon").hidden=!t;$("vpon").textContent=t;
   const h=t?$("vpon").offsetHeight+12:0;if(h!==vpH){vpH=h;frame()}
-  if(t)$("vpon").setAttribute("aria-label",on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
+  if(t)$("vpon").setAttribute("aria-label",!V?"Go to the next day with a viewpoint on the line":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
 }
 function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
@@ -542,7 +547,7 @@ function text(){
   $("thumb").style.left=(50+st.dt/180*100)+"%";$("ta").textContent=hhmm(q.t-90*60e3);$("tb").textContent=hhmm(q.t+90*60e3);
   $("track").setAttribute("aria-valuenow",String(Math.round(st.dt)));$("track").setAttribute("aria-valuetext",hhmm(q.t+st.dt*60e3));
   $("play").setAttribute("aria-label",st.pm?"Play the sunset":"Play the sunrise");
-  $("km").innerHTML=P?`${(q.m/1000).toFixed(1)} KM ${dir}<i>${P.floor?"FLOOR "+P.floor:"OF BURJ KHALIFA"}</i>`:`${(q.m/1000).toFixed(1)} KM ${dir}<i>${q.vp?"BY "+q.vp.v.l:"OF BURJ KHALIFA"}</i>`;
+  $("km").innerHTML=P?`${(q.m/1000).toFixed(1)} KM ${dir}<i>${P.floor?"FLOOR "+P.floor:"OF BURJ KHALIFA"}</i>`:`${(q.m/1000).toFixed(1)} KM ${dir}${q.vp?`<i class="vpby">BY ${q.vp.v.l}</i>`:"<i>OF BURJ KHALIFA</i>"}`;
   $("route").href=`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
   // land spot: directions; water spot: a pin to hand to the skipper
   const atSea=st.sea&&!P;
@@ -794,7 +799,7 @@ $("howLink").addEventListener("click",()=>track("how-it-works"));
 $("igLink").addEventListener("click",()=>track("instagram"));
 $("ics").addEventListener("click",()=>track("calendar"));
 $("addcal").addEventListener("click",()=>$("ics").click());
-$("vpon").addEventListener("click",()=>{st.vp=!(st.q&&st.q.vp);track(st.vp?"viewpoint-line":"geometry-spot");stopPlay();st.dt=0;render(true)});
+$("vpon").addEventListener("click",()=>{if(!vpOnLine(st.day,st.pm)&&vpNext>=0){track("viewpoint-next");st.vp=true;setDay(vpNext);return}st.vp=!(st.q&&st.q.vp);track(st.vp?"viewpoint-line":"geometry-spot");stopPlay();st.dt=0;render(true)});
 $("play").addEventListener("click",()=>track("play"));
 $("mine").addEventListener("click",()=>track("my-place-open"));
 $("share").addEventListener("click",async()=>{
@@ -818,7 +823,7 @@ new ResizeObserver(()=>frame()).observe(document.documentElement);
 (()=>{let seen=false;try{seen=localStorage.getItem("bh-view")==="1"}catch(e){}
   if(seen||new URLSearchParams(location.search).get("open"))return;
   setTimeout(()=>{if(st.place||playId||!$("mp").hidden)return;try{localStorage.setItem("bh-view","1")}catch(e){}
-    showNote("BUILDINGS CAN HIDE THE TOWER. CHECK THE VIEW BEFORE YOU GO, OR PICK A VIEWPOINT IN MY PLACE.",8000)},6500)})();
+    showNote("BUILDINGS CAN HIDE THE TOWER. ON GOLD-DOT DAYS THE SPOT IS A VIEWPOINT WITH A CLEAR VIEW.",8000)},6500)})();
 // a shared place opens in place mode on the shared date; the address bar goes back to the plain spot
 if(sharedPlace){const sp=sharedPlace,day=st.day;sharedPlace=null;setFloor(Math.max(0,Math.min(200,sp.floor)));usePlace(sp.lat,sp.lon,"SHARED PLACE",true);
   if(st.place){const k=st.place.events.findIndex(e=>e.i===day);if(k>=0){st.place.k=k;render(true)}}
