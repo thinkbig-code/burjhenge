@@ -401,9 +401,12 @@ function pick(){
   if(st.day<=0&&pastToday())st.day=1;
   pick0();
 }
-function pastToday(){
-  const d=st.day,sea=st.sea,q=st.q;st.day=0;pick0();const r=!!(st.q&&st.q.t<Date.now()-5*60e3);st.day=d;st.sea=sea;st.q=q;return r;
+function pastToday(pm){
+  const d=st.day,sea=st.sea,q=st.q,m=st.pm;if(pm!=null)st.pm=pm;st.day=0;pick0();const r=!!(st.q&&st.q.t<Date.now()-5*60e3);st.day=d;st.sea=sea;st.q=q;st.pm=m;return r;
 }
+// today's other moment (sunset after a passed sunrise) is still ahead: going back to today switches to it
+const otherToday=()=>!st.place&&pastToday()&&!pastToday(!st.pm);
+function toToday(){if(otherToday()){stopPlay();st.pm=!st.pm;st.dt=0}st.day=-1;setDay(0)}
 function pick0(){
   if(st.vp&&!st.sea){const V=vpOnLine(st.day,st.pm);if(V){st.q={th:V.th,m:V.v.d,t:V.t,vp:V};return}}
   let C=candidates(st.day,st.pm,st.sea);
@@ -545,7 +548,7 @@ function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
   const P=st.place, rel=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
   $("rel").textContent=P?(st.day<=1?rel:"IN "+st.day+" DAYS"):rel;
-  $("prev").disabled=P?P.k<=0:st.day<=(pastToday()?1:0);$("next").disabled=P?P.k>=P.events.length-1:st.day>=NDAYS-1;
+  $("prev").disabled=P?P.k<=0:st.day<=(pastToday()&&!otherToday()?1:0);$("next").disabled=P?P.k>=P.events.length-1:st.day>=NDAYS-1;
   $("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
@@ -659,7 +662,7 @@ $("rBoat").addEventListener("click",()=>{track("route-boat");closeRoute();setTim
 document.addEventListener("pointerdown",e=>{if(!$("rmenu").hidden&&!e.target.closest("#routeWrap"))closeRoute()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRoute()});
 const setSea=v=>{if(st.sea===v)return;stopPlay();st.sea=v;render(true)};
-$("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else setDay(st.day-1)});
+$("prev").addEventListener("click",()=>{if(st.place){if(st.place.k>0){stopPlay();st.place.k--;st.dt=0;render(true)}}else if(st.day===1&&otherToday())toToday();else setDay(st.day-1)});
 /* ---------- calendar ---------- */
 const MONTHS=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
 const ymd=i=>{const d=new Date(DAY0+i*86400e3+TZ);return [d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()]};
@@ -675,9 +678,9 @@ function drawCal(){
   for(let k=0;k<lead;k++)g.appendChild(document.createElement("span"));
   for(let d=1;d<=n;d++){
     const i=idxOf(cy,cm,d),b=document.createElement("button");b.textContent=d;
-    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(i>=0&&i<NDAYS&&!st.place&&vpOnLine(i,st.pm))b.classList.add("vpd");
+    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()&&pastToday(!st.pm)); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(i>=0&&i<NDAYS&&!st.place&&vpOnLine(i,st.pm))b.classList.add("vpd");
     b.setAttribute("aria-label",`${d} ${MONTHS[cm].toLowerCase()} ${cy}`);
-    b.addEventListener("click",()=>{closeCal();if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}st.day=-1;setDay(i)});
+    b.addEventListener("click",()=>{closeCal();if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}if(i===0)toToday();else{st.day=-1;setDay(i)}});
     g.appendChild(b);
   }
 }
@@ -700,7 +703,7 @@ $("mode").addEventListener("click",()=>{
   if(st.place){ // one place only ever gets one of the two: the tower has to stand between you and the sun
     const P=st.place;showNote(`${P.pm?"SUNRISE":"SUNSET"} ISN'T POSSIBLE FROM HERE. PICK A SPOT ${P.pm?"WEST":"EAST"} OF BURJ KHALIFA.`,5000);return}
   stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
-$("ctoday").addEventListener("click",()=>{closeCal();if(st.place){vpMode(false);st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}stopPlay();st.dt=0;st.day=-1;setDay(0)});
+$("ctoday").addEventListener("click",()=>{closeCal();if(st.place){vpMode(false);st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}stopPlay();st.dt=0;toToday()});
 
 /* ---------- my place: panel ---------- */
 let floor=0,lastP=null;
