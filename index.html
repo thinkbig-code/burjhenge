@@ -249,7 +249,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="row"><input id="coord" inputmode="decimal" autocomplete="off" placeholder="e.g. 25.2086, 55.3549" aria-label="Coordinates, for example 25.2086, 55.3549"><button class="pbtn" id="go">GO</button></div>
       <div class="or">OR PICK A VIEWPOINT</div>
       <select id="vp" aria-label="Viewpoints with a clear view of Burj Khalifa"><option value="">Choose a viewpoint</option><optgroup label="SUNSET"><option value="25.2057026,55.3408901" data-l="CREEK HARBOUR">Creek Harbour Viewing Point</option><option value="25.2095628,55.3430804" data-l="CREEK HARBOUR DECK">Creek Harbour viewing deck</option><option value="25.2056452,55.3289562" data-l="AL JADDAF WALK">Al Jaddaf Walk</option><option value="25.2274498,55.3395205" data-l="JADDAF WATERFRONT">Jaddaf Waterfront park</option><option value="25.2216813,55.3510643" data-l="FESTIVAL BAY">Festival Bay, Festival City</option><option value="25.2240729,55.3483254" data-l="FESTIVAL CITY WALK">Festival City Waterfront Walk</option><option value="25.1905387,55.3005262" data-l="D3 WALK">Dubai Design District walk</option></optgroup><optgroup label="SUNRISE"><option value="25.2068908,55.2414358" data-l="NIGHT BEACH">Jumeirah Night Beach</option><option value="25.1932479,55.2411956" data-l="CANAL FOOTBRIDGE">Water Canal Footbridge 3</option></optgroup></select>
-      <div class="floor"><span>FLOOR</span><button id="fdn" aria-label="Lower floor">−</button><output id="fl" aria-live="polite">0</output><button id="fup" aria-label="Higher floor">+</button></div>
+      <div class="floor" id="floorRow"><span>FLOOR</span><button id="fdn" aria-label="Lower floor">−</button><output id="fl" aria-live="polite">0</output><button id="fup" aria-label="Higher floor">+</button></div>
       <div class="pmsg" id="pmsg">Worked out on this device. Your location is not sent anywhere.</div>
       <button class="pbtn" id="ics" hidden>ADD TO CALENDAR</button>
       <button class="pbtn" id="nearest" hidden>SHOW THE NEAREST SPOT</button>
@@ -641,7 +641,7 @@ $("mode").addEventListener("click",()=>{
     const w=document.querySelector(".where");$("note2").textContent=n.textContent;
     n.classList.add("on");w.classList.add("noting");clearTimeout(n._t);n._t=setTimeout(()=>{n.classList.remove("on");w.classList.remove("noting")},5000);return}
   stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
-$("ctoday").addEventListener("click",()=>{closeCal();if(st.place){st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}stopPlay();st.dt=0;st.day=-1;setDay(0)});
+$("ctoday").addEventListener("click",()=>{closeCal();if(st.place){vpMode(false);st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}stopPlay();st.dt=0;st.day=-1;setDay(0)});
 
 /* ---------- my place: panel ---------- */
 let floor=0,lastP=null;
@@ -652,11 +652,14 @@ function closeMine(){if($("mp").hidden)return;$("mp").hidden=true;$("mine").setA
 $("mine").addEventListener("click",()=>$("mp").hidden?openMine():closeMine());
 document.addEventListener("pointerdown",e=>{if(!$("mp").hidden&&!e.target.closest(".minew"))closeMine()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMine()});
-function usePlace(lat,lon,label,stay){
+// viewpoints are at ground level, so the floor row steps aside while one is picked
+const vpMode=on=>{$("floorRow").hidden=on;if(!on)$("vp").value=""};
+function usePlace(lat,lon,label,stay,vp){
   $("nearest").hidden=true;
   const d=dist({lat,lon},BURJ);
   if(d>40000){say("That place is more than 40 km from Burj Khalifa.");return}
   if(d<400){say("That is right next to Burj Khalifa. Try a place at least half a kilometre away.");return}
+  if(!stay||vp)vpMode(!!vp);
   lastP={lat,lon,label};
   const P=placeEvents({lat,lon,h:floor*3.2+1.6,floor,label});
   if(!P.events.length){
@@ -699,13 +702,13 @@ function fromInput(){
 }
 $("go").addEventListener("click",fromInput);
 // curated public viewpoints with a clear view of the tower: picking one is the same as MY PLACE at ground level
-$("vp").addEventListener("change",e=>{const o=e.target.selectedOptions[0];if(!o||!o.value)return;const [la,lo]=o.value.split(",").map(Number);floor=0;$("fl").textContent=0;track("viewpoint");usePlace(la,lo,o.dataset.l)});
+$("vp").addEventListener("change",e=>{const o=e.target.selectedOptions[0];if(!o||!o.value)return;const [la,lo]=o.value.split(",").map(Number);floor=0;$("fl").textContent=0;track("viewpoint");usePlace(la,lo,o.dataset.l,false,true)});
 $("coord").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();fromInput()}});
 const setFloor=f=>{floor=Math.max(0,Math.min(160,f));$("fl").textContent=floor;if(lastP)usePlace(lastP.lat,lastP.lon,lastP.label,true)};
 $("fdn").addEventListener("click",()=>setFloor(floor-1));
 $("fup").addEventListener("click",()=>setFloor(floor+1));
 $("unplace").addEventListener("click",()=>$("back").click());
-$("back").addEventListener("click",()=>{st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;st.day=-1;setDay(0);placeUI();say("Worked out on this device. Your location is not sent anywhere.");closeMine()});
+$("back").addEventListener("click",()=>{vpMode(false);st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;st.day=-1;setDay(0);placeUI();say("Worked out on this device. Your location is not sent anywhere.");closeMine()});
 // nearest place to the given point where the sun sits on the spire on some day this year, on land
 $("nearest").addEventListener("click",()=>{
   if(!lastP)return;const ux=(lastP.lon-BURJ.lon)*Math.cos(BURJ.lat*R)*111320,uy=(lastP.lat-BURJ.lat)*110574;
