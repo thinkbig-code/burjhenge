@@ -522,12 +522,16 @@ var vpTxt="",vpH=0,vpNext=-1; // on phones the horizon rises by the height of th
 function vpShow(){
   const V=!st.place&&!st.sea&&st.q?vpOnLine(st.day,st.pm):null, on=!!(st.q&&st.q.vp);
   let t="",nx=-1;
-  if(!V&&!st.place&&!st.sea&&st.q){for(let d=st.day+1;d<Math.min(NDAYS,st.day+60);d++)if(vpOnLine(d,st.pm)){nx=d;break}
-    if(nx>=0){const N=vpOnLine(nx,st.pm);t=`NEXT VIEWPOINT DAY: ${dmon(DAY0+nx*86400e3+12*3600e3)} · ${N.v.l} ›`}}
+  const on2=st.q&&st.q.vp, g=V&&on2?geoQ(false):null, alt=g&&Math.abs(g.m-V.v.d)>=1000;
+  if(V&&!on2)t=`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`;
+  else if(alt)t=`OR THE ${(g.m/1000).toFixed(0)} KM SPOT · ${hhmm(g.t)} ›`;
+  else if(!st.place&&!st.sea&&st.q){
+    // no viewpoint today: the next day that has one; on a viewpoint day: the next day with a different viewpoint
+    for(let d=st.day+1;d<Math.min(NDAYS,st.day+150);d++){const N=vpOnLine(d,st.pm);if(N&&(!V||N.v.l!==V.v.l)){nx=d;break}}
+    if(nx>=0){const N=vpOnLine(nx,st.pm),dd=dmon(DAY0+nx*86400e3+12*3600e3);t=V?`NEXT: ${N.v.l} · ${dd} ›`:`NEXT VIEWPOINT DAY: ${dd} · ${N.v.l} ›`}}
   vpNext=nx;
-  if(V){if(on){const g=geoQ(false);t=g&&Math.abs(g.m-V.v.d)>=1000?`OR THE ${(g.m/1000).toFixed(0)} KM SPOT · ${hhmm(g.t)} ›`:""}else t=`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`}
   if(t===vpTxt)return;vpTxt=t;$("vpon").hidden=!t;$("vpon").textContent=t;
-  if(t)$("vpon").setAttribute("aria-label",!V?"Go to the next day with a viewpoint on the line":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
+  if(t)$("vpon").setAttribute("aria-label",nx>=0?"Go to the next day with a viewpoint on the line":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
 }
 function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
@@ -799,7 +803,7 @@ $("howLink").addEventListener("click",()=>track("how-it-works"));
 $("igLink").addEventListener("click",()=>track("instagram"));
 $("ics").addEventListener("click",()=>track("calendar"));
 $("addcal").addEventListener("click",()=>$("ics").click());
-$("vpon").addEventListener("click",()=>{if(!vpOnLine(st.day,st.pm)&&vpNext>=0){track("viewpoint-next");st.vp=true;setDay(vpNext);return}st.vp=!(st.q&&st.q.vp);track(st.vp?"viewpoint-line":"geometry-spot");stopPlay();st.dt=0;render(true)});
+$("vpon").addEventListener("click",()=>{if(vpNext>=0){track("viewpoint-next");st.vp=true;setDay(vpNext);return}st.vp=!(st.q&&st.q.vp);track(st.vp?"viewpoint-line":"geometry-spot");stopPlay();st.dt=0;render(true)});
 $("play").addEventListener("click",()=>track("play"));
 $("mine").addEventListener("click",()=>track("my-place-open"));
 $("share").addEventListener("click",async()=>{
