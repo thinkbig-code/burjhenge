@@ -671,7 +671,8 @@ function usePlace(lat,lon,label,stay,vp){
   stopPlay();if(!st.place)st.prevPm=st.pm;st.place=P;st.dt=0;render(true);placeUI();
   const list=P.events.map(e=>`<b>${dmon(e.t)} · ${hhmm(e.t)}</b>`).join(" · ");
   say(`${P.pm?"Sunset":"Sunrise"} on the spire from here: ${list}. Worked out on this device.`);
-  // the panel stays open: the dates and ADD TO CALENDAR are the answer, and a tap outside closes it
+  // a new place: close the panel so the moment itself is in view; a floor change keeps it open (its buttons live there)
+  if(!stay){const inPanel=$("mp").contains(document.activeElement);closeMine();if(inPanel)$("mine").focus({preventScroll:true})}
 }
 $("geo").addEventListener("click",()=>{
   // in-app browsers (Instagram, Facebook, TikTok...) often ask for location and then never answer
