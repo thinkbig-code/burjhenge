@@ -93,6 +93,10 @@ p{margin:0 0 var(--pgap);max-width:36em}
 .row{display:flex;align-items:center;justify-content:space-between;font-size:9px;letter-spacing:var(--ls);color:var(--mute)}
 .steps{display:flex;align-items:center;gap:8px;color:var(--text);font-size:11px}
 .steps i{width:26px;height:26px;border:1px solid var(--edge);border-radius:50%;display:grid;place-items:center;font-style:normal;color:var(--text)}
+.fld{height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border:1px solid var(--edge);border-radius:6px;background:rgba(239,231,218,.05);font-size:10px;color:var(--text)}
+.fld svg{width:11px;height:11px;color:var(--mute)}
+.panel .or{font-size:8px;letter-spacing:var(--ls);color:var(--mute)}
+.panel .or.sep{border-top:1px solid var(--edge);padding-top:10px}
 .result{font-size:9px;letter-spacing:.08em;line-height:1.7;color:var(--text)}
 .result b{color:var(--sun);font-weight:400}
 .ropt{display:grid;grid-template-columns:26px 1fr auto;align-items:center;column-gap:9px;height:38px;padding:0 10px 0 6px;font-size:10px;letter-spacing:var(--ls);line-height:1}
@@ -225,8 +229,11 @@ footer a{padding:12px 0;margin:-12px 0}
       <div class="panel" aria-hidden="true">
         <div class="row"><span style="display:flex;align-items:center;gap:8px;color:var(--text)"><svg style="width:14px;height:14px" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></svg>MY PLACE</span><span>FESTIVAL CITY</span></div>
         <div class="pill solid"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,191.63V184a8,8,0,0,0-16,0v31.63A88.13,88.13,0,0,1,40.37,136H72a8,8,0,0,0,0-16H40.37A88.13,88.13,0,0,1,120,40.37V72a8,8,0,0,0,16,0V40.37A88.13,88.13,0,0,1,215.63,120H184a8,8,0,0,0,0,16h31.63A88.13,88.13,0,0,1,136,215.63Z"/></svg>USE MY LOCATION</div>
+        <div class="fld">25.2240, 55.3483</div>
         <div class="row"><span>FLOOR</span><span class="steps"><i>−</i>0<i>+</i></span></div>
-        <div class="result">SUNSET ON THE SPIRE FROM HERE:<br><b>5 NOV · 17:05</b> &nbsp;·&nbsp; <b>5 FEB · 17:36</b></div>
+        <div class="or sep">OR PICK A VIEWPOINT</div>
+        <div class="fld sel">Choose a viewpoint<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg></div>
+        <div class="result">SUNSET ON THE SPIRE FROM HERE:<br><b>9 NOV · 17:02</b> &nbsp;·&nbsp; <b>1 FEB · 17:32</b></div>
       </div>
       <p class="cap" aria-hidden="true">Example: Festival City, ground floor</p>
     </a>

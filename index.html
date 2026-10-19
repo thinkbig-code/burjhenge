@@ -165,7 +165,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 .route{cursor:pointer;height:40px;padding:0 16px;border:1px solid rgba(255,181,74,.7);border-radius:20px;color:var(--sun);display:flex;align-items:center;gap:8px;font:10px var(--mono);letter-spacing:var(--ls);text-decoration:none}
 .route:hover,.route:focus-visible{background:var(--sun);color:var(--night)}
 /* SHARE is the second product action: brighter than the footer links, still well below ROUTE */
-#share{color:#b4afca}#share:hover,#share:active{color:var(--text)}
+#share,#addcal{color:#b4afca}#share:hover,#share:active,#addcal:hover,#addcal:active{color:var(--text)}
+.acts:has(#addcal:not([hidden])) .go{margin-right:auto}
+@media (max-width:400px){#addcal .lbl{display:none}}
 .play{width:36px;height:36px;border:0;color:var(--mute);margin-left:-11px}
 .play{color:var(--text)}
 @media (hover:hover){.play:hover{color:var(--sun)}}
@@ -237,6 +239,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="kmrow"><div class="note2" id="note2" role="status"></div><div class="km" id="km">8.2 KM EAST<i>OF BURJ KHALIFA</i></div></div>
       <div class="acts">
         <div class="go" id="routeWrap"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="menu" aria-label="Get there by" hidden><a class="ropt" id="rCar" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a></div></div>
+        <button class="btn" id="addcal" aria-label="Add this date to your calendar" hidden><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-48-56a8,8,0,0,1-8,8H136v16a8,8,0,0,1-16,0V160H104a8,8,0,0,1,0-16h16V128a8,8,0,0,1,16,0v16h16A8,8,0,0,1,160,152Z"/></svg><span class="lbl">CALENDAR</span></button>
         <button class="btn" id="share" aria-label="Share a link to this moment"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z"/></svg><span class="lbl">SHARE</span></button>
       </div>
       <div class="toast" id="toast" role="status"></div>
@@ -647,7 +650,7 @@ $("ctoday").addEventListener("click",()=>{closeCal();if(st.place){vpMode(false);
 /* ---------- my place: panel ---------- */
 let floor=0,lastP=null;
 const say=(html)=>{$("pmsg").innerHTML=html};
-function placeUI(){const P=st.place;$("unplace").hidden=!P;$("back").hidden=!P;$("ics").hidden=!(P&&P.events.length)}
+function placeUI(){const P=st.place;$("unplace").hidden=!P;$("back").hidden=!P;$("ics").hidden=$("addcal").hidden=!(P&&P.events.length)}
 function openMine(){$("mp").hidden=false;$("mine").setAttribute("aria-expanded","true");placeUI()}
 function closeMine(){if($("mp").hidden)return;$("mp").hidden=true;$("mine").setAttribute("aria-expanded","false")}
 $("mine").addEventListener("click",()=>$("mp").hidden?openMine():closeMine());
@@ -752,6 +755,7 @@ $("share").addEventListener("click",()=>track("share"));
 $("howLink").addEventListener("click",()=>track("how-it-works"));
 $("igLink").addEventListener("click",()=>track("instagram"));
 $("ics").addEventListener("click",()=>track("calendar"));
+$("addcal").addEventListener("click",()=>$("ics").click());
 $("play").addEventListener("click",()=>track("play"));
 $("mine").addEventListener("click",()=>track("my-place-open"));
 $("share").addEventListener("click",async()=>{
