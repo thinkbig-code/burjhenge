@@ -237,7 +237,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="cal" id="cal" role="dialog" aria-label="Pick a day" hidden>
         <header><button id="cprev" aria-label="Previous month"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button><span id="cmonth">OCTOBER 2026</span><button id="cnext" aria-label="Next month"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button></header>
         <div class="grid" id="grid"></div>
-        <div class="cfoot"><span class="key" id="ckey"><i></i>VIEWPOINT ON THE LINE</span><button id="ctoday">TODAY</button></div>
+        <div class="cfoot"><span class="key" id="ckey"><i></i>CLEAR VIEW FROM A VIEWPOINT</span><button id="ctoday">TODAY</button></div>
       </div>
       <div class="time"><b id="time">17:30</b><span class="tcap"><span class="on">ON THE SPIRE<span id="wx" hidden></span></span><button class="mswitch" id="mode" aria-label="Switch between sunset and sunrise"><span id="modeTxt">SUNSET</span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></button></span></div>
       <div class="note" id="note" role="status"></div>
@@ -531,15 +531,15 @@ function vpShow(){
   const V=!st.place&&!st.sea&&st.q?vpOnLine(st.day,st.pm):null, on=!!(st.q&&st.q.vp);
   let t="",nx=-1;
   const on2=st.q&&st.q.vp, g=V&&on2?geoQ(false):null, alt=g&&Math.abs(g.m-V.v.d)>=1000;
-  if(V&&!on2)t=`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`;
-  else if(alt)t=`OR THE ${(g.m/1000).toFixed(0)} KM SPOT · ${hhmm(g.t)} ›`;
+  if(V&&!on2)t=`CLEAR VIEW FROM ${V.v.l} · ${hhmm(V.t)} ›`;
+  else if(alt)t=`OR THE USUAL SPOT, ${(g.m/1000).toFixed(0)} KM · ${hhmm(g.t)} ›`;
   else if(!st.place&&!st.sea&&st.q){
     // no viewpoint today: the next day that has one; on a viewpoint day: the next day with a different viewpoint
     for(let d=st.day+1;d<Math.min(NDAYS,st.day+150);d++){const N=vpOnLine(d,st.pm);if(N&&(!V||N.v.l!==V.v.l)){nx=d;break}}
-    if(nx>=0){const N=vpOnLine(nx,st.pm),dd=dmon(DAY0+nx*86400e3+12*3600e3);t=V?`NEXT: ${N.v.l} · ${dd} ›`:`NEXT VIEWPOINT DAY: ${dd} · ${N.v.l} ›`}}
+    if(nx>=0){const N=vpOnLine(nx,st.pm),dd=dmon(DAY0+nx*86400e3+12*3600e3);t=`NEXT CLEAR VIEW: ${dd}, ${N.v.l} ›`}}
   vpNext=nx;
   if(t===vpTxt)return;vpTxt=t;$("vpon").hidden=!t;$("vpon").textContent=t;
-  if(t)$("vpon").setAttribute("aria-label",nx>=0?"Go to the next day with a viewpoint on the line":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
+  if(t)$("vpon").setAttribute("aria-label",nx>=0?"Go to the next day with a clear view from a viewpoint":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
 }
 function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
