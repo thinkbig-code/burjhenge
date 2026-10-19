@@ -59,7 +59,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .where{display:grid;justify-items:end;gap:10px;padding-top:58px;text-align:right}
 .kmrow{display:flex;align-items:center;gap:8px;pointer-events:auto}
 .km{font-size:11px;letter-spacing:.08em}
-.vpon{pointer-events:auto;background:none;border:0;padding:4px 0;margin:-4px 0 0;color:var(--sun);font:9px var(--mono);letter-spacing:.08em;text-align:inherit;cursor:pointer;line-height:1.5}
+.where .vpon[hidden]{display:block!important;visibility:hidden} /* the line always keeps its room, so nothing jumps between days */
+.vpon{pointer-events:auto;background:none;border:0;padding:4px 0;margin:-4px 0 0;min-height:22px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--sun);font:9px var(--mono);letter-spacing:.08em;text-align:inherit;cursor:pointer;line-height:1.5}
 .km i.vpby{color:var(--sun)}.km i.vpby::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--sun);margin:0 6px 1px 0;vertical-align:middle}
 .vpon:hover{text-decoration:underline;text-underline-offset:3px}
 .where.noting .vpon,.where.routing .vpon{visibility:hidden}
@@ -437,7 +438,7 @@ function draw(){
   const cv=$("sky"),{c,w,h}=fit(cv), q=st.q;
   if(!q){c.fillStyle="#07080d";c.fillRect(0,0,w,h);return}
   const o=q.o||dest(BURJ,q.th,q.m), d=q.m, hO=q.h||0, b=q.b!=null?q.b:(q.th+180)%360, tip=Math.atan((BURJ.h-hO)/d)*D, p=sunpos(q.t+st.dt*60e3,o.lat,o.lon);
-  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?197+vpH:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
+  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?231:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
   const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
   // stars come out one by one, the brightest first, and only high in the darker sky
@@ -526,7 +527,6 @@ function vpShow(){
   vpNext=nx;
   if(V){if(on){const g=geoQ(false);t=g&&Math.abs(g.m-V.v.d)>=1000?`OR THE ${(g.m/1000).toFixed(0)} KM SPOT · ${hhmm(g.t)} ›`:""}else t=`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`}
   if(t===vpTxt)return;vpTxt=t;$("vpon").hidden=!t;$("vpon").textContent=t;
-  const h=t?$("vpon").offsetHeight+12:0;if(h!==vpH){vpH=h;frame()}
   if(t)$("vpon").setAttribute("aria-label",!V?"Go to the next day with a viewpoint on the line":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
 }
 function text(){
