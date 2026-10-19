@@ -62,7 +62,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .where .vpon[hidden]{display:block!important;visibility:hidden} /* the line always keeps its room, so nothing jumps between days */
 .vpon{pointer-events:auto;background:none;border:0;padding:4px 0;margin:-4px 0 0;min-height:22px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--sun);font:9px var(--mono);letter-spacing:.08em;text-align:inherit;cursor:pointer;line-height:1.5}
 .km i.vpby{color:var(--sun)}.km i.vpby::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--sun);margin:0 6px 1px 0;vertical-align:middle}
-.vpon:hover{text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover){.vpon:hover{text-decoration:underline;text-underline-offset:3px}}
 .where.noting .vpon,.where.routing .vpon{visibility:hidden}
 .km i{display:block;font-style:normal;font-size:9px;color:#aaa5c2;margin-top:4px}
 .acts{display:flex;align-items:center;gap:2px;margin-right:-10px;pointer-events:auto}
@@ -395,8 +395,16 @@ function placeEvents(P){
     if(e<0.6&&e<=ep&&e<=en&&x.t>Date.now()-30*60e3)ev.push({i,t:x.t})}
   return {...P,d,b,pm,tip,th:bearing(BURJ,P),events:ev,k:0};
 }
+// today's moment that has already passed is never offered: the day moves on to tomorrow
 function pick(){
   if(st.place){const P=st.place,e=P.events[P.k];st.day=e.i;st.pm=P.pm;st.q={th:P.th,m:P.d,t:e.t,h:P.h,b:P.b,o:P};return}
+  if(st.day<=0&&pastToday())st.day=1;
+  pick0();
+}
+function pastToday(){
+  const d=st.day,sea=st.sea,q=st.q;st.day=0;pick0();const r=!!(st.q&&st.q.t<Date.now()-5*60e3);st.day=d;st.sea=sea;st.q=q;return r;
+}
+function pick0(){
   if(st.vp&&!st.sea){const V=vpOnLine(st.day,st.pm);if(V){st.q={th:V.th,m:V.v.d,t:V.t,vp:V};return}}
   let C=candidates(st.day,st.pm,st.sea);
   if(!C.length){const alt=candidates(st.day,st.pm,!st.sea);if(alt.length){st.sea=!st.sea;C=alt}}
@@ -537,7 +545,7 @@ function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
   const P=st.place, rel=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
   $("rel").textContent=P?(st.day<=1?rel:"IN "+st.day+" DAYS"):rel;
-  $("prev").disabled=P?P.k<=0:st.day<=0;$("next").disabled=P?P.k>=P.events.length-1:st.day>=NDAYS-1;
+  $("prev").disabled=P?P.k<=0:st.day<=(pastToday()?1:0);$("next").disabled=P?P.k>=P.events.length-1:st.day>=NDAYS-1;
   $("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
@@ -667,7 +675,7 @@ function drawCal(){
   for(let k=0;k<lead;k++)g.appendChild(document.createElement("span"));
   for(let d=1;d<=n;d++){
     const i=idxOf(cy,cm,d),b=document.createElement("button");b.textContent=d;
-    b.disabled=i<0||i>=NDAYS; if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(i>=0&&i<NDAYS&&!st.place&&vpOnLine(i,st.pm))b.classList.add("vpd");
+    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(i>=0&&i<NDAYS&&!st.place&&vpOnLine(i,st.pm))b.classList.add("vpd");
     b.setAttribute("aria-label",`${d} ${MONTHS[cm].toLowerCase()} ${cy}`);
     b.addEventListener("click",()=>{closeCal();if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}st.day=-1;setDay(i)});
     g.appendChild(b);
