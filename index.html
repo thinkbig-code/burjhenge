@@ -120,6 +120,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mp .row{display:flex;gap:8px;align-items:center}
 .mp input{flex:1;min-width:0;height:38px;padding:0 10px;background:rgba(239,231,218,.06);border:1px solid rgba(239,231,218,.18);border-radius:6px;color:var(--text);font:11px var(--mono)}
 .mp input:focus{outline:none;border-color:var(--sun)}
+.mp select{height:38px;padding:0 30px 0 10px;background:rgba(239,231,218,.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%238a86a6'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E") no-repeat right 10px center/12px;border:1px solid rgba(239,231,218,.18);border-radius:6px;color:var(--text);font:10px var(--mono);letter-spacing:.06em;-webkit-appearance:none;appearance:none;cursor:pointer}
+.mp select:focus{outline:none;border-color:var(--sun)}
+.mp select option,.mp select optgroup{background:#0b0c12;color:var(--text)}
 .floor{display:flex;align-items:center;gap:6px;letter-spacing:var(--ls)}
 .floor span{flex:1;color:var(--mute);font-size:9px}
 .floor button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(239,231,218,.2);background:none;color:var(--text);font:14px var(--mono);cursor:pointer}
@@ -243,6 +246,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <button class="pbtn solid" id="geo"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,191.63V184a8,8,0,0,0-16,0v31.63A88.13,88.13,0,0,1,40.37,136H72a8,8,0,0,0,0-16H40.37A88.13,88.13,0,0,1,120,40.37V72a8,8,0,0,0,16,0V40.37A88.13,88.13,0,0,1,215.63,120H184a8,8,0,0,0,0,16h31.63A88.13,88.13,0,0,1,136,215.63Z"/></svg>USE MY LOCATION</button>
       <div class="or">OR PASTE COORDINATES FROM GOOGLE MAPS</div>
       <div class="row"><input id="coord" inputmode="decimal" autocomplete="off" placeholder="e.g. 25.2086, 55.3549" aria-label="Coordinates, for example 25.2086, 55.3549"><button class="pbtn" id="go">GO</button></div>
+      <div class="or">OR PICK A VIEWPOINT</div>
+      <select id="vp" aria-label="Viewpoints with a clear view of Burj Khalifa"><option value="">Choose a viewpoint</option><optgroup label="SUNSET"><option value="25.2057026,55.3408901" data-l="CREEK HARBOUR">Creek Harbour Viewing Point</option><option value="25.2095628,55.3430804" data-l="CREEK HARBOUR DECK">Creek Harbour viewing deck</option><option value="25.2056452,55.3289562" data-l="AL JADDAF WALK">Al Jaddaf Walk</option><option value="25.2274498,55.3395205" data-l="JADDAF WATERFRONT">Jaddaf Waterfront park</option><option value="25.2216813,55.3510643" data-l="FESTIVAL BAY">Festival Bay, Festival City</option><option value="25.2240729,55.3483254" data-l="FESTIVAL CITY WALK">Festival City Waterfront Walk</option><option value="25.1905387,55.3005262" data-l="D3 WALK">Dubai Design District walk</option></optgroup><optgroup label="SUNRISE"><option value="25.2068908,55.2414358" data-l="NIGHT BEACH">Jumeirah Night Beach</option><option value="25.1932479,55.2411956" data-l="CANAL FOOTBRIDGE">Water Canal Footbridge 3</option></optgroup></select>
       <div class="floor"><span>FLOOR</span><button id="fdn" aria-label="Lower floor">−</button><output id="fl" aria-live="polite">0</output><button id="fup" aria-label="Higher floor">+</button></div>
       <div class="pmsg" id="pmsg">Worked out on this device. Your location is not sent anywhere.</div>
       <button class="pbtn" id="ics" hidden>ADD TO CALENDAR</button>
@@ -662,6 +667,8 @@ function fromInput(){
   usePlace(c[0],c[1],"THIS PLACE");
 }
 $("go").addEventListener("click",fromInput);
+// curated public viewpoints with a clear view of the tower: picking one is the same as MY PLACE at ground level
+$("vp").addEventListener("change",e=>{const o=e.target.selectedOptions[0];if(!o||!o.value)return;const [la,lo]=o.value.split(",").map(Number);floor=0;$("fl").textContent=0;track("viewpoint");usePlace(la,lo,o.dataset.l)});
 $("coord").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();fromInput()}});
 const setFloor=f=>{floor=Math.max(0,Math.min(160,f));$("fl").textContent=floor;if(lastP)usePlace(lastP.lat,lastP.lon,lastP.label,true)};
 $("fdn").addEventListener("click",()=>setFloor(floor-1));
