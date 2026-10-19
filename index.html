@@ -238,7 +238,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="cal" id="cal" role="dialog" aria-label="Pick a day" hidden>
         <header><button id="cprev" aria-label="Previous month"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button><span id="cmonth">OCTOBER 2026</span><button id="cnext" aria-label="Next month"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button></header>
         <div class="grid" id="grid"></div>
-        <div class="cfoot"><span class="key" id="ckey"><i></i><span id="ckeyTxt">PHOTO SPOT</span></span><button id="ctoday">TODAY</button></div>
+        <div class="cfoot"><span class="key" id="ckey"><i></i><span id="ckeyTxt">BEST PHOTO SPOT DAY</span></span><button id="ctoday">TODAY</button></div>
       </div>
       <div class="time"><b id="time">17:30</b><span class="tcap"><span class="on">ON THE SPIRE<span id="wx" hidden></span></span><button class="mswitch" id="mode" aria-label="Switch between sunset and sunrise"><span id="modeTxt">SUNSET</span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></button></span></div>
       <div class="note" id="note" role="status"></div>
@@ -525,12 +525,18 @@ function vpOnLine(day,pm){
     if(!q||Math.abs(q.m-v.d)>500)continue;
     const da=((v.b-q.th+540)%360)-180, off=Math.abs(v.d*Math.sin(da*R));
     if(off>400||(best&&off>=best.off))continue;
-    if(!onLand(v.d*Math.sin(q.th*R),v.d*Math.cos(q.th*R)))continue;
+    if(off>150&&!onLand(v.d*Math.sin(q.th*R),v.d*Math.cos(q.th*R)))continue; // right by the pin it is the viewpoint itself, even if the coarse coastline says water
     best={v,off,t:q.t,th:q.th,o:dest(BURJ,q.th,v.d)};
   }
   return vpLineCache[k]=best;
 }
-var vpTxt="",vpH=0,vpNext=-1; // on phones the horizon rises by the height of the viewpoint line while it shows
+var vpTxt="",vpH=0,vpNext=-1;
+// the best day at a viewpoint: the line passes closest to its pin (within 150 m), closer than on the days around it
+// the best day at a viewpoint: the sun sits on the spire as seen from the viewpoint itself (worked out once, on first use)
+var vpBestDays=null;
+function vpBest(i,pm){if(!vpBestDays){if(!VPS)VPS=readVPS();vpBestDays={true:new Set(),false:new Set()};
+  VPS.forEach(v=>placeEvents({lat:v.lat,lon:v.lon,h:1.6,floor:0,label:v.l}).events.forEach(e=>vpBestDays[v.pm].add(e.i)))}
+  return vpBestDays[pm].has(i)} // on phones the horizon rises by the height of the viewpoint line while it shows
 function vpShow(){
   const V=!st.place&&!st.sea&&st.q?vpOnLine(st.day,st.pm):null, on=!!(st.q&&st.q.vp);
   let t="",nx=-1;
@@ -539,8 +545,8 @@ function vpShow(){
   else if(alt)t=`OR THE USUAL SPOT, ${(g.m/1000).toFixed(0)} KM · ${hhmm(g.t)} ›`;
   else if(!st.place&&!st.sea&&st.q){
     // no viewpoint today: the next day that has one; on a viewpoint day: the next day with a different viewpoint
-    for(let d=st.day+1;d<Math.min(NDAYS,st.day+150);d++){const N=vpOnLine(d,st.pm);if(N&&(!V||N.v.l!==V.v.l)){nx=d;break}}
-    if(nx>=0){const N=vpOnLine(nx,st.pm),dd=dmon(DAY0+nx*86400e3+12*3600e3);t=`NEXT PHOTO SPOT: ${dd}, ${N.v.l} ›`}}
+    for(let d=st.day+1;d<Math.min(NDAYS,st.day+150);d++){const N=vpOnLine(d,st.pm);if(N&&(!V||vpBest(d,st.pm))){nx=d;break}}
+    if(nx>=0){const N=vpOnLine(nx,st.pm),dd=dmon(DAY0+nx*86400e3+12*3600e3);t=V&&N.v.l===V.v.l?`BEST DAY HERE: ${dd} ›`:`NEXT PHOTO SPOT: ${dd}, ${N.v.l} ›`}}
   vpNext=nx;
   if(t===vpTxt)return;vpTxt=t;$("vpon").hidden=!t;$("vpon").textContent=t;
   if(t)$("vpon").setAttribute("aria-label",nx>=0?"Go to the next day with a photo spot that has an open view of the tower":on?"Show the usual spot about 8 km out instead":`Stand by ${V.v.l} instead, at ${hhmm(V.t)}`);
@@ -674,13 +680,13 @@ function drawCal(){
   $("cmonth").textContent=MONTHS[cm]+" "+cy;
   $("cprev").disabled=cy*12+cm<=y0*12+m0;$("cnext").disabled=cy*12+cm>=y1*12+m1;
   const g=$("grid");g.textContent="";const PK=st.place?new Map(st.place.events.map((e,k)=>[e.i,k])):null;
-  $("ckeyTxt").textContent=st.place?`FROM ${st.place.label}`:"PHOTO SPOT";
+  $("ckeyTxt").textContent=st.place?`FROM ${st.place.label}`:"BEST PHOTO SPOT DAY";
   ["M","T","W","T","F","S","S"].forEach(t=>{const e=document.createElement("div");e.className="wd";e.textContent=t;g.appendChild(e)});
   const lead=(new Date(Date.UTC(cy,cm,1)).getUTCDay()+6)%7, n=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();
   for(let k=0;k<lead;k++)g.appendChild(document.createElement("span"));
   for(let d=1;d<=n;d++){
     const i=idxOf(cy,cm,d),b=document.createElement("button");b.textContent=d;
-    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()&&pastToday(!st.pm)); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(PK?PK.has(i):(i>=0&&i<NDAYS&&vpOnLine(i,st.pm)))b.classList.add("vpd");
+    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()&&pastToday(!st.pm)); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(PK?PK.has(i):(i>=0&&i<NDAYS&&vpBest(i,st.pm)))b.classList.add("vpd");
     b.setAttribute("aria-label",`${d} ${MONTHS[cm].toLowerCase()} ${cy}`);
     b.addEventListener("click",()=>{closeCal();if(PK&&PK.has(i)){stopPlay();st.place.k=PK.get(i);st.dt=0;render(true);return}if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}if(i===0)toToday();else{st.day=-1;setDay(i)}});
     g.appendChild(b);
