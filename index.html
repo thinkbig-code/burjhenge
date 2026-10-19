@@ -59,6 +59,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .where{display:grid;justify-items:end;gap:10px;padding-top:58px;text-align:right}
 .kmrow{display:flex;align-items:center;gap:8px;pointer-events:auto}
 .km{font-size:11px;letter-spacing:.08em}
+.vpon{pointer-events:auto;background:none;border:0;padding:4px 0;margin:-4px 0 0;color:var(--sun);font:9px var(--mono);letter-spacing:.08em;text-align:inherit;cursor:pointer;line-height:1.5}
+.vpon:hover{text-decoration:underline;text-underline-offset:3px}
+.where.noting .vpon,.where.routing .vpon{visibility:hidden}
 .km i{display:block;font-style:normal;font-size:9px;color:#aaa5c2;margin-top:4px}
 .acts{display:flex;align-items:center;gap:2px;margin-right:-10px;pointer-events:auto}
 .go{display:flex;align-items:center;gap:2px}
@@ -237,6 +240,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
     </div>
     <div class="where">
       <div class="kmrow"><div class="note2" id="note2" role="status"></div><div class="km" id="km">8.2 KM EAST<i>OF BURJ KHALIFA</i></div></div>
+      <button class="vpon" id="vpon" hidden></button>
       <div class="acts">
         <div class="go" id="routeWrap"><a class="route" id="route" href="#" target="_blank" rel="noopener" aria-label="Open the route to this spot in Google Maps"><span id="routeTxt">ROUTE</span><span aria-hidden="true">›</span></a><div class="rmenu" id="rmenu" role="menu" aria-label="Get there by" hidden><a class="ropt" id="rCar" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rCarIco"></span><span>BY CAR</span><em id="rCarKm"></em></a><a class="ropt" id="rBoat" role="menuitem" href="#" target="_blank" rel="noopener"><span class="ri" id="rBoatIco"></span><span>BY BOAT</span><em id="rBoatKm"></em></a></div></div>
         <button class="btn" id="addcal" aria-label="Add this date to your calendar" hidden><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-48-56a8,8,0,0,1-8,8H136v16a8,8,0,0,1-16,0V160H104a8,8,0,0,1,0-16h16V128a8,8,0,0,1,16,0v16h16A8,8,0,0,1,160,152Z"/></svg><span class="lbl">CALENDAR</span></button>
@@ -429,7 +433,7 @@ function draw(){
   const cv=$("sky"),{c,w,h}=fit(cv), q=st.q;
   if(!q){c.fillStyle="#07080d";c.fillRect(0,0,w,h);return}
   const o=q.o||dest(BURJ,q.th,q.m), d=q.m, hO=q.h||0, b=q.b!=null?q.b:(q.th+180)%360, tip=Math.atan((BURJ.h-hO)/d)*D, p=sunpos(q.t+st.dt*60e3,o.lat,o.lon);
-  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?197:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
+  const [top,hor]=skyCols(p.alt), horizonY=Math.min(h*.8,h-(w<=520?197+vpH:110)), ppd=(horizonY-h*.3)/tip, cx=w/2;
   const g=c.createLinearGradient(0,0,0,horizonY);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(hor));c.fillStyle=g;c.fillRect(0,0,w,h);
   const night=Math.max(0,Math.min(1,(-p.alt-1)/6));
   // stars come out one by one, the brightest first, and only high in the darker sky
@@ -487,6 +491,33 @@ function wxShow(){
   el.textContent=w;el.hidden=!w;
   el.parentNode.title=w?"Sky forecast for this moment, from Open-Meteo":"";
 }
+
+/* ---------- viewpoints on the day's line ----------
+   The daily spot is pure geometry and may sit among buildings. When the line passes within a short walk of one of the
+   public viewpoints (open view of the tower), offer the point on the line right there. */
+const VPS=[...document.querySelectorAll("#vp option")].filter(o=>o.value).map(o=>{const [lat,lon]=o.value.split(",").map(Number);
+  return {lat,lon,l:o.dataset.l,pm:o.parentNode.label==="SUNSET",d:dist({lat,lon},BURJ),b:bearing(BURJ,{lat,lon})}});
+const VP_NEAR=400, vpLineCache={};
+function vpOnLine(day,pm){
+  const k=day+(pm?"p":"a");if(k in vpLineCache)return vpLineCache[k];
+  const L=spireLines(day).find(l=>l.pm===pm);let best=null;
+  if(L)for(const v of VPS){if(v.pm!==pm)continue;
+    let q=null;for(const p of L.pts)if(!q||Math.abs(p.m-v.d)<Math.abs(q.m-v.d))q=p;
+    if(!q||Math.abs(q.m-v.d)>500)continue;
+    const da=((v.b-q.th+540)%360)-180, off=Math.abs(v.d*Math.sin(da*R));
+    if(off>VP_NEAR||(best&&off>=best.off))continue;
+    if(!onLand(v.d*Math.sin(q.th*R),v.d*Math.cos(q.th*R)))continue;
+    best={v,off,t:q.t,o:dest(BURJ,q.th,v.d)};
+  }
+  return vpLineCache[k]=best;
+}
+let vpTxt="",vpH=0; // on phones the horizon rises by the height of the viewpoint line while it shows
+function vpShow(){
+  const V=!st.place&&st.q?vpOnLine(st.day,st.pm):null, t=V?`VIEWPOINT ON THIS LINE: ${V.v.l} · ${hhmm(V.t)} ›`:"";
+  if(t===vpTxt)return;vpTxt=t;$("vpon").hidden=!V;$("vpon").textContent=t;
+  const h=V?$("vpon").offsetHeight+12:0;if(h!==vpH){vpH=h;frame()}
+  if(V)$("vpon").setAttribute("aria-label",`Stand by ${V.v.l} instead, about ${Math.round(V.off/50)*50||50} metres from the viewpoint, at ${hhmm(V.t)}`);
+}
 function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
   const P=st.place, rel=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
@@ -495,10 +526,10 @@ function text(){
   $("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
-  if(!q){wxShow();$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
+  if(!q){wxShow();vpShow();$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
   const o=dest(BURJ,q.th,q.m), dir=COMPASS[Math.round(q.th/45)%8];
   // the big time is always the moment to be there; the time being previewed sits under the timeline marker
-  $("time").textContent=hhmm(q.t);wxShow();
+  $("time").textContent=hhmm(q.t);wxShow();vpShow();
   const off=Math.abs(st.dt)>=.5, pct=50+st.dt/180*100;
   $("tnow").hidden=!off;$("tnow").textContent=hhmm(q.t+st.dt*60e3);$("tnow").style.left=Math.max(6,Math.min(94,pct))+"%";
   $("ta").style.visibility=off&&pct<24?"hidden":"";$("tb").style.visibility=off&&pct>76?"hidden":"";
@@ -756,6 +787,9 @@ $("howLink").addEventListener("click",()=>track("how-it-works"));
 $("igLink").addEventListener("click",()=>track("instagram"));
 $("ics").addEventListener("click",()=>track("calendar"));
 $("addcal").addEventListener("click",()=>$("ics").click());
+$("vpon").addEventListener("click",()=>{const V=vpOnLine(st.day,st.pm);if(!V)return;const day=st.day;track("viewpoint-line");
+  floor=0;$("fl").textContent=0;usePlace(V.o.lat,V.o.lon,"BY "+V.v.l,true,true);
+  if(st.place){const k=st.place.events.findIndex(e=>e.i===day);if(k>=0&&k!==st.place.k){st.place.k=k;render(true)}}});
 $("play").addEventListener("click",()=>track("play"));
 $("mine").addEventListener("click",()=>track("my-place-open"));
 $("share").addEventListener("click",async()=>{
