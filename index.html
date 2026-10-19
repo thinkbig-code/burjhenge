@@ -61,7 +61,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .km{font-size:11px;letter-spacing:.08em}
 .where .vpon[hidden]{display:block!important;visibility:hidden} /* the line always keeps its room, so nothing jumps between days */
 .vpon{pointer-events:auto;background:none;border:0;padding:4px 0;margin:-4px 0 0;min-height:22px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--sun);font:9px var(--mono);letter-spacing:.08em;text-align:inherit;cursor:pointer;line-height:1.5}
-.km i.vpby{color:var(--sun)}.km i.vpby::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--sun);margin:0 6px 1px 0;vertical-align:middle}
+.km a.vplink{text-decoration:none;color:inherit}.km i.vpby{color:var(--sun)}@media (hover:hover){.km a.vplink:hover i{text-decoration:underline;text-underline-offset:3px}}.km i.vpby::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--sun);margin:0 6px 1px 0;vertical-align:middle}
 @media (hover:hover){.vpon:hover{text-decoration:underline;text-underline-offset:3px}}
 .where.noting .vpon,.where.routing .vpon{visibility:hidden}
 .km i{display:block;font-style:normal;font-size:9px;color:#aaa5c2;margin-top:4px}
@@ -262,7 +262,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="row"><input id="coord" inputmode="decimal" autocomplete="off" placeholder="e.g. 25.2086, 55.3549" aria-label="Coordinates, for example 25.2086, 55.3549"><button class="pbtn" id="go">GO</button></div>
       <div class="floor" id="floorRow"><span>FLOOR</span><button id="fdn" aria-label="Lower floor">−</button><output id="fl" aria-live="polite">0</output><button id="fup" aria-label="Higher floor">+</button></div>
       <div class="or sep">OR PICK A VIEWPOINT</div>
-      <select id="vp" aria-label="Viewpoints with a clear view of Burj Khalifa"><option value="">Choose a viewpoint</option><optgroup label="SUNSET"><option value="25.2057026,55.3408901" data-l="CREEK HARBOUR">Creek Harbour Viewing Point</option><option value="25.2095628,55.3430804" data-l="CREEK HARBOUR DECK">Creek Harbour viewing deck</option><option value="25.2056452,55.3289562" data-l="AL JADDAF WALK">Al Jaddaf Walk</option><option value="25.2274498,55.3395205" data-l="JADDAF WATERFRONT">Jaddaf Waterfront park</option><option value="25.2216813,55.3510643" data-l="FESTIVAL BAY">Festival Bay, Festival City</option><option value="25.2240729,55.3483254" data-l="FESTIVAL CITY WALK">Festival City Waterfront Walk</option><option value="25.1905387,55.3005262" data-l="D3 WALK">Dubai Design District walk</option></optgroup><optgroup label="SUNRISE"><option value="25.2068908,55.2414358" data-l="NIGHT BEACH">Jumeirah Night Beach</option><option value="25.1932479,55.2411956" data-l="CANAL FOOTBRIDGE">Water Canal Footbridge 3</option></optgroup></select>
+      <select id="vp" aria-label="Viewpoints with a clear view of Burj Khalifa"><option value="">Choose a viewpoint</option><optgroup label="SUNSET"><option value="25.2057026,55.3408901" data-l="DUBAI CREEK HARBOUR">Creek Harbour Viewing Point</option><option value="25.2095628,55.3430804" data-l="CREEK HARBOUR DECK">Creek Harbour viewing deck</option><option value="25.2056452,55.3289562" data-l="AL JADDAF WALK">Al Jaddaf Walk</option><option value="25.2274498,55.3395205" data-l="JADDAF WATERFRONT">Jaddaf Waterfront park</option><option value="25.2216813,55.3510643" data-l="FESTIVAL BAY">Festival Bay, Festival City</option><option value="25.2240729,55.3483254" data-l="FESTIVAL CITY WALK">Festival City Waterfront Walk</option><option value="25.1905387,55.3005262" data-l="D3 WATERFRONT">Dubai Design District walk</option></optgroup><optgroup label="SUNRISE"><option value="25.2068908,55.2414358" data-l="JUMEIRAH NIGHT BEACH">Jumeirah Night Beach</option><option value="25.1932479,55.2411956" data-l="WATER CANAL BRIDGE">Water Canal Footbridge 3</option></optgroup></select>
       <div class="pmsg" id="pmsg">Worked out on this device. Your location is not sent anywhere.</div>
       <button class="pbtn" id="ics" hidden>ADD TO CALENDAR</button>
       <button class="pbtn" id="nearest" hidden>SHOW THE NEAREST SPOT</button>
@@ -530,7 +530,7 @@ function vpOnLine(day,pm){
   }
   return vpLineCache[k]=best;
 }
-var vpTxt="",vpH=0,vpNext=-1;
+var vpTxt="",vpH=0,vpNext=-1,kmLast="";
 // the best day at a viewpoint: the line passes closest to its pin (within 150 m), closer than on the days around it
 // the best day at a viewpoint: the sun sits on the spire as seen from the viewpoint itself (worked out once, on first use)
 var vpBestDays=null;
@@ -559,7 +559,7 @@ function text(){
   $("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
-  if(!q){wxShow();vpShow();$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
+  if(!q){wxShow();vpShow();kmLast="";$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
   const o=dest(BURJ,q.th,q.m), dir=COMPASS[Math.round(q.th/45)%8];
   // the big time is always the moment to be there; the time being previewed sits under the timeline marker
   $("time").textContent=hhmm(q.t);wxShow();vpShow();
@@ -569,7 +569,8 @@ function text(){
   $("thumb").style.left=(50+st.dt/180*100)+"%";$("ta").textContent=hhmm(q.t-90*60e3);$("tb").textContent=hhmm(q.t+90*60e3);
   $("track").setAttribute("aria-valuenow",String(Math.round(st.dt)));$("track").setAttribute("aria-valuetext",hhmm(q.t+st.dt*60e3));
   $("play").setAttribute("aria-label",st.pm?"Play the sunset":"Play the sunrise");
-  $("km").innerHTML=P?`${(q.m/1000).toFixed(1)} KM ${dir}<i>${P.floor?"FLOOR "+P.floor:"OF BURJ KHALIFA"}</i>`:`${(q.m/1000).toFixed(1)} KM ${dir}${q.vp?`<i class="vpby">BY ${q.vp.v.l}</i>`:"<i>OF BURJ KHALIFA</i>"}`;
+  const kmH=P?`${(q.m/1000).toFixed(1)} KM ${dir}<i>${P.floor?"FLOOR "+P.floor:"OF BURJ KHALIFA"}</i>`:`${(q.m/1000).toFixed(1)} KM ${dir}${q.vp?`<a class="vplink" href="https://www.google.com/maps/search/?api=1&query=${q.vp.v.lat},${q.vp.v.lon}" target="_blank" rel="noopener" aria-label="Open the photo spot ${q.vp.v.l} on the map"><i class="vpby">PHOTO SPOT: ${q.vp.v.l} ›</i></a>`:"<i>OF BURJ KHALIFA</i>"}`;
+  if(kmH!==kmLast){kmLast=kmH;$("km").innerHTML=kmH} // only when it changes, so the map link survives playback
   $("route").href=`https://www.google.com/maps/dir/?api=1&destination=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`;
   // land spot: directions; water spot: a pin to hand to the skipper
   const atSea=st.sea&&!P;
@@ -822,6 +823,7 @@ $("howLink").addEventListener("click",()=>track("how-it-works"));
 $("igLink").addEventListener("click",()=>track("instagram"));
 $("ics").addEventListener("click",()=>track("calendar"));
 $("addcal").addEventListener("click",()=>$("ics").click());
+$("km").addEventListener("click",e=>{if(e.target.closest(".vplink"))track("photo-spot-map")});
 $("vpon").addEventListener("click",()=>{if(vpNext>=0){track("viewpoint-next");st.vp=true;setDay(vpNext);return}st.vp=!(st.q&&st.q.vp);track(st.vp?"viewpoint-line":"geometry-spot");stopPlay();st.dt=0;render(true)});
 $("play").addEventListener("click",()=>track("play"));
 $("mine").addEventListener("click",()=>track("my-place-open"));
