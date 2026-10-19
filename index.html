@@ -113,7 +113,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .grid button.today{color:var(--sun)}
 .grid button.sel{border-color:var(--sun)}
 .grid button{position:relative}.grid button.vpd::after{content:"";position:absolute;left:50%;bottom:4px;width:3px;height:3px;margin-left:-1.5px;border-radius:50%;background:var(--sun)}
-.cfoot{align-items:center}.cfoot .key{margin-right:auto;font-size:8px;letter-spacing:.08em;color:var(--mute);display:flex;align-items:center;gap:6px}.cfoot .key i{width:3px;height:3px;border-radius:50%;background:var(--sun)}
+.cfoot{align-items:center}#ckeyTxt{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.cfoot .key i{flex:none}
+.cfoot .key{margin-right:auto;min-width:0;font-size:8px;letter-spacing:.08em;color:var(--mute);display:flex;align-items:center;gap:6px}.cfoot .key i{width:3px;height:3px;border-radius:50%;background:var(--sun)}
 .cfoot{display:flex;justify-content:flex-end;margin-top:6px}
 .cfoot button{height:34px;padding:0 12px;border:0;border-radius:17px;background:none;color:var(--sun);font:10px var(--mono);letter-spacing:var(--ls);cursor:pointer}
 .cfoot button:hover{background:rgba(255,181,74,.1)}
@@ -237,7 +238,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
       <div class="cal" id="cal" role="dialog" aria-label="Pick a day" hidden>
         <header><button id="cprev" aria-label="Previous month"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg></button><span id="cmonth">OCTOBER 2026</span><button id="cnext" aria-label="Next month"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button></header>
         <div class="grid" id="grid"></div>
-        <div class="cfoot"><span class="key" id="ckey"><i></i>PHOTO SPOT</span><button id="ctoday">TODAY</button></div>
+        <div class="cfoot"><span class="key" id="ckey"><i></i><span id="ckeyTxt">PHOTO SPOT</span></span><button id="ctoday">TODAY</button></div>
       </div>
       <div class="time"><b id="time">17:30</b><span class="tcap"><span class="on">ON THE SPIRE<span id="wx" hidden></span></span><button class="mswitch" id="mode" aria-label="Switch between sunset and sunrise"><span id="modeTxt">SUNSET</span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></button></span></div>
       <div class="note" id="note" role="status"></div>
@@ -672,15 +673,16 @@ function drawCal(){
   const [y0,m0]=ymd(0),[y1,m1]=ymd(NDAYS-1);
   $("cmonth").textContent=MONTHS[cm]+" "+cy;
   $("cprev").disabled=cy*12+cm<=y0*12+m0;$("cnext").disabled=cy*12+cm>=y1*12+m1;
-  const g=$("grid");g.textContent="";$("ckey").hidden=!!st.place;
+  const g=$("grid");g.textContent="";const PK=st.place?new Map(st.place.events.map((e,k)=>[e.i,k])):null;
+  $("ckeyTxt").textContent=st.place?`FROM ${st.place.label}`:"PHOTO SPOT";
   ["M","T","W","T","F","S","S"].forEach(t=>{const e=document.createElement("div");e.className="wd";e.textContent=t;g.appendChild(e)});
   const lead=(new Date(Date.UTC(cy,cm,1)).getUTCDay()+6)%7, n=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();
   for(let k=0;k<lead;k++)g.appendChild(document.createElement("span"));
   for(let d=1;d<=n;d++){
     const i=idxOf(cy,cm,d),b=document.createElement("button");b.textContent=d;
-    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()&&pastToday(!st.pm)); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(i>=0&&i<NDAYS&&!st.place&&vpOnLine(i,st.pm))b.classList.add("vpd");
+    b.disabled=i<0||i>=NDAYS||(i===0&&!st.place&&pastToday()&&pastToday(!st.pm)); if(i===0)b.classList.add("today"); if(i===st.day)b.classList.add("sel");if(PK?PK.has(i):(i>=0&&i<NDAYS&&vpOnLine(i,st.pm)))b.classList.add("vpd");
     b.setAttribute("aria-label",`${d} ${MONTHS[cm].toLowerCase()} ${cy}`);
-    b.addEventListener("click",()=>{closeCal();if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}if(i===0)toToday();else{st.day=-1;setDay(i)}});
+    b.addEventListener("click",()=>{closeCal();if(PK&&PK.has(i)){stopPlay();st.place.k=PK.get(i);st.dt=0;render(true);return}if(st.place){st.place=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}if(i===0)toToday();else{st.day=-1;setDay(i)}});
     g.appendChild(b);
   }
 }
