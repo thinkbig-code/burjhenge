@@ -203,6 +203,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
 /* the gold time is the moment on the spire, not the time of sunset; the sunset / sunrise switch sits under that caption */
 .time{cursor:default}
 .tcap{display:grid;gap:2px;align-self:center}
+.tcap .on #wx::before{content:" · "}
 .tcap .on{font:10px var(--mono);letter-spacing:var(--ls);color:var(--text);opacity:.85}
 .mswitch{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;width:max-content;padding:6px 0;margin:-6px 0;background:none;border:0;cursor:pointer;font:10px var(--mono);letter-spacing:var(--ls);color:var(--mute)}
 .mswitch svg{width:12px;height:12px}
@@ -228,7 +229,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--sun);outline-offset
         <div class="grid" id="grid"></div>
         <div class="cfoot"><button id="ctoday">TODAY</button></div>
       </div>
-      <div class="time"><b id="time">17:30</b><span class="tcap"><span class="on">ON THE SPIRE</span><button class="mswitch" id="mode" aria-label="Switch between sunset and sunrise"><span id="modeTxt">SUNSET</span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></button></span></div>
+      <div class="time"><b id="time">17:30</b><span class="tcap"><span class="on">ON THE SPIRE<span id="wx" hidden></span></span><button class="mswitch" id="mode" aria-label="Switch between sunset and sunrise"><span id="modeTxt">SUNSET</span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></button></span></div>
       <div class="note" id="note" role="status"></div>
     </div>
     <div class="where">
@@ -452,6 +453,36 @@ function draw(){
 }
 const hhmm=t=>{const L=new Date(t+TZ);return String(L.getUTCHours()).padStart(2,"0")+":"+String(L.getUTCMinutes()).padStart(2,"0")};
 const dmon=t=>{const L=new Date(t+TZ);return L.getUTCDate()+" "+MON[L.getUTCMonth()]};
+
+// sky forecast for the moment, from Open-Meteo (no key). One request pair for the whole city, at the tower,
+// so a personal place is never sent anywhere. Hidden when the moment is past the forecast range or the fetch fails.
+const WX={h:null,a:null,busy:false};
+function wxLoad(){
+  if(WX.busy)return;WX.busy=true;
+  const ll=`latitude=${BURJ.lat}&longitude=${BURJ.lon}&timezone=Asia%2FDubai`;
+  const get=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);
+  Promise.all([get(`https://api.open-meteo.com/v1/forecast?${ll}&hourly=cloud_cover,visibility&forecast_days=7`),
+    get(`https://air-quality-api.open-meteo.com/v1/air-quality?${ll}&hourly=dust,aerosol_optical_depth&forecast_days=5`)])
+  .then(([h,a])=>{WX.h=h&&h.hourly;WX.a=a&&a.hourly;wxShow()});
+}
+function wxWord(t){
+  const L=new Date(t+TZ+30*60e3).toISOString().slice(0,13)+":00";
+  const at=(H,k)=>{if(!H||!H.time)return null;const i=H.time.indexOf(L);const v=i<0?null:H[k]&&H[k][i];return v==null?null:v};
+  const cc=at(WX.h,"cloud_cover"), vis=at(WX.h,"visibility"), dust=at(WX.a,"dust"), aod=at(WX.a,"aerosol_optical_depth");
+  if(cc==null&&aod==null)return "";
+  if(cc!=null&&cc>70)return "CLOUDY";
+  if((dust!=null&&dust>150)||(aod!=null&&aod>.6)||(vis!=null&&vis<4000))return "DUSTY";
+  if((aod!=null&&aod>.35)||(vis!=null&&vis<10000))return "HAZY";
+  return "CLEAR";
+}
+let wxLast="";
+function wxShow(){
+  const el=$("wx");if(!el)return;
+  const q=st.q, w=q&&(WX.h||WX.a)?wxWord(q.t):"";
+  if(w===wxLast)return;wxLast=w;
+  el.textContent=w;el.hidden=!w;
+  el.parentNode.title=w?"Sky forecast for this moment, from Open-Meteo":"";
+}
 function text(){
   const q=st.q, dayMs=DAY0+st.day*86400e3+12*3600e3;
   const P=st.place, rel=st.day===0?"TODAY":st.day===1?"TOMORROW":["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(dayMs+TZ).getUTCDay()];
@@ -460,10 +491,10 @@ function text(){
   $("mineTxt").textContent=P?P.label:"MY PLACE";
   $("date").textContent=dmon(dayMs);$("date").setAttribute("aria-label",`${dmon(dayMs)}. Pick another day`);
   $("modeTxt").textContent=st.pm?"SUNSET":"SUNRISE";
-  if(!q){$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
+  if(!q){wxShow();$("time").textContent="--:--";$("km").innerHTML=st.sea?"NO SPOT AT SEA TODAY<i>TRY LAND OR THE OTHER SIDE</i>":"NO SPOT ON LAND<i>TRY THE OTHER SIDE</i>";return}
   const o=dest(BURJ,q.th,q.m), dir=COMPASS[Math.round(q.th/45)%8];
   // the big time is always the moment to be there; the time being previewed sits under the timeline marker
-  $("time").textContent=hhmm(q.t);
+  $("time").textContent=hhmm(q.t);wxShow();
   const off=Math.abs(st.dt)>=.5, pct=50+st.dt/180*100;
   $("tnow").hidden=!off;$("tnow").textContent=hhmm(q.t+st.dt*60e3);$("tnow").style.left=Math.max(6,Math.min(94,pct))+"%";
   $("ta").style.visibility=off&&pct<24?"hidden":"";$("tb").style.visibility=off&&pct>76?"hidden":"";
@@ -743,7 +774,7 @@ if(sharedPlace){const sp=sharedPlace,day=st.day;sharedPlace=null;setFloor(Math.m
 (()=>{const q=new URLSearchParams(location.search).get("open");if(!q)return;
   history.replaceState(null,"",location.pathname+location.hash);
   setTimeout(()=>{if(q==="place")openMine();else if(q==="route"&&st.both){$("rmenu").hidden=false;$("route").setAttribute("aria-expanded","true");document.querySelector(".where").classList.add("routing")}},350)})();
-render(false);
+render(false);wxLoad();
 })();
 </script>
 </body>
