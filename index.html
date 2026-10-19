@@ -638,12 +638,12 @@ $("grid").addEventListener("keydown",e=>{const d={ArrowLeft:-1,ArrowRight:1,Arro
   e.preventDefault();e.stopPropagation();const b=[...$("grid").querySelectorAll("button")],i=b.indexOf(document.activeElement);if(i<0)return;
   let j=i+d;while(b[j]&&b[j].disabled)j+=Math.sign(d);if(b[j])b[j].focus()});
 $("next").addEventListener("click",()=>{if(st.place){if(st.place.k<st.place.events.length-1){stopPlay();st.place.k++;st.dt=0;render(true)}}else setDay(st.day+1)});
+// a short line under the actions; on phones it takes the place of the distance for a few seconds
+function showNote(txt,ms){const n=$("note"),w=document.querySelector(".where");n.textContent=txt;$("note2").textContent=txt;
+  n.classList.add("on");w.classList.add("noting");clearTimeout(n._t);n._t=setTimeout(()=>{n.classList.remove("on");w.classList.remove("noting")},ms)}
 $("mode").addEventListener("click",()=>{
   if(st.place){ // one place only ever gets one of the two: the tower has to stand between you and the sun
-    const P=st.place,n=$("note");
-    n.textContent=`${P.pm?"SUNRISE":"SUNSET"} ISN'T POSSIBLE FROM HERE. PICK A SPOT ${P.pm?"WEST":"EAST"} OF BURJ KHALIFA.`;
-    const w=document.querySelector(".where");$("note2").textContent=n.textContent;
-    n.classList.add("on");w.classList.add("noting");clearTimeout(n._t);n._t=setTimeout(()=>{n.classList.remove("on");w.classList.remove("noting")},5000);return}
+    const P=st.place;showNote(`${P.pm?"SUNRISE":"SUNSET"} ISN'T POSSIBLE FROM HERE. PICK A SPOT ${P.pm?"WEST":"EAST"} OF BURJ KHALIFA.`,5000);return}
   stopPlay();st.pm=!st.pm;st.dt=0;render(true)});
 $("ctoday").addEventListener("click",()=>{closeCal();if(st.place){vpMode(false);st.place=null;lastP=null;if(st.prevPm!=null)st.pm=st.prevPm;placeUI()}stopPlay();st.dt=0;st.day=-1;setDay(0)});
 
@@ -674,7 +674,7 @@ function usePlace(lat,lon,label,stay,vp){
   }
   stopPlay();if(!st.place)st.prevPm=st.pm;st.place=P;st.dt=0;render(true);placeUI();
   const list=P.events.map(e=>`<b>${dmon(e.t)} · ${hhmm(e.t)}</b>`).join(" · ");
-  say(`${P.pm?"Sunset":"Sunrise"} on the spire from here: ${list}. Worked out on this device.`);
+  say(`${P.pm?"Sunset":"Sunrise"} on the spire from here: ${list}. Worked out on this device.${vp?"":" Make sure no building blocks your view of the tower."}`);
   // a new place: close the panel so the moment itself is in view; a floor change keeps it open (its buttons live there)
   if(!stay){const inPanel=$("mp").contains(document.activeElement);closeMine();if(inPanel)$("mine").focus({preventScroll:true})}
 }
@@ -775,6 +775,11 @@ new ResizeObserver(()=>frame()).observe(document.documentElement);
     const t0=performance.now(),T=1100,A=4,io=x=>(1-Math.cos(Math.PI*x))/2;
     const step=now=>{if(stop){goHome(0);return}const x=Math.min(1,(now-t0)/T);st.dt=A*io(x);frame();if(x<1)requestAnimationFrame(step);else goHome(450)};
     requestAnimationFrame(step)},4000)})();
+// once per device: the daily spot is pure geometry, so say that buildings can stand in the way
+(()=>{let seen=false;try{seen=localStorage.getItem("bh-view")==="1"}catch(e){}
+  if(seen||new URLSearchParams(location.search).get("open"))return;
+  setTimeout(()=>{if(st.place||playId||!$("mp").hidden)return;try{localStorage.setItem("bh-view","1")}catch(e){}
+    showNote("BUILDINGS CAN HIDE THE TOWER. CHECK THE VIEW BEFORE YOU GO, OR PICK A VIEWPOINT IN MY PLACE.",8000)},6500)})();
 // a shared place opens in place mode on the shared date; the address bar goes back to the plain spot
 if(sharedPlace){const sp=sharedPlace,day=st.day;sharedPlace=null;setFloor(Math.max(0,Math.min(200,sp.floor)));usePlace(sp.lat,sp.lon,"SHARED PLACE",true);
   if(st.place){const k=st.place.events.findIndex(e=>e.i===day);if(k>=0){st.place.k=k;render(true)}}
